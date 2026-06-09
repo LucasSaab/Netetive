@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://cx0rkhxxeeiwf"]
+
+[ext_resource type="Texture2D" uid="uid://44ahna8jswk2" path="res://Sprites/quadro.jpeg" id="1_g8aes"]
+[ext_resource type="Script" uid="uid://cgy32b5uqsxv5" path="res://Scripts/Quadro/Script_geral_quadro.gd" id="1_xg7w6"]
+[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="3_yu7f4"]
+[ext_resource type="Texture2D" uid="uid://cmq4wrdfg4ga4" path="res://Sprites/tutorial.png" id="4_xg7w6"]
+
+[node name="Node2D" type="Node2D" unique_id=336489526 node_paths=PackedStringArray("botao_tutorial", "layer_tutorial")]
+script = ExtResource("1_xg7w6")
+botao_tutorial = NodePath("TB_Tutorial_1")
+layer_tutorial = NodePath("Layer_Tutorial_1")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1123213959]
+position = Vector2(576, 324)
+texture = ExtResource("1_g8aes")
+metadata/_edit_lock_ = true
+
+[node name="TextureRect" type="TextureRect" parent="Sprite2D" unique_id=1445633597]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -442.0
+offset_top = -315.0
+offset_right = -402.0
+offset_bottom = -275.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TB_Tutorial_1" type="TextureButton" parent="." unique_id=41332915]
+offset_left = 510.0
+offset_top = 241.0
+offset_right = 638.0
+offset_bottom = 369.0
+mouse_filter = 1
+texture_normal = ExtResource("3_yu7f4")
+
+[node name="Layer_Tutorial_1" type="CanvasLayer" parent="." unique_id=1645376993]
+visible = false
+
+[node name="TextureRect" type="TextureRect" parent="Layer_Tutorial_1" unique_id=1233776936]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -243.0
+offset_top = -182.0
+offset_right = 241.5
+offset_bottom = 178.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_xg7w6")

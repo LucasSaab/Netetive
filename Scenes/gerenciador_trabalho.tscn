@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cq2t75mxkbcv4"]
+
+[ext_resource type="Script" uid="uid://bx47h4s4fvi3y" path="res://Scripts/Tela/gerenciador_trabalho.gd" id="1_5mnum"]
+
+[node name="GerenciadorTrabalho" type="Node" unique_id=8654933]
+script = ExtResource("1_5mnum")

@@ -1,0 +1,108 @@
+[gd_scene format=3 uid="uid://biv0gloipde26"]
+
+[ext_resource type="Script" uid="uid://cxhc2vr8d6442" path="res://Scripts/Tela/Main_select_script.gd" id="1_2ep5m"]
+[ext_resource type="Texture2D" uid="uid://cq6r74v0jf6xr" path="res://Sprites/Computador tela LCD.png" id="1_2m0fk"]
+[ext_resource type="Script" uid="uid://bx47h4s4fvi3y" path="res://Scripts/Tela/gerenciador_trabalho.gd" id="5_2ep5m"]
+[ext_resource type="Texture2D" uid="uid://coabbnedlctmd" path="res://Sprites/post-it.png" id="6_8oupw"]
+[ext_resource type="Script" uid="uid://b2yoey4cq6dxk" path="res://Scripts/Tela/lembrete.gd" id="8_syxfj"]
+[ext_resource type="PackedScene" uid="uid://jtkkvoxesbp6" path="res://Scenes/modulo_inspecao.tscn" id="10_2ep5m"]
+[ext_resource type="Script" uid="uid://0q4nxfau75n3" path="res://Scripts/Tela/painel_trabalho.gd" id="10_fgk2u"]
+[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="14_fgk2u"]
+[ext_resource type="PackedScene" uid="uid://b2r2i0l2rix7l" path="res://Scenes/LivroInstrucao.tscn" id="14_syxfj"]
+[ext_resource type="Script" uid="uid://cn13lwsqcwowk" path="res://Scripts/Tela/btn_abrir_livro.gd" id="15_3mv3w"]
+
+[node name="Node2D" type="Node2D" unique_id=1409207445]
+script = ExtResource("1_2ep5m")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1015529222]
+position = Vector2(555, 329)
+texture = ExtResource("1_2m0fk")
+metadata/_edit_lock_ = true
+
+[node name="TextureRect" type="TextureRect" parent="Sprite2D" unique_id=367571657]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -460.0
+offset_top = -340.0
+offset_right = -420.0
+offset_bottom = -300.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Lembrete" type="TextureButton" parent="." unique_id=1266665793]
+offset_left = 138.0
+offset_top = 466.0
+offset_right = 266.0
+offset_bottom = 594.0
+texture_normal = ExtResource("6_8oupw")
+script = ExtResource("8_syxfj")
+
+[node name="GerenciadorTrabalho" type="Node" parent="." unique_id=8654933]
+script = ExtResource("5_2ep5m")
+
+[node name="PainelTrabalho" type="Panel" parent="." unique_id=1848193275]
+offset_left = 1249.0
+offset_top = 36.0
+offset_right = 1475.0
+offset_bottom = 215.0
+script = ExtResource("10_fgk2u")
+
+[node name="LabelTitulo" type="Label" parent="PainelTrabalho" unique_id=1380908854]
+layout_mode = 0
+offset_right = 224.0
+offset_bottom = 23.0
+autowrap_mode = 2
+
+[node name="LabelDescricao" type="Label" parent="PainelTrabalho" unique_id=351269692]
+layout_mode = 0
+offset_top = 27.0
+offset_right = 226.0
+offset_bottom = 115.0
+autowrap_mode = 2
+
+[node name="LabelRecompensa" type="Label" parent="PainelTrabalho" unique_id=1382378084]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 113.0
+offset_right = 225.0
+offset_bottom = 144.0
+autowrap_mode = 2
+
+[node name="BtnAceitar" type="Button" parent="PainelTrabalho" unique_id=1194351441]
+layout_mode = 0
+offset_top = 148.0
+offset_right = 133.0
+offset_bottom = 179.0
+text = "Aceitar"
+
+[node name="BtnIgnorar" type="Button" parent="PainelTrabalho" unique_id=1996457759]
+layout_mode = 0
+offset_left = 132.0
+offset_top = 149.0
+offset_right = 224.0
+offset_bottom = 179.0
+text = "Ignorar"
+
+[node name="TimerLembrete" type="Timer" parent="." unique_id=2036266922]
+
+[node name="BtnAbrirLivro" type="TextureButton" parent="." unique_id=1109468233 node_paths=PackedStringArray("container_central")]
+offset_left = 1004.0
+offset_top = 509.0
+offset_right = 1132.0
+offset_bottom = 637.0
+texture_normal = ExtResource("14_fgk2u")
+script = ExtResource("15_3mv3w")
+cena_livro = ExtResource("14_syxfj")
+container_central = NodePath("../CanvasLayer/CenterContainer")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1449463919]
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer" unique_id=1427707015]
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="ModuloInspecao" parent="." unique_id=290836615 instance=ExtResource("10_2ep5m")]

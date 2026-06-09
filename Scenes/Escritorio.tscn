@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://bfj610dpgmmi7"]
+
+[ext_resource type="Texture2D" uid="uid://28n5f3qbruy7" path="res://Sprites/Gemini_Generated_Image_k67wwvk67wwvk67w.png" id="1_qucxe"]
+[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="2_rsnx6"]
+[ext_resource type="Script" uid="uid://ce3ay4sspmeii" path="res://Scripts/Escritorio/texture_button-Quadro.gd" id="3_qucxe"]
+[ext_resource type="Script" uid="uid://dv78l2ckhn3v" path="res://Scripts/Escritorio/Iniciar.gd" id="4_rsnx6"]
+
+[node name="Node2D" type="Node2D" unique_id=772582035]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1432055408]
+position = Vector2(576.99994, 325)
+scale = Vector2(0.86250937, 0.80750006)
+texture = ExtResource("1_qucxe")
+metadata/_edit_lock_ = true
+
+[node name="TextureRect" type="TextureRect" parent="Sprite2D" unique_id=624437573]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -685.5
+offset_top = -420.0
+offset_right = -645.5
+offset_bottom = -380.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Quadro_avisos" type="TextureButton" parent="." unique_id=709997482]
+offset_left = 293.0
+offset_top = 215.0
+offset_right = 421.0
+offset_bottom = 343.0
+action_mode = 0
+texture_normal = ExtResource("2_rsnx6")
+script = ExtResource("3_qucxe")
+
+[node name="Cafeteira" type="TextureButton" parent="." unique_id=42442695]
+offset_left = 44.0
+offset_top = 271.0
+offset_right = 172.0
+offset_bottom = 399.0
+action_mode = 0
+texture_normal = ExtResource("2_rsnx6")
+script = ExtResource("4_rsnx6")
+
+[node name="Label" type="Label" parent="Cafeteira" unique_id=500432906]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Comece o dia!"
+
+[connection signal="pressed" from="Quadro_avisos" to="Quadro_avisos" method="_on_pressed"]
+[connection signal="pressed" from="Cafeteira" to="Cafeteira" method="_on_pressed"]

@@ -1,0 +1,79 @@
+[gd_scene format=3 uid="uid://b2r2i0l2rix7l"]
+
+[ext_resource type="Texture2D" uid="uid://buegdh51vuhx2" path="res://Sprites/LivroAberto.png" id="1_nssht"]
+[ext_resource type="Script" uid="uid://bkmkw6g7st63n" path="res://Scripts/Tela/livro_dicas.gd" id="2_0si60"]
+
+[node name="LivroDicas" type="TextureRect" unique_id=987230262]
+custom_minimum_size = Vector2(800, 600)
+offset_left = 3.0
+offset_top = 4.0
+offset_right = 1156.0
+offset_bottom = 635.0
+texture = ExtResource("1_nssht")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("2_0si60")
+
+[node name="LabelTitulo" type="Label" parent="." unique_id=1826703044]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.060711186
+anchor_top = 0.0570523
+anchor_right = -0.060711186
+anchor_bottom = 0.0570523
+offset_left = 250.0
+offset_top = 99.0
+offset_right = 518.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+autowrap_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="LabelProblema" type="Label" parent="." unique_id=1178325496]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.03469211
+anchor_top = 0.10459588
+anchor_right = -0.03469211
+anchor_bottom = 0.10459588
+offset_left = 227.0
+offset_top = 164.0
+offset_right = 517.0
+offset_bottom = 394.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+autowrap_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="LabelSolucao" type="Label" parent="." unique_id=2086324315]
+layout_mode = 0
+offset_left = 534.0
+offset_top = 116.0
+offset_right = 857.0
+offset_bottom = 441.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+autowrap_mode = 2
+
+[node name="BtnProximo" type="Button" parent="." unique_id=317232154]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -43.0
+offset_top = -15.5
+offset_bottom = 15.5
+grow_horizontal = 0
+grow_vertical = 2
+text = "=>"
+
+[node name="BtnAnterior" type="Button" parent="." unique_id=986049286]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -15.5
+offset_right = 43.0
+offset_bottom = 15.5
+grow_vertical = 2
+text = "<="

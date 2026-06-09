@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://jtkkvoxesbp6"]
+
+[ext_resource type="Script" uid="uid://dn0ligts75o3a" path="res://Scripts/Tela/CaixaDeSelecao.gd" id="1_qrrkl"]
+[ext_resource type="Script" uid="uid://dqxcm8o6qjvdh" path="res://Scripts/Tela/gerenciador_inspecao.gd" id="2_g5n8p"]
+[ext_resource type="Script" uid="uid://ciow368trfnxl" path="res://Scripts/Tela/area_clique_inspecao.gd" id="3_as5hx"]
+[ext_resource type="Script" uid="uid://ckad4jugbl4qv" path="res://Scripts/Tela/nova_aba_script.gd" id="4_0u2il"]
+[ext_resource type="Script" uid="uid://b678bfjf456su" path="res://Scripts/Tela/mensagem_modal_scpt.gd" id="5_u26on"]
+
+[node name="ModuloInspecao" type="Node" unique_id=290836615]
+
+[node name="AreaCliqueInspecao" type="Control" parent="." unique_id=1907862298]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 170.0
+offset_top = 46.0
+offset_right = 943.0
+offset_bottom = 475.0
+script = ExtResource("3_as5hx")
+metadata/_edit_use_anchors_ = true
+
+[node name="GerenciadorInspecao" type="Node" parent="AreaCliqueInspecao" unique_id=1946026905]
+script = ExtResource("2_g5n8p")
+
+[node name="NovaAba" type="TextureRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=160538593]
+offset_left = 170.0
+offset_top = 41.0
+offset_right = 943.0
+offset_bottom = 479.0
+script = ExtResource("4_0u2il")
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba" unique_id=1081019375]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Button" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxContainer" unique_id=1181505343]
+layout_mode = 2
+text = "Inspecionar"
+
+[node name="MensagemModal" type="Panel" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=555702996]
+visible = false
+offset_left = 328.0
+offset_top = 506.0
+offset_right = 773.0
+offset_bottom = 546.0
+mouse_filter = 2
+script = ExtResource("5_u26on")
+
+[node name="Label" type="Label" parent="AreaCliqueInspecao/GerenciadorInspecao/MensagemModal" unique_id=1001500605]
+layout_mode = 0
+offset_right = 443.0
+offset_bottom = 40.0
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Alvo1" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=353646461]
+custom_minimum_size = Vector2(8, 10)
+offset_left = 170.0
+offset_top = 44.0
+offset_right = 937.0
+offset_bottom = 84.0
+mouse_filter = 2
+
+[node name="CaixaSelecao" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=1268796254]
+visible = false
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0, 0, 0.78431374, 0.2901961)
+script = ExtResource("1_qrrkl")

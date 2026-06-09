@@ -1,0 +1,23 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Arquivos de cache e importação da Godot
+.godot/
+.import/
+
+# Arquivos de tradução gerados automaticamente
+*.translation
+
+# Configurações locais do editor (suas preferências de layout de abas)
+*.uid
+mono/
+data_*/
+
+# Arquivos de exportação (se você configurar senhas de Android/iOS futuramente)
+export_presets.cfg
+
+# Arquivos de sistema do Windows/Mac
+Thumbs.db
+.DS_Store
+
+/android/
