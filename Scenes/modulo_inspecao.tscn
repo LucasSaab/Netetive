@@ -10,7 +10,9 @@
 
 [node name="AreaCliqueInspecao" type="Control" parent="." unique_id=1907862298]
 layout_mode = 3
-anchors_preset = 0
+anchor_left = -0.055555556
+anchor_right = 0.120659724
+anchor_bottom = 0.074074075
 offset_left = 170.0
 offset_top = 46.0
 offset_right = 943.0
@@ -56,12 +58,27 @@ vertical_alignment = 1
 autowrap_mode = 2
 
 [node name="Alvo1" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=353646461]
+visible = false
 custom_minimum_size = Vector2(8, 10)
-offset_left = 170.0
-offset_top = 44.0
-offset_right = 937.0
-offset_bottom = 84.0
+offset_left = 101.0
+offset_top = 45.0
+offset_right = 533.0
+offset_bottom = 115.0
 mouse_filter = 2
+
+[node name="Alvo2" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=1696010665]
+visible = false
+offset_left = 102.0
+offset_top = 116.0
+offset_right = 522.0
+offset_bottom = 522.0
+
+[node name="Alvo3" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=153464915]
+visible = false
+offset_left = 523.0
+offset_top = 48.0
+offset_right = 1083.0
+offset_bottom = 521.0
 
 [node name="CaixaSelecao" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=1268796254]
 visible = false
