@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AlvoInspecao" format=3 uid="uid://bfa56hxuhjiwt"]
+
+[ext_resource type="Script" uid="uid://b3u2e6w631h5h" path="res://Scripts/Tela/Gerenciador de Inspecao/alvo_inspecao.gd" id="1_hbkcb"]
+
+[resource]
+script = ExtResource("1_hbkcb")
+tipo = 0
+posicao = Vector2(101, 45)
+tamanho = Vector2(432, 70)
+metadata/_custom_type_script = "uid://b3u2e6w631h5h"
