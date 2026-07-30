@@ -15,12 +15,12 @@ func _ready() -> void:
 
 func sortear_trabalho_aleatorio() -> void:
 	if DadosJogo.banco_de_trabalhos.size() > 0:
-		var trabalho_sorteado: Dictionary = DadosJogo.banco_de_trabalhos.pick_random()
-		
-		titulo_trabalho = trabalho_sorteado["titulo"]
-		descricao_trabalho = trabalho_sorteado["descricao"]
-		
-		var valor_base: int = trabalho_sorteado["recompensa_base"]
+		var trabalho_sorteado: TrabalhoInspecao = DadosJogo.banco_de_trabalhos.pick_random()
+
+		titulo_trabalho = trabalho_sorteado.titulo
+		descricao_trabalho = trabalho_sorteado.descricao
+
+		var valor_base: int = trabalho_sorteado.recompensa_base
 		recompensa = valor_base + randi_range(-15, 25)
 
 func _on_pressed() -> void:

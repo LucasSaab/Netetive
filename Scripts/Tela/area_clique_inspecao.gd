@@ -2,8 +2,12 @@ extends Control
 
 @onready var gerenciador_inspecao: Node = $GerenciadorInspecao
 
-func _gui_input(event: InputEvent) -> void:
-	# Se popup aberto, NÃO chama set_input_as_handled — deixa o clique passar
+
+func _ready() -> void:
+	mouse_filter = MOUSE_FILTER_IGNORE
+
+
+func _unhandled_input(event: InputEvent) -> void:
 	if gerenciador_inspecao != null and gerenciador_inspecao.esta_com_popup_aberto():
 		return
 
