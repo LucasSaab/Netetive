@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://di8ebtlmueqde"]
+
+[ext_resource type="Script" uid="uid://dfqf4b5ja3kq3" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_expediente.gd" id="1_hk1lg"]
+[ext_resource type="Script" uid="uid://mhcm3i7bocvr" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_trabalho.gd" id="2_aetti"]
+[ext_resource type="Script" uid="uid://dwmbd147s1md5" path="res://Scripts/Tela/Modulo Trabalho/menu_trabalhos.gd" id="3_4p3wb"]
+[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="3_aetti"]
+
+[node name="ModuloTrabalho" type="Node" unique_id=174112552]
+
+[node name="GerenciadorExpediente" type="Node" parent="." unique_id=452071550]
+script = ExtResource("1_hk1lg")
+
+[node name="GerenciadorTrabalho" type="Node" parent="." unique_id=1081352621 node_paths=PackedStringArray("btn_abrir_menu", "menu_trabalhos", "vbox_disponiveis", "vbox_ativos", "gerenciador_expediente")]
+script = ExtResource("2_aetti")
+btn_abrir_menu = NodePath("BtnAbrirMenuTrabalho")
+menu_trabalhos = NodePath("MenuTrabalhos")
+vbox_disponiveis = NodePath("MenuTrabalhos/VBoxDisponiveis")
+vbox_ativos = NodePath("MenuTrabalhos/VBoxAtivos")
+gerenciador_expediente = NodePath("../GerenciadorExpediente")
+
+[node name="BtnAbrirMenuTrabalho" type="TextureButton" parent="GerenciadorTrabalho" unique_id=212091698]
+offset_left = 3.0
+offset_top = 516.0
+offset_right = 131.0
+offset_bottom = 644.0
+texture_normal = ExtResource("3_aetti")
+
+[node name="MenuTrabalhos" type="Panel" parent="GerenciadorTrabalho" unique_id=867683152]
+offset_left = 77.0
+offset_top = 77.0
+offset_right = 117.0
+offset_bottom = 117.0
+script = ExtResource("3_4p3wb")
+
+[node name="VBoxDisponiveis" type="VBoxContainer" parent="GerenciadorTrabalho/MenuTrabalhos" unique_id=534861109]
+layout_mode = 0
+offset_left = -74.0
+offset_top = -58.0
+offset_right = -34.0
+offset_bottom = -18.0
+
+[node name="VBoxAtivos" type="VBoxContainer" parent="GerenciadorTrabalho/MenuTrabalhos" unique_id=222275698]
+layout_mode = 0
+offset_left = 85.0
+offset_top = 104.0
+offset_right = 125.0
+offset_bottom = 144.0
