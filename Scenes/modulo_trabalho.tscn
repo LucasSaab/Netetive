@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://di8ebtlmueqde"]
 
-[ext_resource type="Script" uid="uid://dfqf4b5ja3kq3" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_expediente.gd" id="1_hk1lg"]
-[ext_resource type="Script" uid="uid://mhcm3i7bocvr" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_trabalho.gd" id="2_aetti"]
-[ext_resource type="Script" uid="uid://dwmbd147s1md5" path="res://Scripts/Tela/Modulo Trabalho/menu_trabalhos.gd" id="3_4p3wb"]
+[ext_resource type="Script" uid="uid://dxqv2coxschyp" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_expediente.gd" id="1_hk1lg"]
+[ext_resource type="Script" uid="uid://cvod2dmsrb1jw" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_trabalho.gd" id="2_aetti"]
+[ext_resource type="Script" uid="uid://c6dt3g1nck2hx" path="res://Scripts/Tela/Modulo Trabalho/menu_trabalhos.gd" id="3_4p3wb"]
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="3_aetti"]
 
 [node name="ModuloTrabalho" type="Node" unique_id=174112552]

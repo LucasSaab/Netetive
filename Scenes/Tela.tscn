@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://coabbnedlctmd" path="res://Sprites/post-it.png" id="6_8oupw"]
 [ext_resource type="Script" uid="uid://b2yoey4cq6dxk" path="res://Scripts/Tela/lembrete.gd" id="8_syxfj"]
 [ext_resource type="PackedScene" uid="uid://jtkkvoxesbp6" path="res://Scenes/modulo_inspecao.tscn" id="10_2ep5m"]
-[ext_resource type="Script" uid="uid://r7s3r06ikkn5" path="res://Scripts/Tela/coordenador_trabalho.gd" id="11_w1jdw"]
+[ext_resource type="Script" uid="uid://culd1hpl7rg0p" path="res://Scripts/Tela/coordenador_trabalho.gd" id="11_w1jdw"]
 [ext_resource type="PackedScene" uid="uid://di8ebtlmueqde" path="res://Scenes/modulo_trabalho.tscn" id="12_mkaev"]
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="14_fgk2u"]
 [ext_resource type="PackedScene" uid="uid://b2r2i0l2rix7l" path="res://Scenes/LivroInstrucao.tscn" id="14_syxfj"]

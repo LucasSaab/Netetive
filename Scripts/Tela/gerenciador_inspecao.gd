@@ -100,6 +100,7 @@ func verificar_clique(pos: Vector2) -> Dictionary:
 				"capitulo": dados.capitulo_relacionado,
 				"area": area,
 			}
+		
 
 	return {"encontrou_alvo": false, "acertou": false, "capitulo": -1, "area": null}
 

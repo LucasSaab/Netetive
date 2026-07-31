@@ -21,3 +21,5 @@ func _unhandled_input(event: InputEvent) -> void:
 		if gerenciador_inspecao != null:
 			gerenciador_inspecao.registrar_clique_na_area(event.global_position)
 		get_viewport().set_input_as_handled()
+		
+		
