@@ -4,6 +4,25 @@ extends Node
 var fame: int = 0
 var money: float = 0
 
-# Avisos sobre a alterac~
+# Avisos sobre a alteracao dos valores de fama e dinheiro
 signal altered_money(new_money: float)
 signal fame_received(more_fame: int)
+
+# Funcao para incrementar o dinheiro
+ 
+func add_money(qtd: float) -> void:
+	money += qtd
+	altered_money.emit(money) # Notifica a UI que o valor mudou
+
+# Funcao para incrementar a fama
+
+func add_fame(qtd: int) -> void:
+	fame += qtd
+	fame_received.emit(fame) # Notifica a UI que o valor mudou
+	
+# Funcao para decrementar o dinheiro recebido
+
+func drecrease_money(qtd: float) -> void:
+	money -= qtd
+	altered_money.emit(money) # Notifica a UI que o valor mudou
+	
