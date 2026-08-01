@@ -45,7 +45,7 @@ grow_vertical = 2
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 14
-text = "00000,00"
+text = "00000"
 
 [node name="container_fama" type="HBoxContainer" parent="HUD/control/container" unique_id=1907827552]
 custom_minimum_size = Vector2(0, 40)

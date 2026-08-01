@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="2_rsnx6"]
 [ext_resource type="Script" uid="uid://ce3ay4sspmeii" path="res://Scripts/Escritorio/texture_button-Quadro.gd" id="3_qucxe"]
 [ext_resource type="Script" uid="uid://dv78l2ckhn3v" path="res://Scripts/Escritorio/Iniciar.gd" id="4_rsnx6"]
+[ext_resource type="PackedScene" uid="uid://35642qeg3q5m" path="res://Scenes/Scores.tscn" id="5_rsnx6"]
 
 [node name="Node2D" type="Node2D" unique_id=772582035]
 
@@ -50,6 +51,9 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
 text = "Comece o dia!"
+
+[node name="Node2D" parent="." unique_id=311059794 instance=ExtResource("5_rsnx6")]
+position = Vector2(324, 278)
 
 [connection signal="pressed" from="Quadro_avisos" to="Quadro_avisos" method="_on_pressed"]
 [connection signal="pressed" from="Cafeteira" to="Cafeteira" method="_on_pressed"]

@@ -7,5 +7,6 @@ extends Node
 
 func _ready():
 	contador_fama.text = str(Global.fame)
-	contador_dinheiro.text = str(Global.money)
+	# Mostra 2 casas decimais (ex: R$ 100.00)
+	contador_dinheiro.text = "R$ " + String.num(Global.money, 2)
 	
