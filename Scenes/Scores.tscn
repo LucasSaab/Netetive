@@ -1,8 +1,11 @@
 [gd_scene format=3 uid="uid://35642qeg3q5m"]
 
-[node name="Node2D" type="Node2D" unique_id=311059794]
+[ext_resource type="Script" uid="uid://c82m2g4761n3x" path="res://Scenes/hud_manager.gd" id="1_3l0ju"]
+
+[node name="Score" type="Node2D" unique_id=311059794]
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=217126407]
+script = ExtResource("1_3l0ju")
 
 [node name="control" type="Control" parent="HUD" unique_id=253491751]
 custom_minimum_size = Vector2(1100, 619)
@@ -10,11 +13,12 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 50.0
 offset_bottom = 40.0
+mouse_filter = 2
 
 [node name="container" type="MarginContainer" parent="HUD/control" unique_id=1392905618]
 layout_mode = 0
-offset_right = 1100.0
-offset_bottom = 619.0
+offset_right = 1116.0
+offset_bottom = 56.0
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
@@ -59,9 +63,9 @@ size_flags_horizontal = 8
 [node name="contador_fama" type="Label" parent="HUD/control/container/container_fama/icone_fama" unique_id=951730407]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 0
-offset_left = 998.0
+offset_left = 949.0
 offset_top = 8.0
-offset_right = 1098.0
+offset_right = 1049.0
 offset_bottom = 31.0
 size_flags_horizontal = 10
 text = "0000"

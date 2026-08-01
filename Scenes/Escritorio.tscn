@@ -52,8 +52,8 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "Comece o dia!"
 
-[node name="Node2D" parent="." unique_id=311059794 instance=ExtResource("5_rsnx6")]
-position = Vector2(324, 278)
+[node name="Score" parent="." unique_id=311059794 instance=ExtResource("5_rsnx6")]
+position = Vector2(301, 386)
 
 [connection signal="pressed" from="Quadro_avisos" to="Quadro_avisos" method="_on_pressed"]
 [connection signal="pressed" from="Cafeteira" to="Cafeteira" method="_on_pressed"]
