@@ -1,3 +1,68 @@
 [gd_scene format=3 uid="uid://35642qeg3q5m"]
 
 [node name="Node2D" type="Node2D" unique_id=311059794]
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=217126407]
+
+[node name="control" type="Control" parent="HUD" unique_id=253491751]
+custom_minimum_size = Vector2(1100, 619)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 50.0
+offset_bottom = 40.0
+
+[node name="container" type="MarginContainer" parent="HUD/control" unique_id=1392905618]
+layout_mode = 0
+offset_right = 1100.0
+offset_bottom = 619.0
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="container_dinheiro" type="HBoxContainer" parent="HUD/control/container" unique_id=1119767093]
+custom_minimum_size = Vector2(1100, 40)
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="icone_dinheiro" type="TextureRect" parent="HUD/control/container/container_dinheiro" unique_id=1035990618]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+
+[node name="contador_dinheiro" type="Label" parent="HUD/control/container/container_dinheiro/icone_dinheiro" unique_id=774842961]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = 6.0
+offset_right = 50.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 14
+text = "00000,00"
+
+[node name="container_fama" type="HBoxContainer" parent="HUD/control/container" unique_id=1907827552]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="icone_fama" type="TextureRect" parent="HUD/control/container/container_fama" unique_id=699120972]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="contador_fama" type="Label" parent="HUD/control/container/container_fama/icone_fama" unique_id=951730407]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 0
+offset_left = 998.0
+offset_top = 8.0
+offset_right = 1098.0
+offset_bottom = 31.0
+size_flags_horizontal = 10
+text = "0000"
+horizontal_alignment = 2
