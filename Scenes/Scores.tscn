@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://35642qeg3q5m"]
 
 [ext_resource type="Script" uid="uid://c82m2g4761n3x" path="res://Scenes/hud_manager.gd" id="1_3l0ju"]
+[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="2_w4o4m"]
 
 [node name="Score" type="Node2D" unique_id=311059794]
 
@@ -11,21 +12,24 @@ script = ExtResource("1_3l0ju")
 custom_minimum_size = Vector2(1100, 619)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 50.0
-offset_bottom = 40.0
+offset_right = 1152.0
+offset_bottom = 647.0
+size_flags_vertical = 0
 mouse_filter = 2
 
 [node name="container" type="MarginContainer" parent="HUD/control" unique_id=1392905618]
 layout_mode = 0
-offset_right = 1116.0
-offset_bottom = 56.0
+offset_left = 9.0
+offset_top = 12.0
+offset_right = 1096.0
+offset_bottom = 68.0
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="container_dinheiro" type="HBoxContainer" parent="HUD/control/container" unique_id=1119767093]
-custom_minimum_size = Vector2(1100, 40)
+custom_minimum_size = Vector2(1070, 40)
 layout_mode = 2
 size_flags_vertical = 0
 
@@ -34,39 +38,52 @@ custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 8
+texture = ExtResource("2_w4o4m")
+expand_mode = 1
+metadata/_edit_lock_ = true
 
 [node name="contador_dinheiro" type="Label" parent="HUD/control/container/container_dinheiro/icone_dinheiro" unique_id=774842961]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 9.0
-offset_top = 6.0
-offset_right = 50.0
-offset_bottom = -14.0
+offset_left = 49.0
+offset_top = 9.0
+offset_right = 90.0
+offset_bottom = -11.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 1
-theme_override_constants/outline_size = 0
+theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 14
 text = "00000"
+metadata/_edit_lock_ = true
 
 [node name="container_fama" type="HBoxContainer" parent="HUD/control/container" unique_id=1907827552]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+size_flags_horizontal = 8
 size_flags_vertical = 0
 
 [node name="icone_fama" type="TextureRect" parent="HUD/control/container/container_fama" unique_id=699120972]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-size_flags_horizontal = 8
+size_flags_horizontal = 0
+texture = ExtResource("2_w4o4m")
+expand_mode = 1
+metadata/_edit_lock_ = true
 
 [node name="contador_fama" type="Label" parent="HUD/control/container/container_fama/icone_fama" unique_id=951730407]
-custom_minimum_size = Vector2(100, 0)
+custom_minimum_size = Vector2(45, 0)
 layout_mode = 0
-offset_left = 949.0
-offset_top = 8.0
-offset_right = 1049.0
-offset_bottom = 31.0
+offset_left = 43.0
+offset_top = 9.0
+offset_right = 88.0
+offset_bottom = 32.0
 size_flags_horizontal = 10
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 14
 text = "0000"
-horizontal_alignment = 2
+metadata/_edit_lock_ = true
