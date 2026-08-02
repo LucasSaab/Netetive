@@ -11,12 +11,6 @@ func _ready() -> void:
 	# 2. Atualiza com os valores atuais
 	atualizar_fama(Global.fame)
 	atualizar_dinheiro(Global.money)
-	
-	# 3. TESTE: Adiciona dinheiro/fama para forçar o sinal no início
-	Global.add_money(250.75)
-	print(Global.money)
-	Global.add_fame(15)
-	print(Global.fame)
 
 func atualizar_fama(nova_fama: int) -> void:
 	contador_fama.text = str(nova_fama)

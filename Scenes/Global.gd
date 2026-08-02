@@ -12,6 +12,7 @@ signal fame_received(more_fame: int)
  
 func add_money(qtd: float) -> void:
 	money += qtd
+	print("Seu saldo atua ")
 	altered_money.emit(money) # Notifica a UI que o valor mudou
 
 # Funcao para incrementar a fama
