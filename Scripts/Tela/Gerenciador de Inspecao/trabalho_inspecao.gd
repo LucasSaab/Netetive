@@ -10,3 +10,6 @@ extends Resource
 
 @export var imagem_site: Texture2D
 @export var alvos: Array[AlvoInspecao] = []
+
+@export var categoria_correta: String = ""
+@export var opcoes_diagnostico: Array[String] = []

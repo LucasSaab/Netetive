@@ -2,8 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cxhc2vr8d6442" path="res://Scripts/Tela/Main_select_script.gd" id="1_2ep5m"]
 [ext_resource type="Texture2D" uid="uid://cq6r74v0jf6xr" path="res://Sprites/Computador tela LCD.png" id="1_2m0fk"]
-[ext_resource type="Texture2D" uid="uid://ciq6yk5wwi6ba" path="res://Sprites/site_falso_1.png" id="3_mkaev"]
-[ext_resource type="Script" uid="uid://bx47h4s4fvi3y" path="res://Scripts/Tela/gerenciador_trabalho.gd" id="5_2ep5m"]
+[ext_resource type="Texture2D" uid="uid://b63c5sgaj3dsl" path="res://Sprites/background-Pc.jpg" id="3_w1jdw"]
 [ext_resource type="Texture2D" uid="uid://coabbnedlctmd" path="res://Sprites/post-it.png" id="6_8oupw"]
 [ext_resource type="Script" uid="uid://b2yoey4cq6dxk" path="res://Scripts/Tela/lembrete.gd" id="8_syxfj"]
 [ext_resource type="PackedScene" uid="uid://jtkkvoxesbp6" path="res://Scenes/modulo_inspecao.tscn" id="10_2ep5m"]
@@ -34,12 +33,20 @@ offset_bottom = -447.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="ImagemBase2" type="TextureRect" parent="Sprite2D" unique_id=1422568203]
+offset_left = -385.0
+offset_top = -286.0
+offset_right = 385.0
+offset_bottom = 143.0
+texture = ExtResource("3_w1jdw")
+expand_mode = 1
+
 [node name="ImagemBase" type="TextureRect" parent="Sprite2D" unique_id=744804896]
 offset_left = -385.0
 offset_top = -286.0
 offset_right = 385.0
 offset_bottom = 143.0
-texture = ExtResource("3_mkaev")
+texture = ExtResource("3_w1jdw")
 expand_mode = 1
 
 [node name="Lembrete" type="TextureButton" parent="." unique_id=1266665793]
@@ -49,9 +56,6 @@ offset_right = 266.0
 offset_bottom = 594.0
 texture_normal = ExtResource("6_8oupw")
 script = ExtResource("8_syxfj")
-
-[node name="GerenciadorTrabalho" type="Node" parent="." unique_id=8654933]
-script = ExtResource("5_2ep5m")
 
 [node name="TimerLembrete" type="Timer" parent="." unique_id=2036266922]
 
@@ -81,3 +85,5 @@ script = ExtResource("11_w1jdw")
 gerenciador_trabalho = NodePath("../ModuloTrabalho/GerenciadorTrabalho")
 gerenciador_inspecao = NodePath("../ModuloInspecao/AreaCliqueInspecao/GerenciadorInspecao")
 site_textura = NodePath("../Sprite2D/ImagemBase")
+
+[editable path="ModuloTrabalho"]

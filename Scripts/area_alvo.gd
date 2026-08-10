@@ -10,3 +10,6 @@ extends Area2D
 # =====================================================================
 
 var dados: AlvoInspecao
+var foi_encontrado: bool = false        # true quando um alvo SUSPEITO é encontrado
+var ignorado: bool = false
+var ja_inspecionado_negativo: bool = false  # true se o jogador marcou "limpo" sem diagnosticar

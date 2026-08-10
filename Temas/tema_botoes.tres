@@ -1,0 +1,20 @@
+[gd_resource type="Theme" format=3 uid="uid://hsun7wgylrc1"]
+
+[ext_resource type="StyleBox" uid="uid://cqwwj8rhi8gvl" path="res://Temas/botao_normal.tres" id="1_uckge"]
+
+[sub_resource type="SystemFont" id="SystemFont_rsfy2"]
+
+[resource]
+Button/colors/font_color = Color(0, 0, 0, 1)
+Button/colors/font_disabled_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
+Button/colors/font_focus_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+Button/colors/font_pressed_color = Color(0, 0, 0, 1)
+Button/constants/h_separation = 0
+Button/fonts/font = SubResource("SystemFont_rsfy2")
+Button/styles/disabled = ExtResource("1_uckge")
+Button/styles/hover = ExtResource("1_uckge")
+Button/styles/normal = ExtResource("1_uckge")
+Button/styles/pressed = ExtResource("1_uckge")
+VBoxContainer/constants/separation = 0
