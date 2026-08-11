@@ -1,7 +1,7 @@
 extends Resource
 class_name ResultadoTrabalho
 
-var agendado: TrabalhoAgendado
+var agendado: TrabalhoAgendado   # sem @export: TrabalhoAgendado é RefCounted, não Resource
 @export var achou_alvo_correto: bool = false
 @export var diagnostico_escolhido: String = ""
 @export var diagnostico_correto: bool = false

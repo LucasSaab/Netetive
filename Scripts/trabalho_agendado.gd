@@ -8,3 +8,4 @@ var recompensa_dinheiro: int = 0
 var apareceu: bool = false
 var aceito: bool = false
 var concluido: bool = false
+var investigar_usado: bool = false

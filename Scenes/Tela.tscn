@@ -78,6 +78,9 @@ mouse_filter = 2
 
 [node name="ModuloInspecao" parent="." unique_id=290836615 instance=ExtResource("10_2ep5m")]
 
+[node name="GerenciadorInspecao" parent="ModuloInspecao/AreaCliqueInspecao" parent_id_path=PackedInt32Array(290836615, 1907862298) index="0" unique_id=1946026905 node_paths=PackedStringArray("area_referencia")]
+area_referencia = NodePath("../../../Sprite2D/ImagemBase")
+
 [node name="ModuloTrabalho" parent="." unique_id=174112552 instance=ExtResource("12_mkaev")]
 
 [node name="CoordenadorTrabalho" type="Node2D" parent="." unique_id=1596183722 node_paths=PackedStringArray("gerenciador_trabalho", "gerenciador_inspecao", "site_textura")]
@@ -86,4 +89,5 @@ gerenciador_trabalho = NodePath("../ModuloTrabalho/GerenciadorTrabalho")
 gerenciador_inspecao = NodePath("../ModuloInspecao/AreaCliqueInspecao/GerenciadorInspecao")
 site_textura = NodePath("../Sprite2D/ImagemBase")
 
+[editable path="ModuloInspecao"]
 [editable path="ModuloTrabalho"]

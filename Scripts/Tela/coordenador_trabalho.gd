@@ -30,8 +30,12 @@ func _ready() -> void:
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_inspecao não atribuído (ou sem o sinal encerrar_solicitado).")
 
+	if gerenciador_inspecao != null and gerenciador_inspecao.has_signal("investigar_usado"):
+		gerenciador_inspecao.investigar_usado.connect(_on_investigar_usado)
+	else:
+		push_warning("CoordenadorTrabalho: gerenciador_inspecao não atribuído (ou sem o sinal investigar_usado).")
+
 	_dialogo_confirmacao = ConfirmationDialog.new()
-	_dialogo_confirmacao.dialog_text = "Tem certeza que deseja terminar este trabalho?"
 	_dialogo_confirmacao.confirmed.connect(_on_confirmar_encerramento)
 	add_child(_dialogo_confirmacao)
 
@@ -58,6 +62,7 @@ func _on_trabalho_selecionado(agendado: TrabalhoAgendado) -> void:
 
 	if gerenciador_inspecao != null and gerenciador_inspecao.has_method("montar_alvos"):
 		gerenciador_inspecao.montar_alvos(trabalho)
+		gerenciador_inspecao.definir_investigar_disponivel(not agendado.investigar_usado)
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_inspecao não atribuído ou sem montar_alvos().")
 
@@ -78,6 +83,12 @@ func _on_diagnostico_escolhido(opcao: String) -> void:
 	var resultado: ResultadoTrabalho = DadosJogo.resultados_pendentes[_agendado_atual]
 	resultado.diagnostico_escolhido = opcao
 	resultado.diagnostico_correto = (opcao == DadosJogo.titulo_capitulo_correto(_agendado_atual.trabalho))
+
+
+func _on_investigar_usado() -> void:
+	if _agendado_atual != null:
+		_agendado_atual.investigar_usado = true
+
 
 func _on_encerrar_solicitado() -> void:
 	if _agendado_atual == null:
@@ -108,16 +119,15 @@ func _on_confirmar_encerramento() -> void:
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_trabalho não atribuído ou sem marcar_trabalho_concluido().")
 
-	# Limpa os alvos/quadrados revelados da tela — sem isso eles ficam
-	# visíveis até o jogador selecionar outro trabalho.
 	if gerenciador_inspecao != null and gerenciador_inspecao.has_method("limpar_alvos"):
 		gerenciador_inspecao.limpar_alvos()
 
 	if site_textura != null:
-		site_textura.texture = null   # volta a tela do computador pro estado "vazio"
+		site_textura.texture = null
 
 	_agendado_atual = null
 	_mostrar_feedback_encerramento(titulo_trabalho)
+
 
 func _mostrar_feedback_encerramento(titulo_trabalho: String) -> void:
 	_label_feedback.text = "Trabalho \"%s\" encerrado." % titulo_trabalho

@@ -1,6 +1,7 @@
 extends TextureRect
 
 signal inspecionar_pressionado
+signal investigar_pressionado
 signal diagnostico_pressionado
 signal diagnostico_escolhido(opcao: String)
 signal ignorar_pressionado
@@ -9,6 +10,7 @@ signal encerrar_pressionado
 
 @onready var vbox_padrao: VBoxContainer = $VBoxPadrao
 @onready var btn_inspecionar: Button = $VBoxPadrao/BtnInspecionar
+@onready var btn_investigar: Button = $VBoxPadrao/BtnInvestigar
 @onready var btn_diagnosticar: Button = $VBoxPadrao/BtnDiagnosticar
 @onready var btn_ignorar: Button = $VBoxPadrao/BtnIgnorar
 @onready var btn_encerrar: Button = $VBoxPadrao/BtnEncerrar
@@ -21,6 +23,8 @@ func _ready() -> void:
 	hide()
 	if btn_inspecionar != null:
 		btn_inspecionar.pressed.connect(_on_inspecionar_pressed)
+	if btn_investigar != null:
+		btn_investigar.pressed.connect(_on_investigar_pressed)
 	if btn_diagnosticar != null:
 		btn_diagnosticar.pressed.connect(_on_diagnosticar_pressed)
 	if btn_ignorar != null:
@@ -31,15 +35,14 @@ func _ready() -> void:
 		vbox_diagnostico.hide()
 
 
-# diagnostico_disponivel: true se JÁ foi encontrado algum alvo suspeito
-# neste trabalho (não precisa ser neste ponto clicado agora).
-# inspecionar_disponivel: false se este ponto é um alvo NEUTRO já checado.
-func mostrar_em(pos: Vector2, diagnostico_disponivel: bool, ignorado: bool, inspecionar_disponivel: bool) -> void:
+func mostrar_em(pos: Vector2, diagnostico_disponivel: bool, ignorado: bool, inspecionar_disponivel: bool, investigar_disponivel: bool) -> void:
 	global_position = pos
 	_ignorado_atual = ignorado
 
 	if btn_inspecionar != null:
 		btn_inspecionar.disabled = not inspecionar_disponivel
+	if btn_investigar != null:
+		btn_investigar.disabled = not investigar_disponivel
 	if btn_diagnosticar != null:
 		btn_diagnosticar.disabled = not diagnostico_disponivel
 	if btn_ignorar != null:
@@ -52,8 +55,6 @@ func mostrar_em(pos: Vector2, diagnostico_disponivel: bool, ignorado: bool, insp
 	show()
 
 
-# Abre o submenu de diagnóstico AO LADO do menu principal — vbox_padrao
-# continua visível, só o vbox_diagnostico aparece, posicionado à direita.
 func mostrar_diagnostico(opcoes: Array[String]) -> void:
 	if vbox_diagnostico == null:
 		push_warning("NovaAba: vbox_diagnostico não encontrado na cena.")
@@ -88,10 +89,13 @@ func _on_inspecionar_pressed() -> void:
 	esconder()
 
 
+func _on_investigar_pressed() -> void:
+	investigar_pressionado.emit()
+	esconder()
+
+
 func _on_diagnosticar_pressed() -> void:
 	diagnostico_pressionado.emit()
-	# Não esconde aqui — GerenciadorInspecao chama mostrar_diagnostico()
-	# em seguida, abrindo o submenu ao lado.
 
 
 func _on_ignorar_pressed() -> void:

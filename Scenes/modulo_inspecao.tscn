@@ -42,6 +42,10 @@ theme = SubResource("Theme_qrrkl")
 layout_mode = 2
 text = "Inspecionar"
 
+[node name="BtnInvestigar" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxPadrao" unique_id=343259845]
+layout_mode = 2
+text = "Investigar"
+
 [node name="BtnDiagnosticar" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxPadrao" unique_id=2125199900]
 layout_mode = 2
 text = "Diagnosticar"

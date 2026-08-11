@@ -4,6 +4,7 @@ extends Resource
 enum Tipo { SUSPEITO, NEUTRO }
 
 @export var tipo: Tipo = Tipo.NEUTRO
-@export var posicao: Vector2
-@export var tamanho: Vector2 = Vector2(80, 80)
+@export var quadrante: int = 0
+@export var altura_real: float = 0.0
 @export var capitulo_relacionado: int = -1
+@export var dica: String = ""   # texto curto mostrado pelo botão Investigar

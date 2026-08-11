@@ -1,15 +1,8 @@
 class_name AreaAlvo
 extends Area2D
 
-# =====================================================================
-# AreaAlvo
-# ---------------------------------------------------------------------
-# Nó real criado dinamicamente pelo GerenciadorInspecao para representar,
-# na cena, um AlvoInspecao. A propriedade `dados` é o que amarra este
-# nó (posição/colisão) ao Resource (tipo/capítulo).
-# =====================================================================
-
 var dados: AlvoInspecao
-var foi_encontrado: bool = false        # true quando um alvo SUSPEITO é encontrado
-var ignorado: bool = false
-var ja_inspecionado_negativo: bool = false  # true se o jogador marcou "limpo" sem diagnosticar
+var tamanho_quadrante: Vector2 = Vector2.ZERO   # calculado pelo grid, não vem do Resource
+var foi_encontrado: bool = false                # true quando um alvo SUSPEITO é encontrado
+var ignorado: bool = false                      # alterna via botão Ignorar/Designorar no popup
+var ja_inspecionado_negativo: bool = false       # true quando um NEUTRO já foi checado sem nada
