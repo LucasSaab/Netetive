@@ -5,8 +5,8 @@ signal expediente_encerrado
 signal relogio_atualizado(hora_formatada: String)
 signal trabalho_disponibilizado(agendado: TrabalhoAgendado)
 
-@export var quantidade_trabalhos_dia: int = 6
-@export var quantidade_trabalhos_iniciais: int = 2
+@export var quantidade_trabalhos_dia: int = 10
+@export var quantidade_trabalhos_iniciais: int = 3
 @export var minutos_por_segundo_real: float = 4.0
 
 var hora_atual: float = 0.0

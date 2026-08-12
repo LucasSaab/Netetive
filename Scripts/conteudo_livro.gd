@@ -2,7 +2,7 @@ extends RefCounted
 class_name ConteudoLivro
 
 # Base de dados do manual contendo os 12 capítulos estruturados e limpos
-var PAGINAS: Array[Dictionary] = [
+const PAGINAS: Array[Dictionary] = [
 	{
 		"titulo": "Capítulo 1 — Phishing",
 		"descricao": "Sabe aquele e-mail que parece ser do seu banco mas algo parece errado? Provavelmente é phishing. Olha sempre quem está mandando — o endereço do remetente costuma entregar o golpe. Link encurtado ou com nome estranho? Não clica. Mensagem com aquela urgência toda de 'sua conta será bloqueada em 24h'? Respira. É pressão psicológica pra você agir sem pensar.",

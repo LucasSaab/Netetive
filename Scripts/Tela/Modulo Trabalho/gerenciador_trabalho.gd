@@ -3,32 +3,15 @@ extends Node
 # =====================================================================
 # GerenciadorTrabalho
 # ---------------------------------------------------------------------
-# Substitui o antigo fluxo de post-it (Lembrete/PainelTrabalho, hoje
-# não mais usados) pelo novo menu de trabalhos: uma lista de trabalhos
-# Disponíveis (aparecem conforme GerenciadorExpediente os libera) e uma
-# lista de Ativos (já aceitos, aguardando o jogador escolher qual
-# inspecionar agora).
-#
-# Fluxo:
-#   GerenciadorExpediente.trabalho_disponibilizado(agendado)
-#           │
-#           ▼
-#   item aparece em VBoxDisponiveis
-#           │  jogador clica (aceita direto, sem confirmação)
-#           ▼
-#   item some de Disponíveis, aparece em VBoxAtivos
-#           │  jogador clica no item ativo
-#           ▼
-#   trabalho_selecionado(agendado) — Main_select_script.gd escuta isso
-#   e monta a inspeção (imagem do site + alvos) daquele trabalho
+# Menu de trabalhos: lista de Disponíveis (aparecem conforme
+# GerenciadorExpediente os libera) e lista de Ativos (já aceitos).
+# Cada item ativo agora é só um botão de seleção — inspecionar,
+# diagnosticar, ignorar e encerrar acontecem todos dentro da NovaAba,
+# no popup de clique do GerenciadorInspecao.
 # =====================================================================
 
 signal trabalho_selecionado(agendado: TrabalhoAgendado)
 
-# TEMPORÁRIO: auto-aceita um trabalho específico assim que ele aparecer, pra
-# já cair em "Ativos" sem precisar abrir o menu — útil enquanto só esse
-# trabalho tem alvo/imagem calibrados. Trocar/desligar quando mais
-# trabalhos estiverem prontos ou ao testar o fluxo manual do menu.
 @export var auto_aceitar_para_teste: bool = true
 @export var titulo_trabalho_teste: String = "Remover Cavalo de Tróia"
 var _ja_auto_aceitou: bool = false
@@ -37,10 +20,11 @@ var _ja_auto_aceitou: bool = false
 @export var menu_trabalhos: Panel
 @export var vbox_disponiveis: VBoxContainer
 @export var vbox_ativos: VBoxContainer
-@export var gerenciador_expediente: Node  # arraste o nó GerenciadorExpediente aqui
+@export var gerenciador_expediente: Node
 
 var _agendados_disponiveis: Array[TrabalhoAgendado] = []
 var _agendados_ativos: Array[TrabalhoAgendado] = []
+var _itens_ativos: Dictionary = {}   # TrabalhoAgendado -> Button
 
 
 func _ready() -> void:
@@ -63,9 +47,6 @@ func _on_btn_abrir_menu_pressed() -> void:
 		menu_trabalhos.visible = not menu_trabalhos.visible
 
 
-# ---------------------------------------------------------------------
-# NOVO TRABALHO DISPONÍVEL (chegou a hora dele no expediente)
-# ---------------------------------------------------------------------
 func _on_trabalho_disponibilizado(agendado: TrabalhoAgendado) -> void:
 	_agendados_disponiveis.append(agendado)
 	_adicionar_item_disponivel(agendado)
@@ -73,8 +54,6 @@ func _on_trabalho_disponibilizado(agendado: TrabalhoAgendado) -> void:
 	var eh_o_trabalho_de_teste := agendado.trabalho.titulo == titulo_trabalho_teste
 	if auto_aceitar_para_teste and eh_o_trabalho_de_teste and not _ja_auto_aceitou:
 		_ja_auto_aceitou = true
-		# Acha o botão recém-criado (último filho de vbox_disponiveis) e
-		# simula o clique nele, reaproveitando o mesmo caminho de aceite.
 		if vbox_disponiveis != null and vbox_disponiveis.get_child_count() > 0:
 			var botao_recem_criado := vbox_disponiveis.get_child(vbox_disponiveis.get_child_count() - 1)
 			_on_disponivel_pressionado(agendado, botao_recem_criado)
@@ -91,7 +70,6 @@ func _adicionar_item_disponivel(agendado: TrabalhoAgendado) -> void:
 	vbox_disponiveis.add_child(botao)
 
 
-# Clique em um trabalho disponível ACEITA DIRETO (sem painel de confirmação).
 func _on_disponivel_pressionado(agendado: TrabalhoAgendado, botao_origem: Button) -> void:
 	agendado.aceito = true
 
@@ -101,30 +79,42 @@ func _on_disponivel_pressionado(agendado: TrabalhoAgendado, botao_origem: Button
 	_agendados_ativos.append(agendado)
 	_adicionar_item_ativo(agendado)
 
+	DadosJogo.iniciar_resultado_pendente(agendado)
+
+	# NOVO: abre a inspeção direto, sem precisar clicar de novo na lista de ativos
+	trabalho_selecionado.emit(agendado)
+	if menu_trabalhos != null:
+		menu_trabalhos.hide()
+
 
 func _adicionar_item_ativo(agendado: TrabalhoAgendado) -> void:
 	if vbox_ativos == null:
 		push_warning("GerenciadorTrabalho: vbox_ativos não atribuído no Inspetor.")
 		return
 
-	var botao := Button.new()
-	botao.text = agendado.trabalho.titulo
-	botao.pressed.connect(_on_ativo_pressionado.bind(agendado))
-	vbox_ativos.add_child(botao)
+	var btn_titulo := Button.new()
+	btn_titulo.text = agendado.trabalho.titulo
+	btn_titulo.pressed.connect(_on_ativo_pressionado.bind(agendado))
+
+	vbox_ativos.add_child(btn_titulo)
+	_itens_ativos[agendado] = btn_titulo
+
 
 func _on_ativo_pressionado(agendado: TrabalhoAgendado) -> void:
 	trabalho_selecionado.emit(agendado)
 	if menu_trabalhos != null:
 		menu_trabalhos.hide()
 
+
+# Chamado pelo CoordenadorTrabalho depois que o jogador confirma o
+# encerramento no ConfirmationDialog.
 func marcar_trabalho_concluido(agendado: TrabalhoAgendado) -> void:
 	if agendado == null:
 		return
 	agendado.concluido = true
 	DadosJogo.trabalhos_concluidos_hoje += 1
-	DadosJogo.dinheiro_jogador += agendado.recompensa_dinheiro
 
-	for filho in vbox_ativos.get_children():
-		if filho is Button and filho.text == agendado.trabalho.titulo:
-			filho.queue_free()
+	if _itens_ativos.has(agendado):
+		_itens_ativos[agendado].queue_free()
+		_itens_ativos.erase(agendado)
 	_agendados_ativos.erase(agendado)

@@ -1,6 +1,7 @@
 extends Node
-# Banco de dados global do jogo — agora usando TrabalhoInspecao em vez de
-# Dictionary solto, pra carregar junto imagem do site e lista de alvos.
+# Banco de dados global do jogo. A DEFINIÇÃO dos trabalhos (textos,
+# imagem, alvos) mora em banco_de_trabalhos.gd — este arquivo cuida só
+# do ESTADO em runtime: dinheiro, agenda do dia, resultados pendentes.
 
 var banco_de_trabalhos: Array[TrabalhoInspecao] = []
 
@@ -15,15 +16,19 @@ const HORA_FIM_EXPEDIENTE: float = 17.0     # 17:00 — ajustar se o design pedi
 var trabalhos_do_dia: Array[TrabalhoAgendado] = []
 var trabalhos_concluidos_hoje: int = 0
 
+# ---------------------------------------------------------------------
+# Sistema de diagnóstico/veredito diferido — resultado só é revelado
+# no fim do expediente. Chave = TrabalhoAgendado (não TrabalhoInspecao!),
+# porque o mesmo TrabalhoInspecao pode ser sorteado mais de uma vez no
+# mesmo dia (pick_random em sortear_agenda_do_dia) e cada ocorrência
+# precisa do seu próprio resultado.
+# ---------------------------------------------------------------------
+var resultados_pendentes: Dictionary = {}   # TrabalhoAgendado -> ResultadoTrabalho
+var resultados_do_dia: Array[ResultadoTrabalho] = []
+
 
 func _ready() -> void:
-	banco_de_trabalhos = [
-		_criar_trabalho_cavalo_de_troia(),
-		_criar_trabalho_limpeza_disco(),
-		_criar_trabalho_otimizar_inicializacao(),
-		_criar_trabalho_atualizar_drivers(),
-		_criar_trabalho_pasta_termica(),
-	]
+	banco_de_trabalhos = BancoDeTrabalhos.criar_todos()
 
 
 # ---------------------------------------------------------------------
@@ -36,6 +41,7 @@ func _ready() -> void:
 func sortear_agenda_do_dia(quantidade_trabalhos_dia: int, quantidade_trabalhos_iniciais: int) -> void:
 	trabalhos_do_dia.clear()
 	trabalhos_concluidos_hoje = 0
+	resetar_resultados_do_dia()
 
 	if banco_de_trabalhos.is_empty():
 		push_warning("DadosJogo: banco_de_trabalhos vazio, não há como sortear agenda.")
@@ -68,92 +74,73 @@ func disponibilizar_trabalho(agendado: TrabalhoAgendado) -> void:
 
 
 # ---------------------------------------------------------------------
-# Cada função monta 1 TrabalhoInspecao completo: textos + imagem + alvos.
-# TODO: trocar "imagem_site" por preload da arte real quando estiver pronta.
-# TODO: ajustar posicao/tamanho dos alvos conforme a arte final de cada site.
+# DIAGNÓSTICO / VEREDITO DIFERIDO
 # ---------------------------------------------------------------------
-
-func _criar_trabalho_cavalo_de_troia() -> TrabalhoInspecao:
-	var trabalho := TrabalhoInspecao.new()
-	trabalho.titulo = "Remover Cavalo de Tróia"
-	trabalho.descricao = "O usuário baixou um ativador falso e agora o computador está travando muito."
-	trabalho.recompensa_base = 150
-	trabalho.imagem_site = preload("res://Sprites/site_falso_1.png")
-
-	var suspeito := AlvoInspecao.new()
-	suspeito.tipo = AlvoInspecao.Tipo.SUSPEITO
-	suspeito.posicao = Vector2(170, 44)
-	suspeito.tamanho = Vector2(298, 59)
-	suspeito.capitulo_relacionado = 3  # Ransomware, por exemplo
-
-	var neutro1 := AlvoInspecao.new()
-	neutro1.tipo = AlvoInspecao.Tipo.NEUTRO
-	neutro1.posicao = Vector2(80, 60)
-	neutro1.tamanho = Vector2(120, 30)
-
-	trabalho.alvos = [suspeito, neutro1]
-	return trabalho
+func iniciar_resultado_pendente(agendado: TrabalhoAgendado, hora_atual: float = 0.0) -> void:
+	var resultado := ResultadoTrabalho.new()
+	resultado.agendado = agendado
+	resultado.hora_inicio = hora_atual
+	resultados_pendentes[agendado] = resultado
 
 
-func _criar_trabalho_limpeza_disco() -> TrabalhoInspecao:
-	var trabalho := TrabalhoInspecao.new()
-	trabalho.titulo = "Limpeza de Disco"
-	trabalho.descricao = "O armazenamento está 100% cheio com arquivos temporários e lixo eletrônico."
-	trabalho.recompensa_base = 60
-
-	var suspeito := AlvoInspecao.new()
-	suspeito.tipo = AlvoInspecao.Tipo.SUSPEITO
-	suspeito.posicao = Vector2(250, 200)
-	suspeito.tamanho = Vector2(140, 40)
-	suspeito.capitulo_relacionado = 6  # Atualização Ignorada, por exemplo
-
-	trabalho.alvos = [suspeito]
-	return trabalho
+func registrar_tentativa_inspecao(agendado: TrabalhoAgendado, acertou: bool) -> void:
+	if resultados_pendentes.has(agendado):
+		resultados_pendentes[agendado].registrar_tentativa(acertou)
 
 
-func _criar_trabalho_otimizar_inicializacao() -> TrabalhoInspecao:
-	var trabalho := TrabalhoInspecao.new()
-	trabalho.titulo = "Otimizar Inicialização"
-	trabalho.descricao = "Existem mais de 40 programas abrindo junto com o sistema. Deixe o boot mais rápido."
-	trabalho.recompensa_base = 80
+func finalizar_trabalho(agendado: TrabalhoAgendado, hora_atual: float = 0.0) -> ResultadoTrabalho:
+	if not resultados_pendentes.has(agendado):
+		push_warning("DadosJogo: finalizar_trabalho chamado sem resultado pendente para esse agendado.")
+		return null
 
-	var suspeito := AlvoInspecao.new()
-	suspeito.tipo = AlvoInspecao.Tipo.SUSPEITO
-	suspeito.posicao = Vector2(180, 120)
-	suspeito.tamanho = Vector2(150, 35)
-	suspeito.capitulo_relacionado = 8  # Permissões Excessivas, por exemplo
-
-	trabalho.alvos = [suspeito]
-	return trabalho
+	var resultado: ResultadoTrabalho = resultados_pendentes[agendado]
+	resultado.hora_fim = hora_atual
+	resultado.finalizar()
+	resultados_do_dia.append(resultado)
+	resultados_pendentes.erase(agendado)
+	return resultado
 
 
-func _criar_trabalho_atualizar_drivers() -> TrabalhoInspecao:
-	var trabalho := TrabalhoInspecao.new()
-	trabalho.titulo = "Atualizar Drivers de Vídeo"
-	trabalho.descricao = "A placa de vídeo está dando tela azul por falta de atualizações críticas."
-	trabalho.recompensa_base = 110
-
-	var suspeito := AlvoInspecao.new()
-	suspeito.tipo = AlvoInspecao.Tipo.SUSPEITO
-	suspeito.posicao = Vector2(400, 250)
-	suspeito.tamanho = Vector2(130, 30)
-	suspeito.capitulo_relacionado = 7  # Wi-Fi Público, por exemplo
-
-	trabalho.alvos = [suspeito]
-	return trabalho
+func resetar_resultados_do_dia() -> void:
+	resultados_pendentes.clear()
+	resultados_do_dia.clear()
 
 
-func _criar_trabalho_pasta_termica() -> TrabalhoInspecao:
-	var trabalho := TrabalhoInspecao.new()
-	trabalho.titulo = "Substituir Pasta Térmica"
-	trabalho.descricao = "O processador está atingindo 95°C em tarefas básicas. Manutenção urgente."
-	trabalho.recompensa_base = 130
+# Acha o alvo SUSPEITO do trabalho e devolve o título do capítulo do
+# LivroDicas correspondente ao capitulo_relacionado dele.
+func titulo_capitulo_correto(trabalho: TrabalhoInspecao) -> String:
+	if trabalho == null:
+		return ""
+	for alvo in trabalho.alvos:
+		if alvo.tipo == AlvoInspecao.Tipo.SUSPEITO:
+			var indice: int = alvo.capitulo_relacionado
+			if indice >= 0 and indice < ConteudoLivro.PAGINAS.size():
+				return ConteudoLivro.PAGINAS[indice].get("titulo", "")
+			push_warning("DadosJogo: capitulo_relacionado %d fora do range de ConteudoLivro.PAGINAS." % indice)
+			return ""
+	push_warning("DadosJogo: trabalho '%s' não tem alvo SUSPEITO." % trabalho.titulo)
+	return ""
 
-	var suspeito := AlvoInspecao.new()
-	suspeito.tipo = AlvoInspecao.Tipo.SUSPEITO
-	suspeito.posicao = Vector2(220, 180)
-	suspeito.tamanho = Vector2(140, 40)
-	suspeito.capitulo_relacionado = 4  # Engenharia Social, por exemplo
 
-	trabalho.alvos = [suspeito]
-	return trabalho
+# Monta as opções de múltipla escolha do diagnóstico: a correta + distratores
+# aleatórios tirados dos outros capítulos do livro.
+func gerar_opcoes_diagnostico(trabalho: TrabalhoInspecao, quantidade: int = 3) -> Array[String]:
+	var correta := titulo_capitulo_correto(trabalho)
+	var opcoes: Array[String] = []
+	if correta != "":
+		opcoes.append(correta)
+
+	var titulos_disponiveis: Array[String] = []
+	for pagina in ConteudoLivro.PAGINAS:
+		var titulo: String = pagina.get("titulo", "")
+		if titulo != "" and titulo != correta:
+			titulos_disponiveis.append(titulo)
+
+	titulos_disponiveis.shuffle()
+	for titulo in titulos_disponiveis:
+		if opcoes.size() >= quantidade:
+			break
+		opcoes.append(titulo)
+
+	opcoes.shuffle()
+	return opcoes

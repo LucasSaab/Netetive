@@ -3,8 +3,10 @@
 [ext_resource type="Script" uid="uid://ciow368trfnxl" path="res://Scripts/Tela/area_clique_inspecao.gd" id="1_g5n8p"]
 [ext_resource type="Script" uid="uid://dqxcm8o6qjvdh" path="res://Scripts/Tela/gerenciador_inspecao.gd" id="2_as5hx"]
 [ext_resource type="Script" uid="uid://ckad4jugbl4qv" path="res://Scripts/Tela/nova_aba_script.gd" id="3_0u2il"]
+[ext_resource type="Theme" uid="uid://hsun7wgylrc1" path="res://Temas/tema_botoes.tres" id="3_qrrkl"]
 [ext_resource type="Script" uid="uid://b678bfjf456su" path="res://Scripts/Tela/mensagem_modal_scpt.gd" id="4_qrrkl"]
-[ext_resource type="Script" uid="uid://dn0ligts75o3a" path="res://Scripts/Tela/CaixaDeSelecao.gd" id="5_g5n8p"]
+
+[sub_resource type="Theme" id="Theme_qrrkl"]
 
 [node name="ModuloInspecao" type="Node" unique_id=290836615]
 
@@ -26,17 +28,41 @@ offset_left = 170.0
 offset_top = 41.0
 offset_right = 943.0
 offset_bottom = 479.0
+theme = ExtResource("3_qrrkl")
 script = ExtResource("3_0u2il")
 metadata/_edit_use_anchors_ = true
 
-[node name="VBoxContainer" type="VBoxContainer" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba" unique_id=1081019375]
+[node name="VBoxPadrao" type="VBoxContainer" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba" unique_id=1081019375]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 114.0
+offset_bottom = 101.0
+theme = SubResource("Theme_qrrkl")
 
-[node name="Button" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxContainer" unique_id=1181505343]
+[node name="BtnInspecionar" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxPadrao" unique_id=1181505343]
 layout_mode = 2
 text = "Inspecionar"
+
+[node name="BtnInvestigar" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxPadrao" unique_id=343259845]
+layout_mode = 2
+text = "Investigar"
+
+[node name="BtnDiagnosticar" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxPadrao" unique_id=2125199900]
+layout_mode = 2
+text = "Diagnosticar"
+
+[node name="BtnIgnorar" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxPadrao" unique_id=1686893221]
+layout_mode = 2
+
+[node name="BtnEncerrar" type="Button" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba/VBoxPadrao" unique_id=403557275]
+layout_mode = 2
+text = "Encerrar"
+
+[node name="VBoxDiagnostico" type="VBoxContainer" parent="AreaCliqueInspecao/GerenciadorInspecao/NovaAba" unique_id=1356618501]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 31.0
+offset_right = 154.0
+offset_bottom = 71.0
 
 [node name="MensagemModal" type="Panel" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=555702996]
 visible = false
@@ -63,10 +89,10 @@ offset_top = 44.0
 offset_right = 468.0
 offset_bottom = 103.0
 mouse_filter = 2
+color = Color(1, 0, 0, 1)
 
 [node name="CaixaSelecao" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=1268796254]
 visible = false
 offset_right = 40.0
 offset_bottom = 40.0
 color = Color(0, 0, 0.78431374, 0.2901961)
-script = ExtResource("5_g5n8p")

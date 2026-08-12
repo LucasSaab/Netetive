@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://88p5yq7l0dyo"]
+
+[ext_resource type="Theme" uid="uid://hsun7wgylrc1" path="res://Temas/tema_botoes.tres" id="1_fxm7p"]
+[ext_resource type="Script" uid="uid://clm4ej4auw3jd" path="res://Scripts/relatorio_dia.gd" id="1_kdk7v"]
+
+[node name="RelatorioDia" type="Control" unique_id=1177604113]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme = ExtResource("1_fxm7p")
+script = ExtResource("1_kdk7v")
+
+[node name="LabelResumo" type="Label" parent="." unique_id=2071256255]
+layout_mode = 0
+offset_left = 107.0
+offset_top = 10.0
+offset_right = 1017.0
+offset_bottom = 101.0
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=9501922]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 130.0
+offset_right = 1111.0
+offset_bottom = 530.0
+
+[node name="VBoxResultados" type="VBoxContainer" parent="ScrollContainer" unique_id=199619228]
+layout_mode = 2
+
+[node name="BtnVoltar" type="Button" parent="." unique_id=1983734517]
+layout_mode = 0
+offset_left = 405.0
+offset_top = 550.0
+offset_right = 765.0
+offset_bottom = 634.0
+theme_override_font_sizes/font_size = 50
+text = "Finalizar dia"

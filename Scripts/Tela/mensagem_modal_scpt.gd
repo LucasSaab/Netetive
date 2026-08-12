@@ -9,19 +9,21 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func mostrar(intersectou: bool) -> void:
-	# 1. Mostra "Verificando..." primeiro
 	$Label.text = MSG_VERIFICANDO
 	z_index = 100
 	show()
-
-	# 2. Espera alguns segundos
 	await get_tree().create_timer(2.0).timeout
-
-	# 3. Mostra o resultado
 	$Label.text = MSG_INTERSECTANDO if intersectou else MSG_FORA
-
-	# 4. Fecha depois de mais alguns segundos
 	await get_tree().create_timer(2.0).timeout
+	esconder()
+
+# Novo — usado pelo botão Investigar. Sem a etapa "Verificando...",
+# é uma resposta instantânea, exibida por 3s.
+func mostrar_texto(texto: String) -> void:
+	$Label.text = texto
+	z_index = 100
+	show()
+	await get_tree().create_timer(3.0).timeout
 	esconder()
 
 func esconder() -> void:

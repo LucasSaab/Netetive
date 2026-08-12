@@ -10,3 +10,5 @@ extends Resource
 
 @export var imagem_site: Texture2D
 @export var alvos: Array[AlvoInspecao] = []
+
+@export var linhas_grid: int = 5   # colunas são sempre 3 (constante em GerenciadorInspecao)
