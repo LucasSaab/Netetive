@@ -76,26 +76,25 @@ func disponibilizar_trabalho(agendado: TrabalhoAgendado) -> void:
 # ---------------------------------------------------------------------
 # DIAGNÓSTICO / VEREDITO DIFERIDO
 # ---------------------------------------------------------------------
-
-# Chamado por gerenciador_trabalho.gd quando o jogador ACEITA um trabalho
-# (some de Disponíveis, vai pra Ativos) — abre o resultado pendente daquela
-# ocorrência específica.
-func iniciar_resultado_pendente(agendado: TrabalhoAgendado) -> void:
+func iniciar_resultado_pendente(agendado: TrabalhoAgendado, hora_atual: float = 0.0) -> void:
 	var resultado := ResultadoTrabalho.new()
 	resultado.agendado = agendado
+	resultado.hora_inicio = hora_atual
 	resultados_pendentes[agendado] = resultado
 
 
-# Chamado quando o jogador confirma "Encerrar" no popup. Fecha o resultado
-# pendente (calcula acertou_no_geral/recompensa) e move pra lista do dia.
-# Retorna o ResultadoTrabalho pra quem chamou decidir o que fazer (ex:
-# creditar dinheiro), sem revelar nada na tela.
-func finalizar_trabalho(agendado: TrabalhoAgendado) -> ResultadoTrabalho:
+func registrar_tentativa_inspecao(agendado: TrabalhoAgendado, acertou: bool) -> void:
+	if resultados_pendentes.has(agendado):
+		resultados_pendentes[agendado].registrar_tentativa(acertou)
+
+
+func finalizar_trabalho(agendado: TrabalhoAgendado, hora_atual: float = 0.0) -> ResultadoTrabalho:
 	if not resultados_pendentes.has(agendado):
 		push_warning("DadosJogo: finalizar_trabalho chamado sem resultado pendente para esse agendado.")
 		return null
 
 	var resultado: ResultadoTrabalho = resultados_pendentes[agendado]
+	resultado.hora_fim = hora_atual
 	resultado.finalizar()
 	resultados_do_dia.append(resultado)
 	resultados_pendentes.erase(agendado)

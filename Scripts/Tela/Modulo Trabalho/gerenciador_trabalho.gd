@@ -81,6 +81,11 @@ func _on_disponivel_pressionado(agendado: TrabalhoAgendado, botao_origem: Button
 
 	DadosJogo.iniciar_resultado_pendente(agendado)
 
+	# NOVO: abre a inspeção direto, sem precisar clicar de novo na lista de ativos
+	trabalho_selecionado.emit(agendado)
+	if menu_trabalhos != null:
+		menu_trabalhos.hide()
+
 
 func _adicionar_item_ativo(agendado: TrabalhoAgendado) -> void:
 	if vbox_ativos == null:

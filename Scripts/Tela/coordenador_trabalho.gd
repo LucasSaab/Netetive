@@ -1,7 +1,47 @@
 extends Node
 
+# =====================================================================
+# CoordenadorTrabalho
+# ---------------------------------------------------------------------
+# Único responsável por conectar GerenciadorTrabalho (menu de trabalhos)
+# com GerenciadorInspecao (alvos/clique/detecção/diagnóstico). Nenhum
+# dos dois conhece o outro diretamente — essa é a única função deste
+# nó, para manter Main_select_script.gd livre dessa responsabilidade.
+#
+# NOVO (ciclo do dia): também lê o relógio simulado de
+# GerenciadorExpediente para registrar hora_inicio/hora_fim de cada
+# ResultadoTrabalho, usados no relatório de fim de expediente.
+#
+# Fluxo:
+#   GerenciadorTrabalho.trabalho_selecionado(agendado)
+#           │
+#           ▼
+#   CoordenadorTrabalho: guarda agendado, troca imagem do site,
+#                         chama GerenciadorInspecao.montar_alvos(trabalho),
+#                         define_investigar_disponivel(),
+#                         abre resultado pendente com hora_inicio
+#           │
+#   (jogador inspeciona/investiga/diagnostica a tela...)
+#           │
+#           ├─► GerenciadorInspecao.inspecao_concluida(acertou, trabalho)
+#           │        → registra tentativa (certa/errada) no resultado
+#           │        → se acertou, marca achou_alvo_correto = true
+#           │
+#           ├─► GerenciadorInspecao.diagnostico_escolhido(opcao)
+#           │        → grava diagnostico_escolhido/diagnostico_correto
+#           │
+#           ├─► GerenciadorInspecao.investigar_usado
+#           │        → persiste agendado.investigar_usado = true
+#           │
+#           └─► GerenciadorInspecao.encerrar_solicitado
+#                    → abre ConfirmationDialog com o diagnóstico atual
+#                    → ao confirmar: finaliza (hora_fim), marca concluído,
+#                      limpa tela, mostra toast "Trabalho encerrado."
+# =====================================================================
+
 @export var gerenciador_trabalho: Node
 @export var gerenciador_inspecao: Node
+@export var gerenciador_expediente: Node   # NOVO — pra ler hora_atual do relógio simulado
 @export var site_textura: TextureRect
 
 var _agendado_atual: TrabalhoAgendado = null
@@ -35,6 +75,9 @@ func _ready() -> void:
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_inspecao não atribuído (ou sem o sinal investigar_usado).")
 
+	if gerenciador_expediente == null:
+		push_warning("CoordenadorTrabalho: gerenciador_expediente não atribuído — horários do relatório ficarão zerados (0.0).")
+
 	_dialogo_confirmacao = ConfirmationDialog.new()
 	_dialogo_confirmacao.confirmed.connect(_on_confirmar_encerramento)
 	add_child(_dialogo_confirmacao)
@@ -46,6 +89,17 @@ func _ready() -> void:
 	_label_feedback.hide()
 	_label_feedback.z_index = 200
 	add_child(_label_feedback)
+
+
+# ---------------------------------------------------------------------
+# Lê a hora simulada atual do GerenciadorExpediente. Retorna 0.0 se o
+# nó não estiver atribuído (evita erro; só deixa o relatório sem tempo
+# real registrado, avisado uma única vez no _ready()).
+# ---------------------------------------------------------------------
+func _hora_atual() -> float:
+	if gerenciador_expediente != null and "hora_atual" in gerenciador_expediente:
+		return gerenciador_expediente.hora_atual
+	return 0.0
 
 
 func _on_trabalho_selecionado(agendado: TrabalhoAgendado) -> void:
@@ -66,11 +120,22 @@ func _on_trabalho_selecionado(agendado: TrabalhoAgendado) -> void:
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_inspecao não atribuído ou sem montar_alvos().")
 
+	# NOVO: abre o resultado pendente aqui (não mais em gerenciador_trabalho.gd),
+	# já com hora_inicio marcada — garante que o relógio bate mesmo se o
+	# jogador ficar um tempo com o menu de trabalhos aberto antes de entrar.
+	if DadosJogo.resultados_pendentes.has(agendado):
+		return  # já tem um resultado pendente pra esse agendado (reentrada), não recria
+	DadosJogo.iniciar_resultado_pendente(agendado, _hora_atual())
+
 
 func _on_inspecao_concluida(acertou: bool, trabalho: TrabalhoInspecao) -> void:
 	if _agendado_atual == null or _agendado_atual.trabalho != trabalho:
 		push_warning("CoordenadorTrabalho: inspecao_concluida não bate com o agendado atual.")
 		return
+
+	# NOVO: registra a tentativa (certa/errada) pro relatório detalhado,
+	# independente de já ter achado o alvo suspeito antes.
+	DadosJogo.registrar_tentativa_inspecao(_agendado_atual, acertou)
 
 	if acertou and DadosJogo.resultados_pendentes.has(_agendado_atual):
 		DadosJogo.resultados_pendentes[_agendado_atual].achou_alvo_correto = true
@@ -112,7 +177,9 @@ func _on_confirmar_encerramento() -> void:
 		return
 
 	var titulo_trabalho := _agendado_atual.trabalho.titulo
-	DadosJogo.finalizar_trabalho(_agendado_atual)
+
+	# NOVO: passa a hora atual pra fechar hora_fim do resultado.
+	DadosJogo.finalizar_trabalho(_agendado_atual, _hora_atual())
 
 	if gerenciador_trabalho != null and gerenciador_trabalho.has_method("marcar_trabalho_concluido"):
 		gerenciador_trabalho.marcar_trabalho_concluido(_agendado_atual)

@@ -10,9 +10,14 @@ func _ready() -> void:
 
 	if gerenciador_expediente != null and gerenciador_expediente.has_method("iniciar_expediente"):
 		gerenciador_expediente.iniciar_expediente()
+		if gerenciador_expediente.has_signal("expediente_encerrado"):
+			gerenciador_expediente.expediente_encerrado.connect(_on_expediente_encerrado)
 	else:
 		push_warning("Main_select_script: gerenciador_expediente não encontrado ou sem iniciar_expediente().")
 
+
+func _on_expediente_encerrado() -> void:
+	get_tree().change_scene_to_file("res://Scenes/RelatorioDia.tscn")
 
 func _on_btn_abrir_livro_pressed() -> void:
 	var instancia_livro = cena_livro.instantiate()
