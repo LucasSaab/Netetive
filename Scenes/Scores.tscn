@@ -1,7 +1,10 @@
 [gd_scene format=3 uid="uid://35642qeg3q5m"]
 
 [ext_resource type="Script" uid="uid://c82m2g4761n3x" path="res://Scenes/hud_manager.gd" id="1_3l0ju"]
-[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="2_w4o4m"]
+[ext_resource type="Texture2D" uid="uid://cv0mphhh0cr5a" path="res://Sprites/score_system/carteira_de_dinheiro1.png" id="2_b0abw"]
+[ext_resource type="Texture2D" uid="uid://c0ijjtgf1khp0" path="res://Sprites/score_system/trofeu_de_fama.png" id="3_b0abw"]
+[ext_resource type="Script" uid="uid://ct1gffff3v1g7" path="res://Scenes/icone_dinheiro.gd" id="3_ea74h"]
+[ext_resource type="Texture2D" uid="uid://unx0w4ahvgkm" path="res://Sprites/score_system/carteira_de_dinheiro2.png" id="4_658l8"]
 
 [node name="Score" type="Node2D" unique_id=311059794]
 
@@ -33,13 +36,17 @@ custom_minimum_size = Vector2(1070, 40)
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="icone_dinheiro" type="TextureRect" parent="HUD/control/container/container_dinheiro" unique_id=1035990618]
+[node name="icone_dinheiro" type="TextureRect" parent="HUD/control/container/container_dinheiro" unique_id=1035990618 node_paths=PackedStringArray("icone_dinheiro")]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 8
-texture = ExtResource("2_w4o4m")
+texture = ExtResource("2_b0abw")
 expand_mode = 1
+script = ExtResource("3_ea74h")
+carteira_de_dinheiro_1 = ExtResource("2_b0abw")
+carteira_de_dinheiro_2 = ExtResource("4_658l8")
+icone_dinheiro = NodePath(".")
 metadata/_edit_lock_ = true
 
 [node name="contador_dinheiro" type="Label" parent="HUD/control/container/container_dinheiro/icone_dinheiro" unique_id=774842961]
@@ -70,7 +77,7 @@ size_flags_vertical = 0
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_horizontal = 0
-texture = ExtResource("2_w4o4m")
+texture = ExtResource("3_b0abw")
 expand_mode = 1
 metadata/_edit_lock_ = true
 
