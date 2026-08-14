@@ -11,7 +11,7 @@ func _ready():
 
 func atualizar_aparencia():
 	print("Testando! Valor atual do dinheiro: ", Global.money)
-	
+	#realiza a troca das imagens caso haja um valor maior que 0 no dinheiro
 	if Global.money > 0:
 		icone_dinheiro.texture = carteira_de_dinheiro_2
 	else:

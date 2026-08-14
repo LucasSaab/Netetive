@@ -15,7 +15,10 @@ func add_money(qtd: float) -> void:
 
 # Funcao para decrementar o dinheiro
 func decrease_money(qtd: float) -> void:
-	money -= qtd
+	if money > qtd:
+		money -= qtd
+	else:
+		print("Saldo insuficiente!")
 	print("Seu saldo atual e de: %.2f" % money)
 	altered_money.emit(money)
 
