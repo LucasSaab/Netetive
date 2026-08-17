@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://blpsxxqado2l6"]
+
+[ext_resource type="Texture2D" uid="uid://cq6r74v0jf6xr" path="res://Sprites/Computador tela LCD.png" id="1_tmhie"]
+[ext_resource type="Texture2D" uid="uid://c2dxve6jsxbcj" path="res://Sprites/tela_trojan/tela_trabalho_trojan.png" id="2_ydupm"]
+[ext_resource type="Texture2D" uid="uid://coabbnedlctmd" path="res://Sprites/post-it.png" id="3_vcyeg"]
+[ext_resource type="Script" uid="uid://b2yoey4cq6dxk" path="res://Scripts/Tela/lembrete.gd" id="4_cs74e"]
+
+[node name="TelaBaixarTrojan" type="Node2D" unique_id=1158862396]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=219020781]
+position = Vector2(555, 329)
+texture = ExtResource("1_tmhie")
+metadata/_edit_lock_ = true
+
+[node name="TextureRect" type="TextureRect" parent="Sprite2D" unique_id=1144113615]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -703.0
+offset_top = -487.0
+offset_right = -663.0
+offset_bottom = -447.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ImagemBase" type="TextureRect" parent="Sprite2D" unique_id=2134393205]
+offset_left = -385.0
+offset_top = -286.0
+offset_right = 385.0
+offset_bottom = 143.0
+texture = ExtResource("2_ydupm")
+expand_mode = 1
+
+[node name="Lembrete" type="TextureButton" parent="." unique_id=104765767]
+offset_left = 138.0
+offset_top = 466.0
+offset_right = 266.0
+offset_bottom = 594.0
+texture_normal = ExtResource("3_vcyeg")
+script = ExtResource("4_cs74e")
