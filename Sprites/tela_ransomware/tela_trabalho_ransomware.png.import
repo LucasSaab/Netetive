@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c2dxve6jsxbcj"
-path="res://.godot/imported/tela_trabalho_trojan.png-4caa5b3b4d35d284b1bfe12ff6af2d8a.ctex"
+path="res://.godot/imported/tela_trabalho_ransomware.png-51d8beed6901793f12b6447a86fcd4da.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/tela_trojan/tela_trabalho_trojan.png"
-dest_files=["res://.godot/imported/tela_trabalho_trojan.png-4caa5b3b4d35d284b1bfe12ff6af2d8a.ctex"]
+source_file="res://Sprites/tela_ransomware/tela_trabalho_ransomware.png"
+dest_files=["res://.godot/imported/tela_trabalho_ransomware.png-51d8beed6901793f12b6447a86fcd4da.ctex"]
 
 [params]
 

@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://blpsxxqado2l6"]
+
+[ext_resource type="Texture2D" uid="uid://cq6r74v0jf6xr" path="res://Sprites/Computador tela LCD.png" id="1_3n5tg"]
+[ext_resource type="Texture2D" uid="uid://c2dxve6jsxbcj" path="res://Sprites/tela_ransomware/tela_trabalho_ransomware.png" id="2_cvkve"]
+[ext_resource type="Texture2D" uid="uid://coabbnedlctmd" path="res://Sprites/post-it.png" id="3_kcdxl"]
+[ext_resource type="Script" uid="uid://b2yoey4cq6dxk" path="res://Scripts/Tela/lembrete.gd" id="4_n77d8"]
+[ext_resource type="Script" uid="uid://bx47h4s4fvi3y" path="res://Scripts/Tela/gerenciador_trabalho.gd" id="5_foqy5"]
+[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="6_gjlq0"]
+[ext_resource type="Script" uid="uid://cn13lwsqcwowk" path="res://Scripts/Tela/btn_abrir_livro.gd" id="7_4y57o"]
+[ext_resource type="PackedScene" uid="uid://b2r2i0l2rix7l" path="res://Scenes/LivroInstrucao.tscn" id="8_nry1n"]
+[ext_resource type="PackedScene" uid="uid://jtkkvoxesbp6" path="res://Scenes/modulo_inspecao.tscn" id="9_fe8pf"]
+[ext_resource type="PackedScene" uid="uid://di8ebtlmueqde" path="res://Scenes/modulo_trabalho.tscn" id="10_qbo3h"]
+[ext_resource type="Script" uid="uid://culd1hpl7rg0p" path="res://Scripts/Tela/coordenador_trabalho.gd" id="11_qm36q"]
+
+[node name="TelaBaixarTrojan" type="Node2D" unique_id=1158862396]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=219020781]
+position = Vector2(555, 329)
+texture = ExtResource("1_3n5tg")
+metadata/_edit_lock_ = true
+
+[node name="TextureRect" type="TextureRect" parent="Sprite2D" unique_id=1144113615]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -703.0
+offset_top = -487.0
+offset_right = -663.0
+offset_bottom = -447.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ImagemBase" type="TextureRect" parent="Sprite2D" unique_id=2134393205]
+offset_left = -385.0
+offset_top = -286.0
+offset_right = 385.0
+offset_bottom = 143.0
+texture = ExtResource("2_cvkve")
+expand_mode = 1
+
+[node name="Lembrete" type="TextureButton" parent="." unique_id=104765767]
+offset_left = 138.0
+offset_top = 466.0
+offset_right = 266.0
+offset_bottom = 594.0
+texture_normal = ExtResource("3_kcdxl")
+script = ExtResource("4_n77d8")
+
+[node name="GerenciadorTrabalho" type="Node" parent="." unique_id=1241775795]
+script = ExtResource("5_foqy5")
+
+[node name="TimerLembrete" type="Timer" parent="." unique_id=666903828]
+
+[node name="BtnAbrirLivro" type="TextureButton" parent="." unique_id=1271362531 node_paths=PackedStringArray("container_central")]
+offset_left = 1004.0
+offset_top = 509.0
+offset_right = 1132.0
+offset_bottom = 637.0
+texture_normal = ExtResource("6_gjlq0")
+script = ExtResource("7_4y57o")
+cena_livro = ExtResource("8_nry1n")
+container_central = NodePath("")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2045599971]
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer" unique_id=482286913]
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="ModuloInspecao" parent="." unique_id=290836615 instance=ExtResource("9_fe8pf")]
+
+[node name="ModuloTrabalho" parent="." unique_id=174112552 instance=ExtResource("10_qbo3h")]
+
+[node name="CoordenadorTrabalho" type="Node2D" parent="." unique_id=344028625 node_paths=PackedStringArray("gerenciador_trabalho", "gerenciador_inspecao", "site_textura")]
+script = ExtResource("11_qm36q")
+gerenciador_trabalho = NodePath("")
+gerenciador_inspecao = NodePath("")
+site_textura = NodePath("")

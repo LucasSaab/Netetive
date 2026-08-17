@@ -94,7 +94,29 @@ func _criar_trabalho_cavalo_de_troia() -> TrabalhoInspecao:
 	trabalho.alvos = [suspeito, neutro1]
 	return trabalho
 
+func _criar_trabalho_remover_ransomware() -> TrabalhoInspecao:
+	var trabalho := TrabalhoInspecao.new()
+	trabalho.titulo = "Remover ransomware"
+	trabalho.descricao = "O usuário baixou um antivírus suspeito, mas ele acabou criptografando os seus dados"
+	trabalho.recompensa_base = 150
+	trabalho.imagem_site = preload("res://Sprites/tela_ransomware/tela_trabalho_ransomware.png")
+	
+	var suspeito := AlvoInspecao.new()
+	suspeito.tipo = AlvoInspecao.Tipo.SUSPEITO
+	suspeito.posicao = Vector2(170, 44)
+	suspeito.tamanho = Vector2(298, 59)
+	suspeito.capitulo_relacionado = 3  # Ransomware, por exemplo
 
+	var neutro1 := AlvoInspecao.new()
+	neutro1.tipo = AlvoInspecao.Tipo.NEUTRO
+	neutro1.posicao = Vector2(80, 60)
+	neutro1.tamanho = Vector2(120, 30)
+
+	trabalho.alvos = [suspeito, neutro1]
+	return trabalho
+	
+	
+	
 func _criar_trabalho_limpeza_disco() -> TrabalhoInspecao:
 	var trabalho := TrabalhoInspecao.new()
 	trabalho.titulo = "Limpeza de Disco"
