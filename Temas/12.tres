@@ -1,0 +1,32 @@
+[gd_resource type="Theme" format=3 uid="uid://btb15t1ftymvc"]
+
+[ext_resource type="StyleBox" uid="uid://cqwwj8rhi8gvl" path="res://Temas/botao_normal.tres" id="1_dwmge"]
+
+[sub_resource type="SystemFont" id="SystemFont_rsfy2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uckge"]
+bg_color = Color(0.7529412, 0.7529412, 0.7529412, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+
+[resource]
+Button/colors/font_color = Color(0, 0, 0, 1)
+Button/colors/font_disabled_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
+Button/colors/font_focus_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+Button/colors/font_pressed_color = Color(0, 0, 0, 1)
+Button/constants/h_separation = 0
+Button/fonts/font = SubResource("SystemFont_rsfy2")
+Button/styles/disabled = ExtResource("1_dwmge")
+Button/styles/hover = ExtResource("1_dwmge")
+Button/styles/normal = ExtResource("1_dwmge")
+Button/styles/pressed = ExtResource("1_dwmge")
+Label/colors/font_color = Color(0, 0, 0, 1)
+Label/styles/focus = SubResource("StyleBoxFlat_uckge")
+Label/styles/normal = ExtResource("1_dwmge")
+ScrollContainer/styles/focus = ExtResource("1_dwmge")
+ScrollContainer/styles/panel = ExtResource("1_dwmge")
+VBoxContainer/constants/separation = 1

@@ -21,21 +21,43 @@ theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="LabelDinheiro" type="Label" parent="." unique_id=209979966]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 0.5
+offset_left = 213.0
+offset_top = 105.0
+offset_right = 533.0
+offset_bottom = 145.0
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LabelFama" type="Label" parent="." unique_id=8344431]
+layout_mode = 0
+offset_left = 551.0
+offset_top = 105.0
+offset_right = 871.0
+offset_bottom = 165.0
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=9501922]
 layout_mode = 0
 offset_left = 40.0
-offset_top = 130.0
+offset_top = 171.0
 offset_right = 1111.0
-offset_bottom = 530.0
+offset_bottom = 555.0
 
 [node name="VBoxResultados" type="VBoxContainer" parent="ScrollContainer" unique_id=199619228]
 layout_mode = 2
 
 [node name="BtnVoltar" type="Button" parent="." unique_id=1983734517]
 layout_mode = 0
-offset_left = 405.0
-offset_top = 550.0
-offset_right = 765.0
-offset_bottom = 634.0
+offset_left = 406.0
+offset_top = 560.0
+offset_right = 766.0
+offset_bottom = 644.0
 theme_override_font_sizes/font_size = 50
 text = "Finalizar dia"

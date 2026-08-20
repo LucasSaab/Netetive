@@ -1,11 +1,14 @@
 extends Node
 # Banco de dados global do jogo. A DEFINIÇÃO dos trabalhos (textos,
-# imagem, alvos) mora em banco_de_trabalhos.gd — este arquivo cuida só
-# do ESTADO em runtime: dinheiro, agenda do dia, resultados pendentes.
+# imagem, alvos) mora em banco_de_trabalhos.gd; a DEFINIÇÃO dos upgrades
+# (preços, efeitos, upkeep) mora em banco_de_upgrades.gd — este arquivo
+# cuida só do ESTADO em runtime: dinheiro, agenda do dia, resultados
+# pendentes e o progresso do jogador em cada linha de upgrade.
 
 var banco_de_trabalhos: Array[TrabalhoInspecao] = []
 
 var dinheiro_jogador: int = 0
+var fama_jogador: int = 0   # cresce com trabalhos concluídos; controla quantidade_trabalhos_dia (ver GerenciadorExpediente + CalculadoraFama)
 
 # ---------------------------------------------------------------------
 # Sistema de expediente (agenda do dia) — usado por gerenciador_expediente.gd
@@ -26,9 +29,18 @@ var trabalhos_concluidos_hoje: int = 0
 var resultados_pendentes: Dictionary = {}   # TrabalhoAgendado -> ResultadoTrabalho
 var resultados_do_dia: Array[ResultadoTrabalho] = []
 
+# ---------------------------------------------------------------------
+# Sistema de Upgrades (novo) — Dictionary[String, LinhaUpgrade], chaves
+# em BancoDeUpgrades (CHAVE_PC, CHAVE_ASSISTENTE_TREINAMENTO, etc).
+# Cada LinhaUpgrade guarda seu próprio tier_atual — DadosJogo não
+# duplica esse estado, só segura a referência e faz a compra.
+# ---------------------------------------------------------------------
+var upgrades: Dictionary = {}   # String -> LinhaUpgrade
+
 
 func _ready() -> void:
 	banco_de_trabalhos = BancoDeTrabalhos.criar_todos()
+	upgrades = BancoDeUpgrades.criar_todas()
 
 
 # ---------------------------------------------------------------------
@@ -76,6 +88,10 @@ func disponibilizar_trabalho(agendado: TrabalhoAgendado) -> void:
 # ---------------------------------------------------------------------
 # DIAGNÓSTICO / VEREDITO DIFERIDO
 # ---------------------------------------------------------------------
+
+# Chamado por coordenador_trabalho.gd quando o jogador ACEITA um trabalho
+# (some de Disponíveis, vai pra Ativos) — abre o resultado pendente daquela
+# ocorrência específica.
 func iniciar_resultado_pendente(agendado: TrabalhoAgendado, hora_atual: float = 0.0) -> void:
 	var resultado := ResultadoTrabalho.new()
 	resultado.agendado = agendado
@@ -83,11 +99,17 @@ func iniciar_resultado_pendente(agendado: TrabalhoAgendado, hora_atual: float = 
 	resultados_pendentes[agendado] = resultado
 
 
+# Chamado por CoordenadorTrabalho a cada inspeção concluída (acerto ou erro),
+# pra alimentar tentativas_certas/tentativas_erradas do relatório detalhado.
 func registrar_tentativa_inspecao(agendado: TrabalhoAgendado, acertou: bool) -> void:
 	if resultados_pendentes.has(agendado):
 		resultados_pendentes[agendado].registrar_tentativa(acertou)
 
 
+# Chamado quando o jogador confirma "Encerrar" no popup. Fecha o resultado
+# pendente (calcula acertou_no_geral/recompensa, grava hora_fim) e move pra
+# lista do dia. Retorna o ResultadoTrabalho pra quem chamou decidir o que
+# fazer (ex: creditar dinheiro), sem revelar nada na tela.
 func finalizar_trabalho(agendado: TrabalhoAgendado, hora_atual: float = 0.0) -> ResultadoTrabalho:
 	if not resultados_pendentes.has(agendado):
 		push_warning("DadosJogo: finalizar_trabalho chamado sem resultado pendente para esse agendado.")
@@ -144,3 +166,59 @@ func gerar_opcoes_diagnostico(trabalho: TrabalhoInspecao, quantidade: int = 3) -
 
 	opcoes.shuffle()
 	return opcoes
+
+
+# ---------------------------------------------------------------------
+# SISTEMA DE UPGRADES (novo)
+# ---------------------------------------------------------------------
+# comprar_upgrade() é a ÚNICA porta de entrada pra avançar uma linha de
+# upgrade. Ela só entende preço/pré-requisito/dinheiro — não sabe nada
+# sobre o que "Assistente" ou "IA" fazem com o tier depois de comprado.
+# Quem interpreta o efeito (tempo, taxa de sucesso, upkeep) são os
+# scripts dedicados (gerenciador_assistente.gd, gerenciador_ia_noturna.gd,
+# mensagem_modal_scpt.gd pro PC), lendo LinhaUpgrade.valor_efeito_atual()
+# na hora de usar, não guardando cópia própria do valor.
+# ---------------------------------------------------------------------
+
+# Tenta comprar o próximo tier da linha identificada por `chave` (ver
+# constantes CHAVE_* em BancoDeUpgrades). Retorna true se a compra foi
+# concluída; false com um push_warning explicando o motivo, se não.
+func comprar_upgrade(chave: String) -> bool:
+	if not upgrades.has(chave):
+		push_warning("DadosJogo: upgrade '%s' não existe em BancoDeUpgrades." % chave)
+		return false
+
+	var linha: LinhaUpgrade = upgrades[chave]
+
+	if linha.esta_no_maximo():
+		push_warning("DadosJogo: linha '%s' já está no tier máximo." % chave)
+		return false
+
+	if linha.chave_pre_requisito != "" and not _pre_requisito_atendido(linha.chave_pre_requisito):
+		push_warning("DadosJogo: linha '%s' exige o tier 1 de '%s' primeiro." % [chave, linha.chave_pre_requisito])
+		return false
+
+	var tier: TierUpgrade = linha.proximo_tier()
+
+	if dinheiro_jogador < tier.preco:
+		push_warning("DadosJogo: dinheiro insuficiente pra comprar '%s' tier %d (precisa de R$ %d, tem R$ %d)." % [chave, linha.tier_atual + 1, tier.preco, dinheiro_jogador])
+		return false
+
+	dinheiro_jogador -= tier.preco
+	linha.tier_atual += 1
+	return true
+
+
+# Helper de leitura pra UI (painel_upgrades.gd) — evita expor o
+# Dictionary `upgrades` diretamente em todo lugar que precisa consultar
+# uma linha específica.
+func obter_linha_upgrade(chave: String) -> LinhaUpgrade:
+	return upgrades.get(chave, null)
+
+
+func _pre_requisito_atendido(chave_pre_requisito: String) -> bool:
+	if not upgrades.has(chave_pre_requisito):
+		push_warning("DadosJogo: pré-requisito '%s' referenciado não existe em upgrades." % chave_pre_requisito)
+		return false
+	var linha_pre: LinhaUpgrade = upgrades[chave_pre_requisito]
+	return linha_pre.tier_atual >= 1

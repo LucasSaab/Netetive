@@ -3,7 +3,7 @@ extends Control
 signal trabalho_aceito(agendado: TrabalhoAgendado)
 signal trabalho_selecionado(agendado: TrabalhoAgendado)
 
-@onready var vbox_disponiveis: VBoxContainer = $VBoxDisponiveis
+@onready var vbox_disponiveis = $ScrollContainer/VBoxDisponiveis
 @onready var vbox_ativos: VBoxContainer = $VBoxAtivos
 
 

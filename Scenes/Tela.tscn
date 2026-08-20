@@ -3,10 +3,7 @@
 [ext_resource type="Script" uid="uid://cxhc2vr8d6442" path="res://Scripts/Tela/Main_select_script.gd" id="1_2ep5m"]
 [ext_resource type="Texture2D" uid="uid://cq6r74v0jf6xr" path="res://Sprites/Computador tela LCD.png" id="1_2m0fk"]
 [ext_resource type="Texture2D" uid="uid://b63c5sgaj3dsl" path="res://Sprites/background-Pc.jpg" id="3_w1jdw"]
-[ext_resource type="Texture2D" uid="uid://coabbnedlctmd" path="res://Sprites/post-it.png" id="6_8oupw"]
-[ext_resource type="Script" uid="uid://b2yoey4cq6dxk" path="res://Scripts/Tela/lembrete.gd" id="8_syxfj"]
 [ext_resource type="PackedScene" uid="uid://jtkkvoxesbp6" path="res://Scenes/modulo_inspecao.tscn" id="10_2ep5m"]
-[ext_resource type="Script" uid="uid://r7s3r06ikkn5" path="res://Scripts/Tela/coordenador_trabalho.gd" id="11_w1jdw"]
 [ext_resource type="PackedScene" uid="uid://di8ebtlmueqde" path="res://Scenes/modulo_trabalho.tscn" id="12_mkaev"]
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="14_fgk2u"]
 [ext_resource type="PackedScene" uid="uid://b2r2i0l2rix7l" path="res://Scenes/LivroInstrucao.tscn" id="14_syxfj"]
@@ -49,32 +46,18 @@ offset_bottom = 143.0
 texture = ExtResource("3_w1jdw")
 expand_mode = 1
 
-[node name="Lembrete" type="TextureButton" parent="." unique_id=1266665793]
-offset_left = 138.0
-offset_top = 466.0
-offset_right = 266.0
-offset_bottom = 594.0
-texture_normal = ExtResource("6_8oupw")
-script = ExtResource("8_syxfj")
-
 [node name="TimerLembrete" type="Timer" parent="." unique_id=2036266922]
-
-[node name="BtnAbrirLivro" type="TextureButton" parent="." unique_id=1109468233 node_paths=PackedStringArray("container_central")]
-offset_left = 1004.0
-offset_top = 509.0
-offset_right = 1132.0
-offset_bottom = 637.0
-texture_normal = ExtResource("14_fgk2u")
-script = ExtResource("15_3mv3w")
-cena_livro = ExtResource("14_syxfj")
-container_central = NodePath("../CanvasLayer/CenterContainer")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1449463919]
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer" unique_id=1427707015]
-offset_right = 40.0
-offset_bottom = 40.0
-mouse_filter = 2
+[node name="BtnAbrirLivro" type="TextureButton" parent="CanvasLayer" unique_id=1109468233]
+offset_left = 972.0
+offset_top = 554.0
+offset_right = 1100.0
+offset_bottom = 682.0
+texture_normal = ExtResource("14_fgk2u")
+script = ExtResource("15_3mv3w")
+cena_livro = ExtResource("14_syxfj")
 
 [node name="ModuloInspecao" parent="." unique_id=290836615 instance=ExtResource("10_2ep5m")]
 
@@ -83,12 +66,12 @@ area_referencia = NodePath("../../../Sprite2D/ImagemBase")
 
 [node name="ModuloTrabalho" parent="." unique_id=174112552 instance=ExtResource("12_mkaev")]
 
-[node name="CoordenadorTrabalho" type="Node2D" parent="." unique_id=1596183722 node_paths=PackedStringArray("gerenciador_trabalho", "gerenciador_inspecao", "gerenciador_expediente", "site_textura")]
-script = ExtResource("11_w1jdw")
-gerenciador_trabalho = NodePath("../ModuloTrabalho/GerenciadorTrabalho")
-gerenciador_inspecao = NodePath("../ModuloInspecao/AreaCliqueInspecao/GerenciadorInspecao")
-gerenciador_expediente = NodePath("../ModuloTrabalho/GerenciadorExpediente")
-site_textura = NodePath("../Sprite2D/ImagemBase")
+[node name="MenuTrabalhos" parent="ModuloTrabalho/GerenciadorTrabalho" parent_id_path=PackedInt32Array(174112552, 1081352621) index="1" unique_id=867683152]
+visible = false
+
+[node name="CoordenadorTrabalho" parent="ModuloTrabalho" index="3" unique_id=1240996018 node_paths=PackedStringArray("gerenciador_inspecao", "site_textura")]
+gerenciador_inspecao = NodePath("../../ModuloInspecao/AreaCliqueInspecao/GerenciadorInspecao")
+site_textura = NodePath("../../Sprite2D/ImagemBase")
 
 [editable path="ModuloInspecao"]
 [editable path="ModuloTrabalho"]
