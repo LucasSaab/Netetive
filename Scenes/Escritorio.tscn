@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://d6yc02g756hu" path="res://Scripts/Escritorio/btn_upgrades.gd" id="5_8lfxk"]
 [ext_resource type="Theme" uid="uid://btb15t1ftymvc" path="res://Temas/12.tres" id="6_843fw"]
 [ext_resource type="Script" uid="uid://beq28d5oppbo5" path="res://Scripts/Escritorio/painelupgrades.gd" id="6_agita"]
+[ext_resource type="PackedScene" uid="uid://ddgrpiijkvrc7" path="res://Scenes/Scores.tscn" id="8_843fw"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_agita"]
 draw_center = false
@@ -99,6 +100,8 @@ offset_top = 507.0
 offset_right = 853.0
 offset_bottom = 566.0
 text = "Voltar"
+
+[node name="Score" parent="." unique_id=1420922170 instance=ExtResource("8_843fw")]
 
 [connection signal="pressed" from="Quadro_avisos" to="Quadro_avisos" method="_on_pressed"]
 [connection signal="pressed" from="Cafeteira" to="Cafeteira" method="_on_pressed"]

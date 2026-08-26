@@ -13,7 +13,8 @@
 script = ExtResource("1_2ep5m")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1015529222]
-position = Vector2(555, 329)
+position = Vector2(576.00006, 399)
+scale = Vector2(1.3500001, 1.2562499)
 texture = ExtResource("1_2m0fk")
 metadata/_edit_lock_ = true
 
@@ -51,10 +52,10 @@ expand_mode = 1
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1449463919]
 
 [node name="BtnAbrirLivro" type="TextureButton" parent="CanvasLayer" unique_id=1109468233]
-offset_left = 972.0
-offset_top = 554.0
-offset_right = 1100.0
-offset_bottom = 682.0
+offset_left = 1017.0
+offset_top = 519.0
+offset_right = 1145.0
+offset_bottom = 647.0
 texture_normal = ExtResource("14_fgk2u")
 script = ExtResource("15_3mv3w")
 cena_livro = ExtResource("14_syxfj")
