@@ -29,9 +29,9 @@ const PAGINAS: Array[Dictionary] = [
 		"solucao": "Como agir: Encerra o contato imediatamente sem fornecer nenhuma informação. Anota o número ou canal usado pelo golpista and reporta. Se já tiver fornecido algum dado, troca as senhas afetadas na hora e avisa o time de segurança. Nunca instala programas de acesso remoto pedidos por 'suporte técnico' não solicitado."
 	},
 	{
-		"titulo": "Capítulo 6 — Senha Fraca",
-		"descricao": "'123456' não é senha, é tapete de boas-vindas pra invasor. Uma senha decente tem mais de 12 caracteres, mistura letras maiúsculas, minúsculas, números e símbolos. E não usa seu nome, data de nascimento ou 'senha123'. Ah, e cada site precisa de uma senha diferente — se um vazar, os outros ficam protegidos.",
-		"solucao": "Como agir: Troca agora. Usa um gerenciador de senhas — programas como Bitwarden ou KeePass criam e guardam senhas fortes pra você, sem precisar memorizar. Ativa autenticação em dois fatores em todos os serviços que permitirem. Revisa suas senhas antigas pelo menos uma vez por ano."
+	"titulo": "Capítulo 6 — Scareware",
+	"descricao": "Sabe aquela tela que aparece do nada dizendo que seu computador está infectado, com um contador regressivo e uma lista enorme de 'ameaças detectadas'? Isso é scareware — um site ou pop-up falso que finge ser um antivírus pra te assustar e fazer você clicar em 'baixar' rápido demais, sem pensar. O visual é sempre exagerado: alertas em vermelho, ícones piscando, sirene de urgência. O objetivo não é te proteger, é te apressar.",
+	"solucao": "Como agir:- Nenhum navegador ou sistema operacional detecta vírus sozinho — se o alerta veio de uma aba do navegador, é falso.\n- Desconfie de qualquer coisa com contador regressivo pedindo pra você agir 'antes que seja tarde'.\n- Nunca baixe a 'ferramenta de remoção' oferecida na própria tela do alerta — feche a aba ou o navegador inteiro.\n- Rode um antivírus de verdade, já instalado, separadamente — nunca o que a tela suspeita está recomendando."
 	},
 	{
 		"titulo": "Capítulo 7 — Wi-Fi Público",

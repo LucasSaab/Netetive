@@ -5,8 +5,8 @@ signal expediente_encerrado
 signal relogio_atualizado(hora_formatada: String)
 signal trabalho_disponibilizado(agendado: TrabalhoAgendado)
 
-@export var quantidade_trabalhos_dia: int = 10
-@export var quantidade_trabalhos_iniciais: int = 3
+@export var trabalhos_base_dia: int = 6   # mínimo garantido/dia — cresce com fama via CalculadoraFama, ver iniciar_expediente()
+@export var quantidade_trabalhos_iniciais: int = 2
 @export var minutos_por_segundo_real: float = 4.0
 
 var hora_atual: float = 0.0
@@ -15,13 +15,14 @@ var _rodando: bool = false
 
 
 func iniciar_expediente() -> void:
-	DadosJogo.sortear_agenda_do_dia(quantidade_trabalhos_dia, quantidade_trabalhos_iniciais)
+	var quantidade_hoje := CalculadoraFama.calcular_quantidade_trabalhos_dia(DadosJogo.fama_jogador, trabalhos_base_dia)
+	DadosJogo.sortear_agenda_do_dia(quantidade_hoje, quantidade_trabalhos_iniciais)
 
 	hora_atual = DadosJogo.HORA_INICIO_EXPEDIENTE
 	_proximo_indice_agenda = 0
 	_rodando = true
 
-	print("EXPEDIENTE: Iniciado às ", _formatar_hora(hora_atual))
+	print("EXPEDIENTE: Iniciado às ", _formatar_hora(hora_atual), " — ", quantidade_hoje, " trabalhos hoje (fama: ", DadosJogo.fama_jogador, ")")
 	expediente_iniciado.emit()
 	relogio_atualizado.emit(_formatar_hora(hora_atual))
 

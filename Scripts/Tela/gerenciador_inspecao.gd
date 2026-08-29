@@ -12,6 +12,10 @@ const GRUPO_ALVOS := "alvo_dinamico"
 @onready var nova_aba: Control = $NovaAba
 @onready var mensagem_modal: Control = $MensagemModal
 
+# Control cujo `size`/`global_position` define a área total da grade
+# (deve apontar pro TextureRect ImagemBase — se ficar vazio, cai no
+# viewport inteiro como fallback, o que deixa o grid maior/deslocado
+# em relação à imagem do site).
 @export var area_referencia: Control
 
 var trabalho_atual: TrabalhoInspecao
@@ -45,6 +49,9 @@ func definir_investigar_disponivel(disponivel: bool) -> void:
 	_investigar_disponivel = disponivel
 
 
+# =======================================================================
+# MONTAGEM DA GRADE (3 colunas fixas × N linhas, com compensação de altura)
+# =======================================================================
 func montar_alvos(trabalho: TrabalhoInspecao) -> void:
 	limpar_alvos()
 	trabalho_atual = trabalho
@@ -60,17 +67,20 @@ func montar_alvos(trabalho: TrabalhoInspecao) -> void:
 	var origem := area_referencia.global_position if area_referencia != null else Vector2.ZERO
 	var largura_coluna := tamanho_area.x / float(COLUNAS_GRID)
 
-	var mapa_alvos: Dictionary = {}
+	# 1. Mapear quais quadrantes já têm um AlvoInspecao explícito (do trabalho).
+	var mapa_alvos: Dictionary = {}   # indice -> AlvoInspecao
 	for alvo in trabalho.alvos:
 		if mapa_alvos.has(alvo.quadrante):
 			push_warning("GerenciadorInspecao: quadrante %d já tem alvo atribuído — ignorando duplicata." % alvo.quadrante)
 			continue
 		mapa_alvos[alvo.quadrante] = alvo
 
+	# 2. Calcular a altura de cada LINHA (não de cada quadrante — todos os
+	#    quadrantes da mesma linha compartilham a mesma altura).
 	var alturas_linha: Array[float] = []
 	alturas_linha.resize(linhas)
 
-	var linhas_fixas: Dictionary = {}
+	var linhas_fixas: Dictionary = {}   # linha -> altura forçada por algum AlvoInspecao.altura_real
 	for indice in mapa_alvos.keys():
 		@warning_ignore("integer_division")
 		var linha: int = int(indice) / COLUNAS_GRID
@@ -96,6 +106,8 @@ func montar_alvos(trabalho: TrabalhoInspecao) -> void:
 	for l in range(linhas):
 		alturas_linha[l] = linhas_fixas[l] if linhas_fixas.has(l) else altura_padrao
 
+	# 3. Criar um AreaAlvo por quadrante (linha × coluna). Quadrantes sem
+	#    Resource explícito viram NEUTRO automático.
 	var y_atual := 0.0
 	for l in range(linhas):
 		for c in range(COLUNAS_GRID):
@@ -139,6 +151,9 @@ func limpar_alvos() -> void:
 			filho.queue_free()
 
 
+# =======================================================================
+# POPUPS
+# =======================================================================
 func esta_com_popup_aberto() -> bool:
 	return (nova_aba != null and nova_aba.visible) or (mensagem_modal != null and mensagem_modal.visible)
 
@@ -176,6 +191,9 @@ func fechar_todos_os_popups() -> void:
 		mensagem_modal.hide()
 
 
+# =======================================================================
+# VERIFICAÇÃO DO CLIQUE
+# =======================================================================
 func verificar_clique(pos: Vector2) -> Dictionary:
 	var area := _encontrar_area_no_ponto(pos)
 	if area != null:
@@ -188,6 +206,22 @@ func verificar_clique(pos: Vector2) -> Dictionary:
 	return {"encontrou_alvo": false, "acertou": false, "capitulo": -1, "area": null}
 
 
+# Tempo entre clicar "Inspecionar" e o quadrante revelar a cor — tem que
+# ficar sincronizado com o tempo que o MensagemModal usa pro popup de
+# texto (mesmo upgrade PC controla os dois). Prioriza ler o valor direto
+# do MensagemModal (que já expõe tempo_total_atual() publicamente); só
+# cai pra ler a linha de upgrade direto se, por algum motivo, o
+# MensagemModal não estiver atribuído ou não tiver esse método.
+func _tempo_verificacao_atual() -> float:
+	if mensagem_modal != null and mensagem_modal.has_method("tempo_total_atual"):
+		return mensagem_modal.tempo_total_atual()
+
+	var linha: LinhaUpgrade = DadosJogo.obter_linha_upgrade(BancoDeUpgrades.CHAVE_PC)
+	if linha == null:
+		return 4.0
+	return linha.valor_efeito_atual(4.0)
+
+
 func _on_botao_inspecionar_pressed() -> void:
 	if nova_aba != null:
 		nova_aba.hide()
@@ -197,7 +231,9 @@ func _on_botao_inspecionar_pressed() -> void:
 	if mensagem_modal != null and mensagem_modal.has_method("mostrar"):
 		mensagem_modal.mostrar(resultado.acertou)
 
-	await get_tree().create_timer(4.0).timeout
+	var tempo := _tempo_verificacao_atual()
+	if tempo > 0.0:
+		await get_tree().create_timer(tempo).timeout
 
 	if resultado.acertou:
 		var area: AreaAlvo = resultado.area
@@ -213,7 +249,9 @@ func _on_botao_inspecionar_pressed() -> void:
 
 # ---------------------------------------------------------------------
 # INVESTIGAR — dá dica textual sobre o quadrante clicado, com 3 respostas
-# possíveis dependendo do estado daquele quadrante específico.
+# possíveis dependendo do estado daquele quadrante específico. Consome
+# o uso (limite de 1 por trabalho) só quando revela uma dica de verdade
+# (caso 3) — os casos 1 e 2 não entregam informação, então são "grátis".
 # ---------------------------------------------------------------------
 func _on_investigar_pressionado() -> void:
 	if _area_no_popup == null:
