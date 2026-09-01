@@ -32,7 +32,7 @@ Node2D
 │   └── TextureRect          ← Fundo visual do escritório (pixel art)
 ├── Quadro_avisos            ← Botão interativo: abre o Quadro de tarefas
 └── Cafeteira                ← Elemento decorativo/interativo
-    └── Label                ← Texto "Comece o dia!" exibido na tela
+	└── Label                ← Texto "Comece o dia!" exibido na tela
 ```
 
 > **Engine:** Godot 4  
@@ -55,7 +55,7 @@ Botão interativo representado visualmente pelo quadro de cortiça na parede. Ao
 extends TextureButton
 
 func _on_pressed() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Quadro.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Quadro.tscn")
 ```
 
 | Evento | Ação |
@@ -71,16 +71,16 @@ Elemento presente no canto esquerdo da tela. Exibe o texto **"Comece o dia!"** v
 extends TextureButton
 
 func _on_pressed() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Tela.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Tela.tscn")
 ```
 
 ### Fluxo de Navegação
 
 ```
 [Escritório]
-     │
-     │  Jogador clica no Quadro_avisos
-     ▼
+	 │
+	 │  Jogador clica no Quadro_avisos
+	 ▼
 [Quadro.tscn]  ←── início do loop de gameplay
 ```
 
@@ -102,7 +102,7 @@ Node2D                        ← Script geral da cena (Script_geral_quadro.gd)
 │   └── TextureRect           ← Fundo visual: foto do quadro de cortiça
 ├── TB_Tutorial_1             ← Botão interativo: abre o tutorial (tb_tutorial_1.gd)
 └── Layer_Tutorial_1          ← CanvasLayer que contém o painel do tutorial
-    └── TextureRect           ← Conteúdo visual do tutorial (instruções, controles, etc.)
+	└── TextureRect           ← Conteúdo visual do tutorial (instruções, controles, etc.)
 ```
 
 > **Engine:** Godot 4  
@@ -122,32 +122,32 @@ extends Node2D
 @export var layer_tutorial: CanvasLayer
 
 func _ready() -> void:
-    # Garante que o tutorial começa oculto
-    if layer_tutorial != null:
-        layer_tutorial.hide()
-    # Conecta o sinal do botão manualmente (evita dupla conexão)
-    if botao_tutorial != null and not botao_tutorial.pressed.is_connected(_on_botao_tutorial_pressionado):
-        botao_tutorial.pressed.connect(_on_botao_tutorial_pressionado)
+	# Garante que o tutorial começa oculto
+	if layer_tutorial != null:
+		layer_tutorial.hide()
+	# Conecta o sinal do botão manualmente (evita dupla conexão)
+	if botao_tutorial != null and not botao_tutorial.pressed.is_connected(_on_botao_tutorial_pressionado):
+		botao_tutorial.pressed.connect(_on_botao_tutorial_pressionado)
 
 func _on_botao_tutorial_pressionado() -> void:
-    if layer_tutorial != null:
-        layer_tutorial.show()
+	if layer_tutorial != null:
+		layer_tutorial.show()
 
 func _input(event: InputEvent) -> void:
-    # Atalho de teclado: Barra de Espaço abre o tutorial
-    if event.is_action_pressed("ui_accept"):
-        if layer_tutorial != null:
-            layer_tutorial.show()
-    # Clique direito: fecha tutorial SE aberto, senão volta ao escritório
-    if event.is_action_pressed("clique_direito"):
-        if layer_tutorial != null and layer_tutorial.visible:
-            layer_tutorial.hide()
-            get_viewport().set_input_as_handled()
-        else:
-            voltar_para_escritorio()
+	# Atalho de teclado: Barra de Espaço abre o tutorial
+	if event.is_action_pressed("ui_accept"):
+		if layer_tutorial != null:
+			layer_tutorial.show()
+	# Clique direito: fecha tutorial SE aberto, senão volta ao escritório
+	if event.is_action_pressed("clique_direito"):
+		if layer_tutorial != null and layer_tutorial.visible:
+			layer_tutorial.hide()
+			get_viewport().set_input_as_handled()
+		else:
+			voltar_para_escritorio()
 
 func voltar_para_escritorio() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")
 ```
 
 | Ação do jogador | Resultado |
@@ -171,8 +171,8 @@ extends TextureButton
 @onready var layer_tutorial: CanvasLayer = $"../Layer_Tutorial_1"
 
 func _on_pressed() -> void:
-    if layer_tutorial != null:
-        layer_tutorial.show()
+	if layer_tutorial != null:
+		layer_tutorial.show()
 ```
 
 > **Nota:** Este botão acessa o `CanvasLayer` via caminho relativo `$"../Layer_Tutorial_1"`. O script geral da cena também conecta este botão via `@export` — ambos produzem o mesmo efeito. Futuramente pode ser unificado para evitar redundância.
@@ -187,16 +187,16 @@ Camada de sobreposição que exibe o conteúdo do tutorial por cima da cena. Com
 
 ```
 [Escritório]
-     │  Clica no Quadro_avisos
-     ▼
+	 │  Clica no Quadro_avisos
+	 ▼
 [Quadro]  ──── Clica em TB_Tutorial_1 ou pressiona Espaço ────► [Layer_Tutorial_1 visível]
-     │                                                                    │
-     │                                                         Clique direito
-     │                                                                    │
-     │◄───────────────────────────────────────────────────────────────────┘
-     │
-     │  Clique direito (tutorial fechado)
-     ▼
+	 │                                                                    │
+	 │                                                         Clique direito
+	 │                                                                    │
+	 │◄───────────────────────────────────────────────────────────────────┘
+	 │
+	 │  Clique direito (tutorial fechado)
+	 ▼
 [Escritório]
 ```
 
@@ -221,16 +221,16 @@ Node2D                         ← Script principal (Main_select_script.gd)
 ├── TimerLembrete              ← Timer para controlar ciclo dos lembretes
 ├── BtnAbrirLivro              ← Botão que abre/fecha o LivroDicas (btn_abrir_livro.gd)
 └── CanvasLayer                ← Camada de sobreposição para elementos UI
-    ├── CenterContainer        ← Centraliza o LivroDicas na tela
-    └── ModuloInspecao         ← Contém toda a lógica de inspeção de elementos
-        ├── AreaCliqueInspecao ← Captura cliques na tela (area_clique_inspecao.gd)
-        ├── GerenciadorInspecao← Lógica central de inspeção (gerenciador_inspecao.gd)
-        │   ├── NovaAba        ← Menu contextual de clique (nova_aba_script.gd)
-        │   ├── MensagemModal  ← Resultado da inspeção (mensagem_modal_scpt.gd)
-        │   ├── Alvo1          ← ColorRect oculto: região suspeita real (CaixaDeSelecao.gd)
-        │   ├── Alvo2          ← ColorRect neutro (não suspeito)
-        │   └── Alvo3          ← ColorRect neutro (não suspeito)
-        └── PainelModal        ← Versão alternativa do modal (mensagem_modal.gd)
+	├── CenterContainer        ← Centraliza o LivroDicas na tela
+	└── ModuloInspecao         ← Contém toda a lógica de inspeção de elementos
+		├── AreaCliqueInspecao ← Captura cliques na tela (area_clique_inspecao.gd)
+		├── GerenciadorInspecao← Lógica central de inspeção (gerenciador_inspecao.gd)
+		│   ├── NovaAba        ← Menu contextual de clique (nova_aba_script.gd)
+		│   ├── MensagemModal  ← Resultado da inspeção (mensagem_modal_scpt.gd)
+		│   ├── Alvo1          ← ColorRect oculto: região suspeita real (CaixaDeSelecao.gd)
+		│   ├── Alvo2          ← ColorRect neutro (não suspeito)
+		│   └── Alvo3          ← ColorRect neutro (não suspeito)
+		└── PainelModal        ← Versão alternativa do modal (mensagem_modal.gd)
 ```
 
 > **Arquivo da cena:** `res://Scenes/Tela.tscn`
@@ -260,7 +260,7 @@ Recebe o sinal `foi_clicado` do Lembrete e repassa os dados ao `PainelTrabalho`.
 
 ```gdscript
 func _on_lembrete_foi_clicado(titulo, descricao, recompensa, lembrete_clicado):
-    painel_trabalho.abrir(lembrete_clicado, titulo, descricao, recompensa)
+	painel_trabalho.abrir(lembrete_clicado, titulo, descricao, recompensa)
 ```
 
 ##### `PainelTrabalho` — `Panel`
@@ -329,16 +329,16 @@ Coordena toda a lógica de inspeção: abertura da `NovaAba`, verificação de c
 **Fluxo de inspeção:**
 ```
 Jogador clica na área
-        │
-        ▼
+		│
+		▼
 AreaCliqueInspecao.registrar_clique_na_area(pos)
-        │
-        ▼
+		│
+		▼
 NovaAba aparece próxima ao clique
-        │
+		│
 Jogador clica em "Inspecionar"
-        │
-        ▼
+		│
+		▼
 _on_botao_inspecionar_pressed()
   ├── Verifica se pos está sobre Alvo1 (suspeito) ou Alvo2/3 (neutros)
   ├── MensagemModal.mostrar(resultado)
@@ -387,9 +387,9 @@ Script raiz da cena. Atualmente atua como ponto de entrada e delegador: os geren
 
 ```gdscript
 func _on_btn_abrir_livro_pressed() -> void:
-    var instancia_livro = cena_livro.instantiate()
-    add_child(instancia_livro)
-    instancia_livro.abrir_livro()
+	var instancia_livro = cena_livro.instantiate()
+	add_child(instancia_livro)
+	instancia_livro.abrir_livro()
 ```
 
 > **Nota:** `_on_botao_inspecionar_pressed()` está vazio no script principal — a lógica de inspeção foi migrada para o `GerenciadorInspecao`.
@@ -398,29 +398,29 @@ func _on_btn_abrir_livro_pressed() -> void:
 
 ```
 [Tela carrega]
-      │
-      ├── PainelTrabalho ─── hide()
-      ├── LivroDicas ─────── hide() (instanciado sob demanda)
-      ├── NovaAba ─────────── hide()
-      └── MensagemModal ───── hide()
+	  │
+	  ├── PainelTrabalho ─── hide()
+	  ├── LivroDicas ─────── hide() (instanciado sob demanda)
+	  ├── NovaAba ─────────── hide()
+	  └── MensagemModal ───── hide()
 
 [Durante o gameplay]
 
   Post-it (Lembrete) clicado
-      │
-      └─► GerenciadorTrabalho → PainelTrabalho.abrir()
-               ├── Aceitar → trabalho_aceito + post-it some
-               └── Ignorar → painel fecha
+	  │
+	  └─► GerenciadorTrabalho → PainelTrabalho.abrir()
+			   ├── Aceitar → trabalho_aceito + post-it some
+			   └── Ignorar → painel fecha
 
   Clique na tela (AreaCliqueInspecao)
-      │
-      └─► NovaAba aparece → "Inspecionar"
-               └─► GerenciadorInspecao verifica alvos
-                        └─► MensagemModal exibe resultado (4s total)
-                                 └─► Alvo1 muda de cor se acertou
+	  │
+	  └─► NovaAba aparece → "Inspecionar"
+			   └─► GerenciadorInspecao verifica alvos
+						└─► MensagemModal exibe resultado (4s total)
+								 └─► Alvo1 muda de cor se acertou
 
   BtnAbrirLivro clicado
-      └─► LivroDicas instanciado/destruido no CenterContainer
+	  └─► LivroDicas instanciado/destruido no CenterContainer
 ```
 
 ---
@@ -436,16 +436,16 @@ Atualmente a cena trabalha com **3 alvos fixos** (`Alvo1`, `Alvo2`, `Alvo3`), ma
 ```
 ModuloInspecao
 └── AreaCliqueInspecao         ← Captura cliques do jogador na tela (Control)
-    └── GerenciadorInspecao    ← Lógica de verificação dos alvos (Node)
-        ├── NovaAba            ← Menu contextual "Inspecionar" (TextureRect)
-        │   └── VBoxContainer
-        │       └── Button     ← Botão que confirma a inspeção
-        ├── MensagemModal      ← Feedback textual da inspeção (Control)
-        │   └── Label          ← Texto: "Verificando...", "Alvo detectado!", etc.
-        ├── Alvo1               ← ColorRect: alvo suspeito (ou neutro, dependendo do sorteio)
-        ├── Alvo2               ← ColorRect: alvo neutro
-        ├── Alvo3               ← ColorRect: alvo neutro
-        └── CaixaSelecao        ← ColorRect auxiliar (script vazio; ver seção 3.1)
+	└── GerenciadorInspecao    ← Lógica de verificação dos alvos (Node)
+		├── NovaAba            ← Menu contextual "Inspecionar" (TextureRect)
+		│   └── VBoxContainer
+		│       └── Button     ← Botão que confirma a inspeção
+		├── MensagemModal      ← Feedback textual da inspeção (Control)
+		│   └── Label          ← Texto: "Verificando...", "Alvo detectado!", etc.
+		├── Alvo1               ← ColorRect: alvo suspeito (ou neutro, dependendo do sorteio)
+		├── Alvo2               ← ColorRect: alvo neutro
+		├── Alvo3               ← ColorRect: alvo neutro
+		└── CaixaSelecao        ← ColorRect auxiliar (script vazio; ver seção 3.1)
 ```
 
 > Esta estrutura corresponde exatamente ao que já foi documentado na seção 3.1 (scripts `area_clique_inspecao.gd`, `gerenciador_inspecao.gd`, `nova_aba_script.gd`, `mensagem_modal_scpt.gd`, `CaixaDeSelecao.gd`). Esta seção foca no **papel de design** dos alvos dentro do módulo.
