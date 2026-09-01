@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://ddgrpiijkvrc7"]
+
+[ext_resource type="Script" uid="uid://cfgs358chu1yk" path="res://Scripts/Escritorio/hud_manager.gd" id="1_3l0ju"]
+[ext_resource type="Texture2D" uid="uid://cv0mphhh0cr5a" path="res://Sprites/score_system/carteira_de_dinheiro1.png" id="2_ea74h"]
+[ext_resource type="Script" uid="uid://b3xjd5roflf6w" path="res://Scripts/Escritorio/icone_dinheiro.gd" id="3_658l8"]
+[ext_resource type="Texture2D" uid="uid://unx0w4ahvgkm" path="res://Sprites/score_system/carteira_de_dinheiro2.png" id="4_qu1xn"]
+[ext_resource type="Texture2D" uid="uid://c0ijjtgf1khp0" path="res://Sprites/score_system/trofeu_de_fama.png" id="5_q2nyd"]
+
+[node name="Score" type="Node2D" unique_id=1420922170]
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1381383213]
+script = ExtResource("1_3l0ju")
+
+[node name="control" type="Control" parent="HUD" unique_id=241860645]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="container_dinheiro" type="HBoxContainer" parent="HUD/control" unique_id=1660821792]
+layout_mode = 0
+offset_right = 128.0
+offset_bottom = 128.0
+scale = Vector2(0.5, 0.5)
+
+[node name="icone_dinheiro" type="TextureRect" parent="HUD/control/container_dinheiro" unique_id=1097318280 node_paths=PackedStringArray("icone_dinheiro")]
+layout_mode = 2
+texture = ExtResource("2_ea74h")
+script = ExtResource("3_658l8")
+carteira_de_dinheiro_1 = ExtResource("2_ea74h")
+carteira_de_dinheiro_2 = ExtResource("4_qu1xn")
+icone_dinheiro = NodePath(".")
+
+[node name="contador_dinheiro" type="Label" parent="HUD/control/container_dinheiro/icone_dinheiro" unique_id=1153904789]
+layout_mode = 0
+offset_left = 138.0
+offset_top = 30.0
+offset_right = 139.0
+offset_bottom = 99.0
+theme_override_font_sizes/font_size = 50
+
+[node name="container_fama" type="HBoxContainer" parent="HUD/control" unique_id=423851117]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 74.0
+offset_right = 129.0
+offset_bottom = 202.0
+scale = Vector2(0.5, 0.5)
+
+[node name="icone_fama" type="TextureRect" parent="HUD/control/container_fama" unique_id=162362283]
+layout_mode = 2
+texture = ExtResource("5_q2nyd")
+
+[node name="contador_fama" type="Label" parent="HUD/control/container_fama/icone_fama" unique_id=761808397]
+layout_mode = 0
+offset_left = 138.0
+offset_top = 30.0
+offset_right = 139.0
+offset_bottom = 99.0
+theme_override_font_sizes/font_size = 50

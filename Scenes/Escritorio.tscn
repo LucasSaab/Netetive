@@ -4,6 +4,13 @@
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="2_rsnx6"]
 [ext_resource type="Script" uid="uid://ce3ay4sspmeii" path="res://Scripts/Escritorio/texture_button-Quadro.gd" id="3_qucxe"]
 [ext_resource type="Script" uid="uid://dv78l2ckhn3v" path="res://Scripts/Escritorio/Iniciar.gd" id="4_rsnx6"]
+[ext_resource type="Script" uid="uid://d6yc02g756hu" path="res://Scripts/Escritorio/btn_upgrades.gd" id="5_8lfxk"]
+[ext_resource type="Theme" uid="uid://btb15t1ftymvc" path="res://Temas/12.tres" id="6_843fw"]
+[ext_resource type="Script" uid="uid://beq28d5oppbo5" path="res://Scripts/Escritorio/painelupgrades.gd" id="6_agita"]
+[ext_resource type="PackedScene" uid="uid://ddgrpiijkvrc7" path="res://Scenes/Scores.tscn" id="8_843fw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_agita"]
+draw_center = false
 
 [node name="Node2D" type="Node2D" unique_id=772582035]
 
@@ -51,5 +58,51 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "Comece o dia!"
 
+[node name="BtnUpgrades" type="TextureButton" parent="." unique_id=1036206567 node_paths=PackedStringArray("painel_upgrades")]
+offset_left = 508.0
+offset_top = 285.0
+offset_right = 668.0
+offset_bottom = 370.0
+texture_normal = ExtResource("2_rsnx6")
+script = ExtResource("5_8lfxk")
+painel_upgrades = NodePath("../Painelupgrades")
+
+[node name="Painelupgrades" type="Panel" parent="." unique_id=172688701]
+visible = false
+offset_left = 4.0
+offset_right = 1148.0
+offset_bottom = 543.0
+theme = ExtResource("6_843fw")
+theme_override_styles/panel = SubResource("StyleBoxFlat_agita")
+script = ExtResource("6_agita")
+
+[node name="LabelDinheiro" type="Label" parent="Painelupgrades" unique_id=906350140]
+layout_mode = 0
+offset_left = 314.0
+offset_top = 508.0
+offset_right = 488.0
+offset_bottom = 570.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Painelupgrades" unique_id=1869633429]
+layout_mode = 0
+offset_left = 317.0
+offset_top = 166.0
+offset_right = 856.0
+offset_bottom = 508.0
+
+[node name="VBoxLinhas" type="VBoxContainer" parent="Painelupgrades/ScrollContainer" unique_id=613409231]
+layout_mode = 2
+
+[node name="BtnFechar" type="Button" parent="Painelupgrades" unique_id=2041787276]
+layout_mode = 0
+offset_left = 686.0
+offset_top = 507.0
+offset_right = 853.0
+offset_bottom = 566.0
+text = "Voltar"
+
+[node name="Score" parent="." unique_id=1420922170 instance=ExtResource("8_843fw")]
+
 [connection signal="pressed" from="Quadro_avisos" to="Quadro_avisos" method="_on_pressed"]
 [connection signal="pressed" from="Cafeteira" to="Cafeteira" method="_on_pressed"]
+[connection signal="pressed" from="BtnUpgrades" to="BtnUpgrades" method="_on_pressed"]

@@ -4,6 +4,11 @@
 [ext_resource type="Script" uid="uid://mhcm3i7bocvr" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_trabalho.gd" id="2_aetti"]
 [ext_resource type="Script" uid="uid://dwmbd147s1md5" path="res://Scripts/Tela/Modulo Trabalho/menu_trabalhos.gd" id="3_4p3wb"]
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="3_aetti"]
+[ext_resource type="Theme" uid="uid://btb15t1ftymvc" path="res://Temas/12.tres" id="4_fc5s7"]
+[ext_resource type="Script" uid="uid://d1dlhcwn3leyb" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_assitente.gd" id="5_4p3wb"]
+[ext_resource type="Script" uid="uid://r7s3r06ikkn5" path="res://Scripts/Tela/coordenador_trabalho.gd" id="6_a8tgx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fc5s7"]
 
 [node name="ModuloTrabalho" type="Node" unique_id=174112552]
 
@@ -14,7 +19,7 @@ script = ExtResource("1_hk1lg")
 script = ExtResource("2_aetti")
 btn_abrir_menu = NodePath("BtnAbrirMenuTrabalho")
 menu_trabalhos = NodePath("MenuTrabalhos")
-vbox_disponiveis = NodePath("MenuTrabalhos/VBoxDisponiveis")
+vbox_disponiveis = NodePath("MenuTrabalhos/ScrollContainer/VBoxDisponiveis")
 vbox_ativos = NodePath("MenuTrabalhos/VBoxAtivos")
 gerenciador_expediente = NodePath("../GerenciadorExpediente")
 
@@ -26,22 +31,33 @@ offset_bottom = 644.0
 texture_normal = ExtResource("3_aetti")
 
 [node name="MenuTrabalhos" type="Panel" parent="GerenciadorTrabalho" unique_id=867683152]
-offset_left = 77.0
-offset_top = 77.0
-offset_right = 117.0
-offset_bottom = 117.0
+offset_right = 370.0
+offset_bottom = 500.0
+theme = ExtResource("4_fc5s7")
+theme_override_styles/panel = SubResource("StyleBoxFlat_fc5s7")
 script = ExtResource("3_4p3wb")
 
-[node name="VBoxDisponiveis" type="VBoxContainer" parent="GerenciadorTrabalho/MenuTrabalhos" unique_id=534861109]
+[node name="ScrollContainer" type="ScrollContainer" parent="GerenciadorTrabalho/MenuTrabalhos" unique_id=1693502322]
 layout_mode = 0
-offset_left = -74.0
-offset_top = -58.0
-offset_right = -34.0
-offset_bottom = -18.0
+offset_right = 370.0
+offset_bottom = 430.0
+
+[node name="VBoxDisponiveis" type="VBoxContainer" parent="GerenciadorTrabalho/MenuTrabalhos/ScrollContainer" unique_id=534861109]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="VBoxAtivos" type="VBoxContainer" parent="GerenciadorTrabalho/MenuTrabalhos" unique_id=222275698]
 layout_mode = 0
-offset_left = 85.0
-offset_top = 104.0
-offset_right = 125.0
-offset_bottom = 144.0
+offset_top = 430.0
+offset_right = 368.0
+offset_bottom = 470.0
+
+[node name="GerenciadorAssistente" type="Node" parent="." unique_id=2032629639 node_paths=PackedStringArray("gerenciador_expediente")]
+script = ExtResource("5_4p3wb")
+gerenciador_expediente = NodePath("../GerenciadorExpediente")
+
+[node name="CoordenadorTrabalho" type="Node2D" parent="." unique_id=1240996018 node_paths=PackedStringArray("gerenciador_trabalho", "gerenciador_expediente", "gerenciador_assistente")]
+script = ExtResource("6_a8tgx")
+gerenciador_trabalho = NodePath("../GerenciadorTrabalho")
+gerenciador_expediente = NodePath("../GerenciadorExpediente")
+gerenciador_assistente = NodePath("../GerenciadorAssistente")
