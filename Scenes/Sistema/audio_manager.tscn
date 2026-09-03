@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://clvbe8ej0yei5"]
+
+[ext_resource type="PackedScene" uid="uid://c16pa7j8km8mn" path="res://Scenes/Sistema/AudioManager.tscn" id="1_f25nw"]
+
+[node name="AudioManager" unique_id=2124816279 instance=ExtResource("1_f25nw")]
