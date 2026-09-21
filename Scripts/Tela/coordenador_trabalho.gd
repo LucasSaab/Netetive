@@ -2,14 +2,17 @@ extends Node
 
 @export var gerenciador_trabalho: Node
 @export var gerenciador_inspecao: Node
-@export var gerenciador_expediente: Node   # v3.2 — lê hora_atual pro relatório
-@export var gerenciador_assistente: Node   # novo — fila de trabalhos delegados
+@export var gerenciador_expediente: Node
+@export var gerenciador_assistente: Node
 @export var site_textura: TextureRect
+
+@onready var dialogo_confirmacao: ConfirmationDialog = $DialogoConfirmacao
+@onready var label_feedback: Label = $LabelFeedback
+@onready var painel_diagnostico: Panel = $PainelDiagnostico
+@onready var label_diagnostico: Label = $PainelDiagnostico/LabelDiagnostico
 
 var _agendado_atual: TrabalhoAgendado = null
 var _agendado_pendente_encerramento: TrabalhoAgendado = null
-var _dialogo_confirmacao: ConfirmationDialog = null
-var _label_feedback: Label = null
 
 
 func _ready() -> void:
@@ -27,6 +30,11 @@ func _ready() -> void:
 		gerenciador_trabalho.encerrar_ativo_solicitado.connect(_on_encerrar_ativo_solicitado)
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_trabalho não atribuído (ou sem o sinal encerrar_ativo_solicitado).")
+
+	if gerenciador_trabalho != null and gerenciador_trabalho.has_signal("prazo_expirado"):
+		gerenciador_trabalho.prazo_expirado.connect(_on_prazo_expirado)
+	else:
+		push_warning("CoordenadorTrabalho: gerenciador_trabalho não atribuído (ou sem o sinal prazo_expirado).")
 
 	if gerenciador_inspecao != null and gerenciador_inspecao.has_signal("inspecao_concluida"):
 		gerenciador_inspecao.inspecao_concluida.connect(_on_inspecao_concluida)
@@ -56,17 +64,24 @@ func _ready() -> void:
 	if gerenciador_expediente == null:
 		push_warning("CoordenadorTrabalho: gerenciador_expediente não atribuído — horários do relatório ficarão zerados (0.0).")
 
-	_dialogo_confirmacao = ConfirmationDialog.new()
-	_dialogo_confirmacao.confirmed.connect(_on_confirmar_encerramento)
-	add_child(_dialogo_confirmacao)
+	if dialogo_confirmacao != null:
+		dialogo_confirmacao.confirmed.connect(_on_confirmar_encerramento)
+		dialogo_confirmacao.add_to_group("popups")   # sem isso, o cursor virtual não sabe que esse popup está aberto
+	else:
+		push_warning("CoordenadorTrabalho: nó 'DialogoConfirmacao' não encontrado — confira a estrutura da cena.")
 
-	_label_feedback = Label.new()
-	_label_feedback.add_theme_font_size_override("font_size", 20)
-	_label_feedback.add_theme_color_override("font_color", Color.WHITE)
-	_label_feedback.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_label_feedback.hide()
-	_label_feedback.z_index = 200
-	add_child(_label_feedback)
+	if label_feedback != null:
+		label_feedback.hide()
+	else:
+		push_warning("CoordenadorTrabalho: nó 'LabelFeedback' não encontrado — confira a estrutura da cena.")
+
+	if painel_diagnostico != null:
+		painel_diagnostico.hide()
+	else:
+		push_warning("CoordenadorTrabalho: nó 'PainelDiagnostico' não encontrado — confira a estrutura da cena.")
+
+	if label_diagnostico == null:
+		push_warning("CoordenadorTrabalho: nó 'PainelDiagnostico/LabelDiagnostico' não encontrado — confira a estrutura da cena.")
 
 
 func _hora_atual() -> float:
@@ -80,6 +95,14 @@ func _on_trabalho_selecionado(agendado: TrabalhoAgendado) -> void:
 		push_warning("CoordenadorTrabalho: trabalho_selecionado chegou com agendado/trabalho nulo.")
 		return
 
+	if _agendado_atual != null and _agendado_atual != agendado and not _agendado_atual.concluido:
+		var tem_tempo_limitado := CalculadoraModificadores.tem_modificador(_agendado_atual.modificadores, ModificadorAtivo.Tipo.TEMPO_LIMITADO)
+
+		if tem_tempo_limitado:
+			_encerrar_por_interrupcao(_agendado_atual)
+		elif gerenciador_trabalho != null and gerenciador_trabalho.has_method("devolver_para_disponiveis"):
+			gerenciador_trabalho.devolver_para_disponiveis(_agendado_atual)
+
 	_agendado_atual = agendado
 	var trabalho: TrabalhoInspecao = agendado.trabalho
 	print("Inspecionando agora: ", trabalho.titulo)
@@ -88,25 +111,32 @@ func _on_trabalho_selecionado(agendado: TrabalhoAgendado) -> void:
 		site_textura.texture = trabalho.imagem_site
 
 	if gerenciador_inspecao != null and gerenciador_inspecao.has_method("montar_alvos"):
-		gerenciador_inspecao.montar_alvos(trabalho)
+		gerenciador_inspecao.montar_alvos(trabalho, agendado)
 		gerenciador_inspecao.definir_investigar_disponivel(not agendado.investigar_usado)
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_inspecao não atribuído ou sem montar_alvos().")
 
-	# v3.2: abre o resultado pendente aqui, com hora_inicio real do
-	# relógio simulado. Guarda contra recriar se o jogador reentra no
-	# mesmo trabalho ativo mais de uma vez.
+	# Sempre reconfigura o cursor pro trabalho novo — isso já reseta a
+	# escala do Mouse Grande sozinho se o próximo trabalho não tiver esse
+	# modificador. Mas ainda precisamos limpar explicitamente nos pontos
+	# de ENCERRAMENTO (abaixo), pra não ficar dependendo só disso.
+	GerenciadorCursorVirtual.configurar_para_trabalho(agendado.modificadores, gerenciador_inspecao)
+
 	if DadosJogo.resultados_pendentes.has(agendado):
 		return
 	DadosJogo.iniciar_resultado_pendente(agendado, _hora_atual())
 
 
-# ---------------------------------------------------------------------
-# DELEGAR AO ASSISTENTE (novo)
-# ---------------------------------------------------------------------
-# GerenciadorTrabalho só emite o pedido; aqui é onde de fato se decide
-# se aceita (via GerenciadorAssistente.delegar()) e se limpa a tela caso
-# o trabalho delegado fosse o que estava aberto na inspeção no momento.
+func _encerrar_por_interrupcao(agendado: TrabalhoAgendado) -> void:
+	var titulo_trabalho := agendado.trabalho.titulo
+	DadosJogo.finalizar_trabalho(agendado, _hora_atual())
+
+	if gerenciador_trabalho != null and gerenciador_trabalho.has_method("marcar_trabalho_concluido"):
+		gerenciador_trabalho.marcar_trabalho_concluido(agendado)
+
+	_mostrar_feedback("Trabalho \"%s\" encerrado (Tempo Limitado interrompido)." % titulo_trabalho)
+
+
 func _on_delegar_solicitado(agendado: TrabalhoAgendado) -> void:
 	if gerenciador_assistente == null:
 		push_warning("CoordenadorTrabalho: delegar solicitado, mas gerenciador_assistente não está atribuído.")
@@ -122,13 +152,10 @@ func _on_delegar_solicitado(agendado: TrabalhoAgendado) -> void:
 			gerenciador_inspecao.limpar_alvos()
 		if site_textura != null:
 			site_textura.texture = null
+		GerenciadorCursorVirtual.limpar_modificadores_de_trabalho()
 		_agendado_atual = null
 
 
-# Chamado quando o Assistente termina um trabalho da fila (sucesso ou
-# erro). Mesmo destino final de "Encerrar" manual: remove da lista de
-# Ativos e mostra um toast — mas com texto próprio, deixando claro que
-# foi o Assistente quem resolveu, não o jogador.
 func _on_assistente_concluido(agendado: TrabalhoAgendado, acertou: bool) -> void:
 	if gerenciador_trabalho != null and gerenciador_trabalho.has_method("marcar_trabalho_concluido"):
 		gerenciador_trabalho.marcar_trabalho_concluido(agendado)
@@ -157,6 +184,8 @@ func _on_diagnostico_escolhido(opcao: String) -> void:
 	resultado.diagnostico_escolhido = opcao
 	resultado.diagnostico_correto = (opcao == DadosJogo.titulo_capitulo_correto(_agendado_atual.trabalho))
 
+	_mostrar_feedback_diagnostico(opcao)
+
 
 func _on_investigar_usado() -> void:
 	if _agendado_atual != null:
@@ -167,21 +196,13 @@ func _on_encerrar_solicitado() -> void:
 	if _agendado_atual == null:
 		push_warning("CoordenadorTrabalho: encerrar solicitado sem agendado atual.")
 		return
-
 	_abrir_confirmacao_encerramento(_agendado_atual)
 
 
-# Encerrar disparado pelo botão da LISTA de Ativos (não pelo popup
-# NovaAba) — precisa funcionar mesmo se `agendado` não for o trabalho
-# atualmente aberto na tela de inspeção. Por isso usa
-# _agendado_pendente_encerramento em vez de _agendado_atual: encerrar
-# um item da lista não deve mexer na inspeção de outro trabalho que
-# porventura esteja aberta no momento.
 func _on_encerrar_ativo_solicitado(agendado: TrabalhoAgendado) -> void:
 	if agendado == null:
 		push_warning("CoordenadorTrabalho: encerrar_ativo_solicitado chegou com agendado nulo.")
 		return
-
 	_abrir_confirmacao_encerramento(agendado)
 
 
@@ -193,11 +214,11 @@ func _abrir_confirmacao_encerramento(agendado: TrabalhoAgendado) -> void:
 		diagnostico = DadosJogo.resultados_pendentes[agendado].diagnostico_escolhido
 
 	if diagnostico == "":
-		_dialogo_confirmacao.dialog_text = "Você ainda não diagnosticou este problema.\nDeseja mesmo terminar o trabalho assim?"
+		dialogo_confirmacao.dialog_text = "Você ainda não diagnosticou este problema.\nDeseja mesmo terminar o trabalho assim?"
 	else:
-		_dialogo_confirmacao.dialog_text = "Você está considerando o problema como:\n\"%s\"\n\nTem certeza que deseja terminar o trabalho?" % diagnostico
+		dialogo_confirmacao.dialog_text = "Você está considerando o problema como:\n\"%s\"\n\nTem certeza que deseja terminar o trabalho?" % diagnostico
 
-	_dialogo_confirmacao.popup_centered()
+	dialogo_confirmacao.popup_centered()
 
 
 func _on_confirmar_encerramento() -> void:
@@ -213,36 +234,67 @@ func _on_confirmar_encerramento() -> void:
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_trabalho não atribuído ou sem marcar_trabalho_concluido().")
 
-	# Só limpa a tela de inspeção se o trabalho encerrado era o que
-	# estava aberto nela — encerrar via lista não deve afetar a
-	# inspeção de um trabalho diferente que porventura esteja aberta.
 	if _agendado_atual == agendado:
 		if gerenciador_inspecao != null and gerenciador_inspecao.has_method("limpar_alvos"):
 			gerenciador_inspecao.limpar_alvos()
 		if site_textura != null:
 			site_textura.texture = null
+		GerenciadorCursorVirtual.limpar_modificadores_de_trabalho()
 		_agendado_atual = null
 
 	_agendado_pendente_encerramento = null
 	_mostrar_feedback("Trabalho \"%s\" encerrado." % titulo_trabalho)
 
 
-# ---------------------------------------------------------------------
-# TOAST DE FEEDBACK — função base compartilhada; encerramento manual e
-# conclusão pelo Assistente só variam o texto exibido.
-# ---------------------------------------------------------------------
+func _on_prazo_expirado(agendado: TrabalhoAgendado) -> void:
+	if agendado == null:
+		return
+
+	var ja_diagnosticado := false
+	if DadosJogo.resultados_pendentes.has(agendado):
+		ja_diagnosticado = DadosJogo.resultados_pendentes[agendado].diagnostico_escolhido != ""
+
+	if ja_diagnosticado:
+		return
+
+	var titulo_trabalho := agendado.trabalho.titulo
+	DadosJogo.finalizar_trabalho(agendado, _hora_atual())
+
+	if gerenciador_trabalho != null and gerenciador_trabalho.has_method("marcar_trabalho_concluido"):
+		gerenciador_trabalho.marcar_trabalho_concluido(agendado)
+
+	if _agendado_atual == agendado:
+		if gerenciador_inspecao != null and gerenciador_inspecao.has_method("limpar_alvos"):
+			gerenciador_inspecao.limpar_alvos()
+		if site_textura != null:
+			site_textura.texture = null
+		GerenciadorCursorVirtual.limpar_modificadores_de_trabalho()
+		_agendado_atual = null
+
+	if _agendado_pendente_encerramento == agendado:
+		_agendado_pendente_encerramento = null
+
+	_mostrar_feedback("Trabalho \"%s\" expirou." % titulo_trabalho)
+
+
 func _mostrar_feedback_assistente(titulo_trabalho: String, acertou: bool) -> void:
 	var resultado_texto := "concluído com sucesso" if acertou else "concluído, mas com erro"
 	_mostrar_feedback("Assistente: \"%s\" %s." % [titulo_trabalho, resultado_texto])
 
 
 func _mostrar_feedback(texto: String) -> void:
-	_label_feedback.text = texto
-
-	var tamanho_tela := get_viewport().get_visible_rect().size
-	_label_feedback.size = Vector2(400, 40)
-	_label_feedback.position = Vector2((tamanho_tela.x - 400) / 2, tamanho_tela.y - 80)
-
-	_label_feedback.show()
+	if label_feedback == null:
+		return
+	label_feedback.text = texto
+	label_feedback.show()
 	await get_tree().create_timer(2.0).timeout
-	_label_feedback.hide()
+	label_feedback.hide()
+
+
+func _mostrar_feedback_diagnostico(opcao: String) -> void:
+	if painel_diagnostico == null or label_diagnostico == null:
+		return
+	label_diagnostico.text = "Trabalho diagnosticado como \"%s\"." % opcao
+	painel_diagnostico.show()
+	await get_tree().create_timer(2.0).timeout
+	painel_diagnostico.hide()

@@ -106,7 +106,7 @@ static func _resolver_trabalho(agendado: TrabalhoAgendado, hora_fim_expediente: 
 	resultado.diagnostico_escolhido = "Resolvido pela IA (noturno)"
 	resultado.acertou_no_geral = acertou
 	resultado.recompensa = int(agendado.recompensa_dinheiro * _eficiencia_atual()) if acertou else 0
-	resultado.fama_ganha = int(agendado.trabalho.recompensa_fama * _eficiencia_atual()) if acertou else 0
+	resultado.fama_ganha = int(agendado.recompensa_fama * _eficiencia_atual()) if acertou else 0
 
 	agendado.concluido = true
 	DadosJogo.trabalhos_concluidos_hoje += 1

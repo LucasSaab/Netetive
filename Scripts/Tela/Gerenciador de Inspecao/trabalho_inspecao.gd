@@ -11,4 +11,5 @@ extends Resource
 @export var imagem_site: Texture2D
 @export var alvos: Array[AlvoInspecao] = []
 
-@export var linhas_grid: int = 5   # colunas são sempre 3 (constante em GerenciadorInspecao)
+@export var linhas_grid: int = 5     # mínimo efetivo 3 — aplicado em GerenciadorInspecao.montar_alvos()
+@export var colunas_grid: int = 3    # mínimo efetivo 3 — mesma regra de linhas_grid

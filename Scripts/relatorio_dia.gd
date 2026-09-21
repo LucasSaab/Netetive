@@ -105,4 +105,5 @@ func _criar_linha(resultado: ResultadoTrabalho) -> Control:
 
 
 func _on_voltar_pressed() -> void:
+	GerenciadorMusica.tocar_musica_principal()
 	get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")

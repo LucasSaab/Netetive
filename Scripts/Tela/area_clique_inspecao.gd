@@ -1,6 +1,7 @@
 extends Control
 
 @onready var gerenciador_inspecao: Node = $GerenciadorInspecao
+@export var cursor_virtual: Node   # GerenciadorCursorVirtual — opcional
 
 
 func _ready() -> void:
@@ -18,6 +19,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var posicao: Vector2 = event.global_position
+
+		if cursor_virtual != null and cursor_virtual.has_method("esta_ativo") and cursor_virtual.esta_ativo():
+			posicao = cursor_virtual.posicao_logica
+
 		if gerenciador_inspecao != null:
-			gerenciador_inspecao.registrar_clique_na_area(event.global_position)
+			gerenciador_inspecao.registrar_clique_na_area(posicao)
 		get_viewport().set_input_as_handled()

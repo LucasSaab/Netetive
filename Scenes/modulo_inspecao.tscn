@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://ckad4jugbl4qv" path="res://Scripts/Tela/nova_aba_script.gd" id="3_0u2il"]
 [ext_resource type="Theme" uid="uid://hsun7wgylrc1" path="res://Temas/tema_botoes.tres" id="3_qrrkl"]
 [ext_resource type="Script" uid="uid://b678bfjf456su" path="res://Scripts/Tela/mensagem_modal_scpt.gd" id="4_qrrkl"]
+[ext_resource type="PackedScene" uid="uid://cvghsodnqw1c6" path="res://Scenes/gerenciador_cursor_virtual.tscn" id="6_g5n8p"]
 
 [sub_resource type="Theme" id="Theme_qrrkl"]
 
@@ -24,6 +25,7 @@ metadata/_edit_use_anchors_ = true
 script = ExtResource("2_as5hx")
 
 [node name="NovaAba" type="TextureRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=160538593]
+z_index = 1
 offset_left = 170.0
 offset_top = 41.0
 offset_right = 943.0
@@ -96,3 +98,5 @@ visible = false
 offset_right = 40.0
 offset_bottom = 40.0
 color = Color(0, 0, 0.78431374, 0.2901961)
+
+[node name="GerenciadorCursorVirtual" parent="." unique_id=996825541 instance=ExtResource("6_g5n8p")]

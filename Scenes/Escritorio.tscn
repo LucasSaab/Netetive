@@ -4,9 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="2_rsnx6"]
 [ext_resource type="Script" uid="uid://ce3ay4sspmeii" path="res://Scripts/Escritorio/texture_button-Quadro.gd" id="3_qucxe"]
 [ext_resource type="Script" uid="uid://dv78l2ckhn3v" path="res://Scripts/Escritorio/Iniciar.gd" id="4_rsnx6"]
-[ext_resource type="Script" uid="uid://d6yc02g756hu" path="res://Scripts/Escritorio/btn_upgrades.gd" id="5_8lfxk"]
+[ext_resource type="Script" uid="uid://cydl2owd05yh0" path="res://Scripts/Escritorio/btn_upgrades.gd" id="5_8lfxk"]
 [ext_resource type="Theme" uid="uid://btb15t1ftymvc" path="res://Temas/12.tres" id="6_843fw"]
-[ext_resource type="Script" uid="uid://beq28d5oppbo5" path="res://Scripts/Escritorio/painelupgrades.gd" id="6_agita"]
+[ext_resource type="Script" uid="uid://tkv87jc1y5od" path="res://Scripts/Escritorio/painelupgrades.gd" id="6_agita"]
 [ext_resource type="PackedScene" uid="uid://ddgrpiijkvrc7" path="res://Scenes/Scores.tscn" id="8_843fw"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_agita"]
@@ -86,7 +86,7 @@ offset_bottom = 570.0
 [node name="ScrollContainer" type="ScrollContainer" parent="Painelupgrades" unique_id=1869633429]
 layout_mode = 0
 offset_left = 317.0
-offset_top = 166.0
+offset_top = 156.0
 offset_right = 856.0
 offset_bottom = 508.0
 

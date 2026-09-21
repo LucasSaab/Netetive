@@ -16,14 +16,22 @@ func _ready() -> void:
 		push_warning("Main_select_script: gerenciador_expediente não encontrado ou sem iniciar_expediente().")
 
 
+# Som de clique global — toca em QUALQUER clique esquerdo do mouse
+# enquanto Tela.tscn estiver ativa (botões, menus, site, lista de
+# trabalhos, tudo). Usa _input() em vez de _unhandled_input() pra não
+# depender de nenhum outro script "deixar passar" o evento primeiro.
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		GerenciadorMusica.tocar_som_clique_menu()
+
+
 func _on_expediente_encerrado() -> void:
-	# Novo: resolve os trabalhos sobrados via IA ANTES de trocar de cena,
-	# pra que os resultados dela já estejam em DadosJogo.resultados_do_dia
-	# quando RelatorioDia.montar_relatorio() rodar.
 	var hora_fim := 0.0
 	if gerenciador_expediente != null and "hora_atual" in gerenciador_expediente:
 		hora_fim = gerenciador_expediente.hora_atual
 	GerenciadorIANoturna.processar_noite(hora_fim)
+
+	GerenciadorMusica.tocar_musica_relatorio()
 
 	get_tree().change_scene_to_file("res://Scenes/RelatorioDia.tscn")
 

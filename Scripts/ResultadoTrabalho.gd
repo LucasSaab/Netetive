@@ -34,4 +34,4 @@ func tempo_gasto_minutos() -> float:
 func finalizar() -> void:
 	acertou_no_geral = achou_alvo_correto and diagnostico_correto
 	recompensa = agendado.recompensa_dinheiro if acertou_no_geral else 0
-	fama_ganha = agendado.trabalho.recompensa_fama if acertou_no_geral else 0
+	fama_ganha = agendado.recompensa_fama if acertou_no_geral else 0
