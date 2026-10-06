@@ -85,7 +85,5 @@ func caminho_icone() -> String:
 		Tipo.MOUSE_RAPIDO:
 			return "res://Sprites/Modificadores/mouse_rapido.png"
 		Tipo.TRAVAMENTO:
-			# TEMPORÁRIO — reaproveitando o ícone do antigo Mouse Devagar até
-			# você ter uma arte própria pra "Travamento".
-			return "res://Sprites/Modificadores/mouse_devagar.png"
+			return "res://Sprites/Modificadores/travamento.png"
 	return ""

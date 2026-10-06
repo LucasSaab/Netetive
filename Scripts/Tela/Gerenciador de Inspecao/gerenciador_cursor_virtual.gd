@@ -3,23 +3,22 @@ extends CanvasLayer
 # =====================================================================
 # GerenciadorCursorVirtual — AUTOLOAD
 # ---------------------------------------------------------------------
-# Controle de velocidade e sincronização do cursor virtual via
-# Input.warp_mouse(): o cursor REAL do SO é constantemente realinhado
-# com posicao_logica, então qualquer input nativo (clique em botão de
-# UI, hover) já chega na posição certa sem precisar reescrever nada
-# além do clique bruto. Processa via _input() (não _unhandled_input())
-# pra interceptar antes de qualquer Control consumir o evento.
+# Garante a ocultação contínua do cursor nativo do SO (Input.mouse_mode)
+# para que apenas o cursor customizado (sprite_cursor) fique visível,
+# mesmo em modificadores cosméticos como MOUSE_GRANDE e COPIAS.
 # =====================================================================
 
 const TIPOS_QUE_EXIGEM_CAPTURA: Array = [
 	ModificadorAtivo.Tipo.MOUSE_RAPIDO,
 	ModificadorAtivo.Tipo.TRAVAMENTO,
+	ModificadorAtivo.Tipo.LABIRINTO,
 ]
 
 @onready var sprite_cursor: Sprite2D = $SpriteCursor
+@onready var desenho_labirinto: DesenhoLabirinto = $DesenhoLabirinto
 
 var posicao_logica: Vector2 = Vector2.ZERO
-var _pos_warp_esperada: Vector2 = Vector2(-99999, -99999)
+var _warps_pendentes: int = 0
 
 var _modificadores_atuais: Array[ModificadorAtivo] = []
 var _gerenciador_inspecao_atual: Node = null
@@ -47,16 +46,22 @@ func _ready() -> void:
 func _entrar_modo_cosmetico() -> void:
 	_exige_captura = false
 	_pausado_por_popup = false
-	_pos_warp_esperada = Vector2(-99999, -99999)
+	_warps_pendentes = 0
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	if desenho_labirinto != null:
+		desenho_labirinto.atualizar_segmentos([])
 
 
 func _entrar_modo_captura() -> void:
 	posicao_logica = get_viewport().get_mouse_position()
 	if not _escape_manual_ativo:
 		Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
-		_pos_warp_esperada = posicao_logica
-		Input.warp_mouse(posicao_logica)
+		_avisar_e_warpar(posicao_logica)
+
+
+func _avisar_e_warpar(destino: Vector2) -> void:
+	_warps_pendentes += 1
+	Input.warp_mouse(destino)
 
 
 func configurar_para_trabalho(modificadores: Array[ModificadorAtivo], gerenciador_inspecao: Node = null) -> void:
@@ -110,13 +115,17 @@ func obter_posicao_clique() -> Vector2:
 	return get_viewport().get_mouse_position()
 
 
+func _tem_labirinto() -> bool:
+	return CalculadoraModificadores.tem_modificador(_modificadores_atuais, ModificadorAtivo.Tipo.LABIRINTO)
+
+
 func _input(event: InputEvent) -> void:
 	if not _exige_captura or _pausado_por_popup or _escape_manual_ativo:
 		return
 
 	if event is InputEventMouseMotion:
-		if _pos_warp_esperada != Vector2(-99999, -99999) and event.position.is_equal_approx(_pos_warp_esperada):
-			_pos_warp_esperada = Vector2(-99999, -99999)
+		if _warps_pendentes > 0:
+			_warps_pendentes -= 1
 			return
 
 		var delta: Vector2 = event.relative
@@ -124,16 +133,19 @@ func _input(event: InputEvent) -> void:
 		if _surto_velocidade_ativo:
 			multiplicador_velocidade = _multiplicador_velocidade_surto
 
-		if multiplicador_velocidade == 1.0:
-			posicao_logica = event.position
-		else:
-			posicao_logica += delta * multiplicador_velocidade
-			var tamanho_tela := get_viewport().get_visible_rect().size
-			posicao_logica.x = clamp(posicao_logica.x, 0.0, tamanho_tela.x)
-			posicao_logica.y = clamp(posicao_logica.y, 0.0, tamanho_tela.y)
+		var posicao_proposta := posicao_logica + delta * multiplicador_velocidade
+		var tamanho_tela := get_viewport().get_visible_rect().size
+		posicao_proposta.x = clamp(posicao_proposta.x, 0.0, tamanho_tela.x)
+		posicao_proposta.y = clamp(posicao_proposta.y, 0.0, tamanho_tela.y)
 
-			_pos_warp_esperada = posicao_logica
-			Input.warp_mouse(posicao_logica)
+		if _tem_labirinto() and is_instance_valid(_gerenciador_inspecao_atual) and _gerenciador_inspecao_atual.has_method("restringir_movimento_labirinto"):
+			posicao_proposta = _gerenciador_inspecao_atual.restringir_movimento_labirinto(posicao_logica, posicao_proposta)
+
+		posicao_logica = posicao_proposta
+
+		# Evita acumular warps se a diferença for apenas de precisão decimal
+		if posicao_logica.distance_squared_to(get_viewport().get_mouse_position()) > 1.0:
+			_avisar_e_warpar(posicao_logica)
 
 	elif event is InputEventMouseButton:
 		event.position = posicao_logica
@@ -146,12 +158,11 @@ func _input(event: InputEvent) -> void:
 		else:
 			posicao_logica = get_viewport().get_mouse_position()
 			Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
-			_pos_warp_esperada = posicao_logica
-			Input.warp_mouse(posicao_logica)
+			_avisar_e_warpar(posicao_logica)
 
 
 func _notification(what: int) -> void:
-	if not _exige_captura or _escape_manual_ativo:
+	if _escape_manual_ativo:
 		return
 
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
@@ -159,12 +170,19 @@ func _notification(what: int) -> void:
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
 		if not _pausado_por_popup:
 			posicao_logica = get_viewport().get_mouse_position()
-			Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
-			_pos_warp_esperada = posicao_logica
-			Input.warp_mouse(posicao_logica)
+			if _exige_captura:
+				Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
+				_avisar_e_warpar(posicao_logica)
+			else:
+				Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 
 func _process(delta: float) -> void:
+	if not _escape_manual_ativo and not _pausado_por_popup:
+		var modo_esperado := Input.MOUSE_MODE_CONFINED_HIDDEN if _exige_captura else Input.MOUSE_MODE_HIDDEN
+		if Input.mouse_mode != modo_esperado:
+			Input.mouse_mode = modo_esperado
+
 	if _exige_captura and not _escape_manual_ativo:
 		var popup_aberto: bool = false
 		if is_instance_valid(_gerenciador_inspecao_atual) and _gerenciador_inspecao_atual.has_method("esta_com_popup_aberto"):
@@ -176,19 +194,37 @@ func _process(delta: float) -> void:
 			_retomar_captura_se_pausado()
 
 		if sprite_cursor != null:
-			sprite_cursor.global_position = get_viewport().get_mouse_position() if _pausado_por_popup else posicao_logica
+			sprite_cursor.visible = not _pausado_por_popup
+			if not _pausado_por_popup:
+				sprite_cursor.global_position = posicao_logica
 	else:
 		if sprite_cursor != null:
+			sprite_cursor.visible = true
 			sprite_cursor.global_position = get_viewport().get_mouse_position()
 
 	_atualizar_surto_velocidade(delta)
 	_atualizar_cursores_falsos()
+	_atualizar_desenho_labirinto()
+
+
+func _atualizar_desenho_labirinto() -> void:
+	if desenho_labirinto == null:
+		return
+
+	var ativo := _exige_captura and not _pausado_por_popup and _tem_labirinto()
+	if not ativo or not is_instance_valid(_gerenciador_inspecao_atual) or not _gerenciador_inspecao_atual.has_method("obter_segmentos_parede_proximos"):
+		desenho_labirinto.atualizar_segmentos([])
+		return
+
+	var segmentos: Array = _gerenciador_inspecao_atual.obter_segmentos_parede_proximos(posicao_logica, CalculadoraModificadores.RAIO_REVELACAO_LABIRINTO)
+	desenho_labirinto.atualizar_segmentos(segmentos)
 
 
 func _pausar_captura_temporariamente() -> void:
 	if not _pausado_por_popup:
 		_pausado_por_popup = true
-		_pos_warp_esperada = Vector2(-99999, -99999)
+		_warps_pendentes = 0
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _retomar_captura_se_pausado() -> void:
@@ -196,15 +232,10 @@ func _retomar_captura_se_pausado() -> void:
 		return
 	_pausado_por_popup = false
 	posicao_logica = get_viewport().get_mouse_position()
-	_pos_warp_esperada = posicao_logica
-	Input.warp_mouse(posicao_logica)
+	Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN if _exige_captura else Input.MOUSE_MODE_HIDDEN
+	_avisar_e_warpar(posicao_logica)
 
 
-# ---------------------------------------------------------------------
-# SURTOS DE VELOCIDADE — Mouse Rápido (acelera) e Travamento (congela,
-# multiplicador 0.0). Se os dois estiverem no mesmo trabalho, cada
-# surto sorteia qual dos dois dispara — nunca os dois ao mesmo tempo.
-# ---------------------------------------------------------------------
 func _agendar_proximo_surto_velocidade() -> void:
 	_tempo_ate_proximo_surto_velocidade = randf_range(
 		CalculadoraModificadores.INTERVALO_SURTO_VELOCIDADE_MIN,
@@ -254,9 +285,9 @@ func _criar_cursores_falsos(quantidade: int) -> void:
 			falso.texture = sprite_cursor.texture
 			falso.centered = false
 			falso.scale = sprite_cursor.scale
-		falso.modulate = Color(1, 1, 1)
+		falso.modulate = Color(1, 1, 1, 1)
 		falso.global_position = get_viewport().get_mouse_position()
-		falso.set_meta("velocidade_passeio", Vector2(randf_range(-70, 70), randf_range(-40, 40)))
+		falso.set_meta("velocidade_passeio", Vector2(randf_range(-70, 70), randf_range(-70, 70)))
 		add_child(falso)
 		_cursores_falsos.append(falso)
 

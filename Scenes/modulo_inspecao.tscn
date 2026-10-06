@@ -5,7 +5,6 @@
 [ext_resource type="Script" uid="uid://ckad4jugbl4qv" path="res://Scripts/Tela/nova_aba_script.gd" id="3_0u2il"]
 [ext_resource type="Theme" uid="uid://hsun7wgylrc1" path="res://Temas/tema_botoes.tres" id="3_qrrkl"]
 [ext_resource type="Script" uid="uid://b678bfjf456su" path="res://Scripts/Tela/mensagem_modal_scpt.gd" id="4_qrrkl"]
-[ext_resource type="PackedScene" uid="uid://cvghsodnqw1c6" path="res://Scenes/gerenciador_cursor_virtual.tscn" id="6_g5n8p"]
 
 [sub_resource type="Theme" id="Theme_qrrkl"]
 
@@ -82,21 +81,3 @@ offset_bottom = 40.0
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
-
-[node name="Alvo1" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=353646461]
-visible = false
-custom_minimum_size = Vector2(8, 10)
-offset_left = 170.0
-offset_top = 44.0
-offset_right = 468.0
-offset_bottom = 103.0
-mouse_filter = 2
-color = Color(1, 0, 0, 1)
-
-[node name="CaixaSelecao" type="ColorRect" parent="AreaCliqueInspecao/GerenciadorInspecao" unique_id=1268796254]
-visible = false
-offset_right = 40.0
-offset_bottom = 40.0
-color = Color(0, 0, 0.78431374, 0.2901961)
-
-[node name="GerenciadorCursorVirtual" parent="." unique_id=996825541 instance=ExtResource("6_g5n8p")]

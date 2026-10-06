@@ -21,8 +21,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		var posicao: Vector2 = event.global_position
 
-		if cursor_virtual != null and cursor_virtual.has_method("esta_ativo") and cursor_virtual.esta_ativo():
-			posicao = cursor_virtual.posicao_logica
+		if cursor_virtual != null and cursor_virtual.has_method("obter_posicao_clique"):
+			posicao = cursor_virtual.obter_posicao_clique()
 
 		if gerenciador_inspecao != null:
 			gerenciador_inspecao.registrar_clique_na_area(posicao)

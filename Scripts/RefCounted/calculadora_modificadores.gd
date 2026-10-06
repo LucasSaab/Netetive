@@ -41,6 +41,9 @@ const INTERVALO_SURTO_VELOCIDADE_MAX := 10.0
 const DURACAO_SURTO_VELOCIDADE := 2.0
 const MULTIPLICADOR_TRAVAMENTO := 0.0   # congelamento total durante o surto
 
+# --- Labirinto ---
+const RAIO_REVELACAO_LABIRINTO := 90.0   # distância (px) em que as paredes ficam visíveis
+
 static var TIPOS_T1: Array = [
 	ModificadorAtivo.Tipo.DESCONHECIDO,
 	ModificadorAtivo.Tipo.CONEXAO_LENTA,
@@ -60,6 +63,7 @@ static var TIPOS_T2: Array = [
 static var TIPOS_T3: Array = [
 	ModificadorAtivo.Tipo.CAOS,
 	ModificadorAtivo.Tipo.TRAVAMENTO,
+	ModificadorAtivo.Tipo.LABIRINTO,
 ]
 
 static var TIPOS_NIVEL_UNICO: Array = [

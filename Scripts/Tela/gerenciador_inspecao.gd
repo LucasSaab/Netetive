@@ -24,6 +24,14 @@ var _algum_alvo_suspeito_encontrado: bool = false
 var _investigar_disponivel: bool = true
 var _bloqueado_por_armadilha: bool = false
 
+var _labirinto_ativo: bool = false
+var _labirinto_paredes: Dictionary = {}
+var _labirinto_linhas: int = 0
+var _labirinto_colunas: int = 0
+var _labirinto_origem: Vector2 = Vector2.ZERO
+var _labirinto_largura_coluna: float = 0.0
+var _labirinto_altura_linha: float = 0.0
+
 
 func _ready() -> void:
 	if nova_aba != null:
@@ -81,6 +89,17 @@ func montar_alvos(trabalho: TrabalhoInspecao, agendado: TrabalhoAgendado = null)
 	var tamanho_area := rect_ref.size
 	var largura_coluna := tamanho_area.x / float(colunas)
 	var altura_linha := tamanho_area.y / float(linhas)
+
+	_labirinto_ativo = agendado != null and CalculadoraModificadores.tem_modificador(agendado.modificadores, ModificadorAtivo.Tipo.LABIRINTO)
+	if _labirinto_ativo:
+		_labirinto_paredes = GeradorLabirinto.gerar(linhas, colunas)
+		_labirinto_linhas = linhas
+		_labirinto_colunas = colunas
+		_labirinto_origem = origem
+		_labirinto_largura_coluna = largura_coluna
+		_labirinto_altura_linha = altura_linha
+	else:
+		_labirinto_paredes = {}
 
 	var mapa_alvos: Dictionary = {}
 	for alvo in trabalho.alvos:
@@ -174,6 +193,129 @@ func limpar_alvos() -> void:
 	for filho in get_tree().get_nodes_in_group(GRUPO_ALVOS):
 		if is_instance_valid(filho) and filho.get_parent() == self:
 			filho.queue_free()
+
+
+func labirinto_esta_ativo() -> bool:
+	return _labirinto_ativo
+
+
+func _celula_de(pos: Vector2) -> Vector2i:
+	var relativa := pos - _labirinto_origem
+	var c: int = int(floor(relativa.x / _labirinto_largura_coluna))
+	var l: int = int(floor(relativa.y / _labirinto_altura_linha))
+	c = clamp(c, 0, _labirinto_colunas - 1)
+	l = clamp(l, 0, _labirinto_linhas - 1)
+	return Vector2i(c, l)
+
+
+func _parede_bloqueada(indice: int, lado: String) -> bool:
+	var dados: Dictionary = _labirinto_paredes.get(indice, {})
+	return dados.get(lado, true)
+
+
+func restringir_movimento_labirinto(pos_atual: Vector2, pos_desejada: Vector2) -> Vector2:
+	if not _labirinto_ativo:
+		return pos_desejada
+
+	var resultado := pos_atual
+	resultado.x = _mover_eixo(resultado, pos_desejada.x, true)
+	resultado.y = _mover_eixo(resultado, pos_desejada.y, false)
+	return resultado
+
+
+func _mover_eixo(pos_atual: Vector2, valor_desejado: float, eixo_x: bool) -> float:
+	var celula := _celula_de(pos_atual)
+	var coluna := celula.x
+	var linha := celula.y
+
+	var atual: float = pos_atual.x if eixo_x else pos_atual.y
+	var direcao := signf(valor_desejado - atual)
+	if direcao == 0.0:
+		return valor_desejado
+
+	var passo := 0
+	while passo < 32:
+		passo += 1
+
+		var proxima_coluna := coluna
+		var proxima_linha := linha
+		var lado := ""
+		if eixo_x:
+			proxima_coluna += int(direcao)
+			lado = "leste" if direcao > 0 else "oeste"
+		else:
+			proxima_linha += int(direcao)
+			lado = "sul" if direcao > 0 else "norte"
+
+		var fronteira: float
+		if eixo_x:
+			fronteira = _labirinto_origem.x + float(max(coluna, proxima_coluna)) * _labirinto_largura_coluna
+		else:
+			fronteira = _labirinto_origem.y + float(max(linha, proxima_linha)) * _labirinto_altura_linha
+
+		var atingiu_fronteira := (direcao > 0 and valor_desejado >= fronteira) or (direcao < 0 and valor_desejado <= fronteira)
+
+		if not atingiu_fronteira:
+			return valor_desejado
+
+		var fora_dos_limites := proxima_coluna < 0 or proxima_coluna >= _labirinto_colunas or proxima_linha < 0 or proxima_linha >= _labirinto_linhas
+		var indice_atual := linha * _labirinto_colunas + coluna
+
+		if fora_dos_limites or _parede_bloqueada(indice_atual, lado):
+			# Trava a posição na borda sem empurrar para trás
+			if direcao > 0:
+				return max(atual, min(valor_desejado, fronteira - 0.001))
+			else:
+				return min(atual, max(valor_desejado, fronteira + 0.001))
+
+		atual = fronteira
+		coluna = proxima_coluna
+		linha = proxima_linha
+
+	return atual
+
+
+func obter_segmentos_parede_proximos(pos: Vector2, raio: float) -> Array:
+	var segmentos: Array = []
+	if not _labirinto_ativo:
+		return segmentos
+
+	for l in range(_labirinto_linhas):
+		for c in range(_labirinto_colunas):
+			var indice := l * _labirinto_colunas + c
+			var dados: Dictionary = _labirinto_paredes.get(indice, {})
+
+			var x0 := _labirinto_origem.x + c * _labirinto_largura_coluna
+			var y0 := _labirinto_origem.y + l * _labirinto_altura_linha
+			var x1 := x0 + _labirinto_largura_coluna
+			var y1 := y0 + _labirinto_altura_linha
+
+			if dados.get("norte", true):
+				_adicionar_segmento_se_proximo(segmentos, Vector2(x0, y0), Vector2(x1, y0), pos, raio)
+			if dados.get("oeste", true):
+				_adicionar_segmento_se_proximo(segmentos, Vector2(x0, y0), Vector2(x0, y1), pos, raio)
+			if l == _labirinto_linhas - 1 and dados.get("sul", true):
+				_adicionar_segmento_se_proximo(segmentos, Vector2(x0, y1), Vector2(x1, y1), pos, raio)
+			if c == _labirinto_colunas - 1 and dados.get("leste", true):
+				_adicionar_segmento_se_proximo(segmentos, Vector2(x1, y0), Vector2(x1, y1), pos, raio)
+
+	return segmentos
+
+
+func _adicionar_segmento_se_proximo(lista: Array, inicio: Vector2, fim: Vector2, pos: Vector2, raio: float) -> void:
+	var distancia := _distancia_ponto_segmento(pos, inicio, fim)
+	if distancia <= raio:
+		var alpha: float = 1.0 - clamp(distancia / raio, 0.0, 1.0)
+		lista.append({"inicio": inicio, "fim": fim, "alpha": alpha})
+
+
+func _distancia_ponto_segmento(p: Vector2, a: Vector2, b: Vector2) -> float:
+	var ab := b - a
+	var t := 0.0
+	if ab.length_squared() > 0.0:
+		t = clamp((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+	var projecao := a + ab * t
+	return p.distance_to(projecao)
 
 
 func esta_com_popup_aberto() -> bool:

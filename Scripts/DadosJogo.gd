@@ -5,8 +5,8 @@ extends Node
 
 var banco_de_trabalhos: Array[TrabalhoInspecao] = []
 
-var dinheiro_jogador: int = 1000000
-var fama_jogador: int = 1000   # cresce com trabalhos concluídos; controla quantidade_trabalhos_dia (ver GerenciadorExpediente + CalculadoraFama)
+var dinheiro_jogador: int = 100
+var fama_jogador: int = 10000   # cresce com trabalhos concluídos; controla quantidade_trabalhos_dia (ver GerenciadorExpediente + CalculadoraFama)
 
 # ---------------------------------------------------------------------
 # Sistema de upgrades (PC, Assistente, IA)

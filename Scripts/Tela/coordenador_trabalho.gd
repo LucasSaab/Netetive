@@ -111,11 +111,12 @@ func _on_trabalho_selecionado(agendado: TrabalhoAgendado) -> void:
 		site_textura.texture = trabalho.imagem_site
 
 	if gerenciador_inspecao != null and gerenciador_inspecao.has_method("montar_alvos"):
-		gerenciador_inspecao.montar_alvos(trabalho, agendado)
+		await gerenciador_inspecao.montar_alvos(trabalho, agendado)
 		gerenciador_inspecao.definir_investigar_disponivel(not agendado.investigar_usado)
 	else:
 		push_warning("CoordenadorTrabalho: gerenciador_inspecao não atribuído ou sem montar_alvos().")
 
+	GerenciadorCursorVirtual.configurar_para_trabalho(agendado.modificadores, gerenciador_inspecao)
 	# Sempre reconfigura o cursor pro trabalho novo — isso já reseta a
 	# escala do Mouse Grande sozinho se o próximo trabalho não tiver esse
 	# modificador. Mas ainda precisamos limpar explicitamente nos pontos

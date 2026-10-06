@@ -16,7 +16,13 @@ extends Node
 # momento do aceite, monitorado por _process() — se estourar sem
 # diagnóstico feito, emite prazo_expirado. Esses trabalhos nunca voltam
 # pra Disponíveis se interrompidos — CoordenadorTrabalho fecha direto.
-# =====================================================================
+#
+# A contagem regressiva NÃO fica dentro do cartão de Ativos (some se o
+# painel estiver fechado) — fica num HUD fixo no canto superior direito
+# (vbox_prazos_hud), numa caixinha que usa o StyleBox "panel" do tema
+# do jogo (12.tres) — o mesmo estilo que o menu_trabalhos já usa, pra
+# ficar visualmente consistente sem duplicar cores na mão.
+# ---------------------------------------------------------------------
 
 signal trabalho_selecionado(agendado: TrabalhoAgendado)
 signal delegar_solicitado(agendado: TrabalhoAgendado)
@@ -24,6 +30,11 @@ signal encerrar_ativo_solicitado(agendado: TrabalhoAgendado)
 signal prazo_expirado(agendado: TrabalhoAgendado)
 
 const CENA_BADGE_MODIFICADOR := preload("res://Scenes/UI/BadgeModificador.tscn")
+const TEMA_JOGO: Theme = preload("res://Temas/12.tres")
+
+const COR_PRAZO_NORMAL := Color(1.0, 0.6, 0.2)
+const COR_PRAZO_CRITICO := Color(1.0, 0.2, 0.2)
+const LIMIAR_PRAZO_CRITICO_HORAS := 1.0
 
 @export var auto_aceitar_para_teste: bool = true
 @export var titulo_trabalho_teste: String = "Remover Cavalo de Tróia"
@@ -34,10 +45,12 @@ var _ja_auto_aceitou: bool = false
 @export var vbox_disponiveis: VBoxContainer
 @export var vbox_ativos: VBoxContainer
 @export var gerenciador_expediente: Node
+@export var vbox_prazos_hud: VBoxContainer   # HUD fixo, fora do menu — canto superior direito
 
 var _agendados_disponiveis: Array[TrabalhoAgendado] = []
 var _agendados_ativos: Array[TrabalhoAgendado] = []
-var _itens_ativos: Dictionary = {}   # TrabalhoAgendado -> Control (cartão)
+var _itens_ativos: Dictionary = {}    # TrabalhoAgendado -> Control (cartão)
+var _caixas_prazo: Dictionary = {}    # TrabalhoAgendado -> PanelContainer (no HUD)
 
 
 func _ready() -> void:
@@ -54,6 +67,9 @@ func _ready() -> void:
 	else:
 		push_warning("GerenciadorTrabalho: gerenciador_expediente não atribuído (ou sem o sinal trabalho_disponibilizado).")
 
+	if vbox_prazos_hud == null:
+		push_warning("GerenciadorTrabalho: vbox_prazos_hud não atribuído no Inspetor — contagem regressiva não será exibida.")
+
 
 func _hora_atual() -> float:
 	if gerenciador_expediente != null and "hora_atual" in gerenciador_expediente:
@@ -62,7 +78,7 @@ func _hora_atual() -> float:
 
 
 # ---------------------------------------------------------------------
-# MONITORAMENTO DE PRAZO (Tempo Limitado)
+# MONITORAMENTO DE PRAZO (Tempo Limitado) + contagem regressiva ao vivo
 # ---------------------------------------------------------------------
 func _process(_delta: float) -> void:
 	if gerenciador_expediente == null or _agendados_ativos.is_empty():
@@ -72,11 +88,47 @@ func _process(_delta: float) -> void:
 	var expirados: Array[TrabalhoAgendado] = []
 
 	for agendado in _agendados_ativos:
-		if agendado.hora_limite >= 0.0 and hora_atual >= agendado.hora_limite:
+		if agendado.hora_limite < 0.0:
+			continue
+		if hora_atual >= agendado.hora_limite:
 			expirados.append(agendado)
+		else:
+			_atualizar_label_prazo(agendado, hora_atual)
 
 	for agendado in expirados:
 		prazo_expirado.emit(agendado)
+
+
+func _atualizar_label_prazo(agendado: TrabalhoAgendado, hora_atual: float) -> void:
+	if not _caixas_prazo.has(agendado):
+		return
+
+	var caixa: PanelContainer = _caixas_prazo[agendado]
+	if not is_instance_valid(caixa):
+		_caixas_prazo.erase(agendado)
+		return
+
+	var label := caixa.get_child(0) as Label
+	if label == null:
+		return
+
+	var restante := agendado.hora_limite - hora_atual
+	label.text = _texto_prazo(agendado, hora_atual)
+	label.add_theme_color_override("font_color", COR_PRAZO_CRITICO if restante <= LIMIAR_PRAZO_CRITICO_HORAS else COR_PRAZO_NORMAL)
+
+
+func _texto_prazo(agendado: TrabalhoAgendado, hora_atual: float) -> String:
+	return "⏱ %s" % _formatar_tempo_restante(agendado.hora_limite - hora_atual)
+
+
+func _formatar_tempo_restante(horas_restantes: float) -> String:
+	var minutos_totais := int(round(max(horas_restantes, 0.0) * 60.0))
+	@warning_ignore("integer_division")
+	var h := minutos_totais / 60
+	var m := minutos_totais % 60
+	if h > 0:
+		return "%dh %02dmin" % [h, m]
+	return "%dmin" % m
 
 
 func _on_btn_abrir_menu_pressed() -> void:
@@ -189,6 +241,7 @@ func _on_disponivel_pressionado(agendado: TrabalhoAgendado, origem: Node) -> voi
 
 	_agendados_ativos.append(agendado)
 	_adicionar_item_ativo(agendado)
+	_adicionar_prazo_hud_se_houver(agendado)
 
 	trabalho_selecionado.emit(agendado)
 	if menu_trabalhos != null:
@@ -213,8 +266,60 @@ func _definir_prazo_se_houver_relogio(agendado: TrabalhoAgendado) -> void:
 
 
 # ---------------------------------------------------------------------
+# HUD DE PRAZO — caixinha fixa no canto superior direito (vbox_prazos_hud),
+# com o StyleBox do tema do jogo, independente do menu Disponíveis/Ativos
+# estar aberto ou fechado.
+# ---------------------------------------------------------------------
+func _obter_estilo_caixa_prazo() -> StyleBox:
+	# 1ª opção: pega o mesmo StyleBox "panel" que o menu_trabalhos usa,
+	# pra bater exatamente com o resto da UI do jogo.
+	if menu_trabalhos != null:
+		var estilo_do_menu := menu_trabalhos.get_theme_stylebox("panel")
+		if estilo_do_menu != null:
+			return estilo_do_menu
+
+	# 2ª opção: busca direto no tema 12.tres pelo tipo "Panel".
+	if TEMA_JOGO != null and TEMA_JOGO.has_stylebox("panel", "Panel"):
+		return TEMA_JOGO.get_stylebox("panel", "Panel")
+
+	return null
+
+
+func _adicionar_prazo_hud_se_houver(agendado: TrabalhoAgendado) -> void:
+	if agendado.hora_limite < 0.0:
+		return
+	if vbox_prazos_hud == null:
+		return
+
+	var caixa := PanelContainer.new()
+	if TEMA_JOGO != null:
+		caixa.theme = TEMA_JOGO
+
+	var estilo := _obter_estilo_caixa_prazo()
+	if estilo != null:
+		caixa.add_theme_stylebox_override("panel", estilo)
+
+	var label_prazo := Label.new()
+	label_prazo.text = _texto_prazo(agendado, _hora_atual())
+	label_prazo.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	label_prazo.add_theme_color_override("font_color", COR_PRAZO_NORMAL)
+	caixa.add_child(label_prazo)
+
+	vbox_prazos_hud.add_child(caixa)
+	_caixas_prazo[agendado] = caixa
+
+
+func _remover_prazo_hud(agendado: TrabalhoAgendado) -> void:
+	if _caixas_prazo.has(agendado):
+		if is_instance_valid(_caixas_prazo[agendado]):
+			_caixas_prazo[agendado].queue_free()
+		_caixas_prazo.erase(agendado)
+
+
+# ---------------------------------------------------------------------
 # ATIVOS — cartão com Título | Valor | Encerrar (linha 1) + Descrição
-# (linha 2). Sempre mostra tudo, mesmo se era Desconhecido.
+# (linha 2). Sempre mostra tudo, mesmo se era Desconhecido. A contagem
+# regressiva NÃO fica aqui — ver _adicionar_prazo_hud_se_houver().
 # ---------------------------------------------------------------------
 func _adicionar_item_ativo(agendado: TrabalhoAgendado) -> void:
 	if vbox_ativos == null:
@@ -272,6 +377,7 @@ func marcar_trabalho_concluido(agendado: TrabalhoAgendado) -> void:
 	if _itens_ativos.has(agendado):
 		_itens_ativos[agendado].queue_free()
 		_itens_ativos.erase(agendado)
+	_remover_prazo_hud(agendado)
 	_agendados_ativos.erase(agendado)
 
 
@@ -288,6 +394,7 @@ func devolver_para_disponiveis(agendado_antigo: TrabalhoAgendado) -> void:
 	if _itens_ativos.has(agendado_antigo):
 		_itens_ativos[agendado_antigo].queue_free()
 		_itens_ativos.erase(agendado_antigo)
+	_remover_prazo_hud(agendado_antigo)
 	_agendados_ativos.erase(agendado_antigo)
 
 	DadosJogo.resultados_pendentes.erase(agendado_antigo)
