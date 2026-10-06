@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://fxxitdef638m"]
+
+[ext_resource type="Script" uid="uid://b4kogfa204u2w" path="res://Scripts/gerenciador_musica.gd" id="1_fwi7q"]
+[ext_resource type="AudioStream" uid="uid://bmb1id4wglfk3" path="res://SFX/Trilha_principal-Midnight_Routine.mp3" id="2_hulgj"]
+[ext_resource type="AudioStream" uid="uid://bj7si06pm46g5" path="res://SFX/Trilha_relatorio-Under_Load.mp3" id="3_p1mh7"]
+[ext_resource type="AudioStream" uid="uid://by1p0n4ps1lpm" path="res://SFX/mouse_clique.mp3" id="4_p1mh7"]
+[ext_resource type="AudioStream" uid="uid://um6q4h40firm" path="res://SFX/scan.mp3" id="5_ltj65"]
+
+[node name="GerenciadorMusica" type="Node" unique_id=1056025847]
+script = ExtResource("1_fwi7q")
+stream_principal = ExtResource("2_hulgj")
+stream_relatorio = ExtResource("3_p1mh7")
+
+[node name="Player" type="AudioStreamPlayer" parent="." unique_id=810399614]
+bus = &"Musica"
+
+[node name="SomCliqueMenu" type="AudioStreamPlayer" parent="." unique_id=1514453171]
+stream = ExtResource("4_p1mh7")
+bus = &"SFX"
+
+[node name="SomVerificacao" type="AudioStreamPlayer" parent="." unique_id=1372377007]
+stream = ExtResource("5_ltj65")
+bus = &"SFX"

@@ -26,7 +26,7 @@ const PAGINAS: Array[Dictionary] = [
 	{
 		"titulo": "Capítulo 5 — Engenharia Social",
 		"descricao": "Alguém ligou dizendo ser do suporte técnico e pedindo sua senha? Desliga. Banco mandou mensagem pedindo seus dados? Desconfia. Nenhuma empresa séria pede senha por telefone ou mensagem. Se achar que pode ser verdade, liga você mesmo pro número oficial — nunca o que eles te passaram.",
-		"solucao": "Como agir: Encerra o contato imediatamente sem fornecer nenhuma informação. Anota o número ou canal usado pelo golpista and reporta. Se já tiver fornecido algum dado, troca as senhas afetadas na hora e avisa o time de segurança. Nunca instala programas de acesso remoto pedidos por 'suporte técnico' não solicitado."
+		"solucao": "Como agir: Encerra o contato imediatamente sem fornecer nenhuma informação. Anota o número ou canal usado pelo golpista e reporta. Se já tiver fornecido algum dado, troca as senhas afetadas na hora e avisa o time de segurança. Nunca instala programas de acesso remoto pedidos por 'suporte técnico' não solicitado."
 	},
 	{
 	"titulo": "Capítulo 6 — Scareware",

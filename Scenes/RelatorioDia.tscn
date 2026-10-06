@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://88p5yq7l0dyo"]
 
 [ext_resource type="Theme" uid="uid://hsun7wgylrc1" path="res://Temas/tema_botoes.tres" id="1_fxm7p"]
-[ext_resource type="Script" uid="uid://clm4ej4auw3jd" path="res://Scripts/relatorio_dia.gd" id="1_kdk7v"]
+[ext_resource type="Script" uid="uid://hf3n62qffk1g" path="res://Scripts/relatorio_dia.gd" id="1_kdk7v"]
 
 [node name="RelatorioDia" type="Control" unique_id=1177604113]
 layout_mode = 3

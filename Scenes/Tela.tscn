@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cxhc2vr8d6442" path="res://Scripts/Tela/Main_select_script.gd" id="1_2ep5m"]
 [ext_resource type="Texture2D" uid="uid://cq6r74v0jf6xr" path="res://Sprites/Computador tela LCD.png" id="1_2m0fk"]
 [ext_resource type="Texture2D" uid="uid://b63c5sgaj3dsl" path="res://Sprites/background-Pc.jpg" id="3_w1jdw"]
+[ext_resource type="Theme" uid="uid://btb15t1ftymvc" path="res://Temas/12.tres" id="7_otqlo"]
 [ext_resource type="PackedScene" uid="uid://jtkkvoxesbp6" path="res://Scenes/modulo_inspecao.tscn" id="10_2ep5m"]
 [ext_resource type="PackedScene" uid="uid://di8ebtlmueqde" path="res://Scenes/modulo_trabalho.tscn" id="12_mkaev"]
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="14_fgk2u"]
@@ -13,21 +14,19 @@
 script = ExtResource("1_2ep5m")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1015529222]
-position = Vector2(576.00006, 399)
-scale = Vector2(1.3500001, 1.2562499)
+position = Vector2(574.50006, 402.50003)
+scale = Vector2(1.3715911, 1.2796875)
 texture = ExtResource("1_2m0fk")
 metadata/_edit_lock_ = true
 
 [node name="TextureRect" type="TextureRect" parent="Sprite2D" unique_id=367571657]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -703.0
-offset_top = -487.0
-offset_right = -663.0
-offset_bottom = -447.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -440.0
+offset_top = -320.0
+offset_right = -440.0
+offset_bottom = -320.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -60,14 +59,29 @@ texture_normal = ExtResource("14_fgk2u")
 script = ExtResource("15_3mv3w")
 cena_livro = ExtResource("14_syxfj")
 
+[node name="VBoxPrazosHud" type="VBoxContainer" parent="CanvasLayer" unique_id=1673080912]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 40.0
+grow_horizontal = 0
+theme = ExtResource("7_otqlo")
+
 [node name="ModuloInspecao" parent="." unique_id=290836615 instance=ExtResource("10_2ep5m")]
 
-[node name="GerenciadorInspecao" parent="ModuloInspecao/AreaCliqueInspecao" parent_id_path=PackedInt32Array(290836615, 1907862298) index="0" unique_id=1946026905 node_paths=PackedStringArray("area_referencia")]
+[node name="GerenciadorInspecao" parent="ModuloInspecao/AreaCliqueInspecao" parent_id_path=PackedInt32Array(290836615, 1907862298) index="0" unique_id=1946026905 node_paths=PackedStringArray("area_referencia", "site_textura")]
 area_referencia = NodePath("../../../Sprite2D/ImagemBase")
+site_textura = NodePath("../../../Sprite2D/ImagemBase")
 
 [node name="ModuloTrabalho" parent="." unique_id=174112552 instance=ExtResource("12_mkaev")]
 
-[node name="MenuTrabalhos" parent="ModuloTrabalho/GerenciadorTrabalho" parent_id_path=PackedInt32Array(174112552, 1081352621) index="1" unique_id=867683152]
+[node name="GerenciadorTrabalho" parent="ModuloTrabalho" index="1" unique_id=1081352621 node_paths=PackedStringArray("vbox_prazos_hud")]
+auto_aceitar_para_teste = true
+titulo_trabalho_teste = "Remover Cavalo de Tróia"
+vbox_prazos_hud = NodePath("../../CanvasLayer/VBoxPrazosHud")
+
+[node name="MenuTrabalhos" parent="ModuloTrabalho/GerenciadorTrabalho" index="1" unique_id=867683152]
 visible = false
 
 [node name="CoordenadorTrabalho" parent="ModuloTrabalho" index="3" unique_id=1240996018 node_paths=PackedStringArray("gerenciador_inspecao", "site_textura")]

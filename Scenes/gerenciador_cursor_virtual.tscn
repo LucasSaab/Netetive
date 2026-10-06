@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cvghsodnqw1c6"]
+
+[ext_resource type="Script" uid="uid://dfgig18tg6j6i" path="res://Scripts/Tela/Gerenciador de Inspecao/gerenciador_cursor_virtual.gd" id="1_y1it1"]
+[ext_resource type="Texture2D" uid="uid://bguh1b7wji3cg" path="res://Sprites/cursor.png" id="2_y1it1"]
+[ext_resource type="Script" uid="uid://ccurmxsqfwtn6" path="res://Scripts/Tela/Gerenciador de Inspecao/desenho_labirinto.gd" id="3_hfnpy"]
+
+[node name="GerenciadorCursorVirtual" type="CanvasLayer" unique_id=996825541]
+layer = 100
+script = ExtResource("1_y1it1")
+
+[node name="SpriteCursor" type="Sprite2D" parent="." unique_id=1837780018]
+texture = ExtResource("2_y1it1")
+
+[node name="DesenhoLabirinto" type="Node2D" parent="." unique_id=1612046955]
+script = ExtResource("3_hfnpy")

@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://bygopto2tcvf2"]
+
+[ext_resource type="Script" uid="uid://b716p7x6chmpf" path="res://Scenes/UI/badge_modificador.gd" id="1_7rva4"]
+
+[node name="BadgeModificador" type="Control" unique_id=1673974742]
+clip_children = 1
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_7rva4")
+
+[node name="Icone" type="TextureRect" parent="." unique_id=575627650]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LabelNivel" type="Label" parent="." unique_id=526824470]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 2

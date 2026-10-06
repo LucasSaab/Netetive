@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://ddgrpiijkvrc7"]
 
-[ext_resource type="Script" uid="uid://cfgs358chu1yk" path="res://Scripts/Escritorio/hud_manager.gd" id="1_3l0ju"]
+[ext_resource type="Script" uid="uid://dvoeed1j5fanp" path="res://Scripts/Escritorio/hud_manager.gd" id="1_3l0ju"]
 [ext_resource type="Texture2D" uid="uid://cv0mphhh0cr5a" path="res://Sprites/score_system/carteira_de_dinheiro1.png" id="2_ea74h"]
-[ext_resource type="Script" uid="uid://b3xjd5roflf6w" path="res://Scripts/Escritorio/icone_dinheiro.gd" id="3_658l8"]
-[ext_resource type="Texture2D" uid="uid://unx0w4ahvgkm" path="res://Sprites/score_system/carteira_de_dinheiro2.png" id="4_qu1xn"]
+[ext_resource type="Script" uid="uid://dmoaeo3cehymq" path="res://Scripts/Escritorio/icone_dinheiro.gd" id="3_658l8"]
+[ext_resource type="Texture2D" uid="uid://unx0w4ahvgkm" path="res://Sprites/score_system/carteira_de_dinheiro2.png" id="4_ea74h"]
 [ext_resource type="Texture2D" uid="uid://c0ijjtgf1khp0" path="res://Sprites/score_system/trofeu_de_fama.png" id="5_q2nyd"]
 
 [node name="Score" type="Node2D" unique_id=1420922170]
@@ -28,7 +28,7 @@ layout_mode = 2
 texture = ExtResource("2_ea74h")
 script = ExtResource("3_658l8")
 carteira_de_dinheiro_1 = ExtResource("2_ea74h")
-carteira_de_dinheiro_2 = ExtResource("4_qu1xn")
+carteira_de_dinheiro_2 = ExtResource("4_ea74h")
 icone_dinheiro = NodePath(".")
 
 [node name="contador_dinheiro" type="Label" parent="HUD/control/container_dinheiro/icone_dinheiro" unique_id=1153904789]
