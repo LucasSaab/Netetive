@@ -2,7 +2,7 @@
 
 > Jogo educativo de cibersegurança em Godot 4, inspirado em *Papers, Please*. O jogador assume o papel de alguém que precisa identificar ameaças digitais (phishing, sites maliciosos, perfis falsos etc.) durante o expediente de trabalho.
 >
-> **Última atualização deste documento:** 26/08/2026
+> **Última atualização deste documento:** 21/11/2026
 
 ---
 
@@ -18,7 +18,10 @@
    - [3.5 Ciclo do Dia: Iniciar Dia e Relatório de Fim de Expediente](#35-ciclo-do-dia-iniciar-dia-e-relatório-de-fim-de-expediente)
    - [3.6 Sistema de Upgrades: PC, Assistente e IA](#36-sistema-de-upgrades-pc-assistente-e-ia)
    - [3.7 Sistema de Fama](#37-sistema-de-fama)
-   - [3.8 HUD de Dinheiro/Fama e Trabalhos de Scareware/Ransomware](#38-hud-de-dinheirofama-e-trabalhos-de-scarewareransomware)
+   - [3.8 Grid M×N e Múltiplos Alvos Suspeitos](#38-grid-mn-e-múltiplos-alvos-suspeitos)
+   - [3.9 Sistema de Áudio: Música de Fundo e Efeitos Sonoros](#39-sistema-de-áudio-música-de-fundo-e-efeitos-sonoros)
+   - [3.10 Sistema de Modificadores de Dificuldade e Cursor Virtual](#310-sistema-de-modificadores-de-dificuldade-e-cursor-virtual)
+   - [3.11 HUD de Dinheiro/Fama](#311-hud-de-dinheirofama)
 4. [Estado Geral do Projeto](#4-estado-geral-do-projeto)
 5. [Observações Gerais para Desenvolvimento Futuro](#5-observações-gerais-para-desenvolvimento-futuro)
 
@@ -55,8 +58,6 @@ Node2D
 				└── icone_fama
 					└── contador_fama (Label)
 ```
-
-> **v3.5:** o nó `Score` é uma instância de `Scores.tscn` — ver seção [3.8](#38-hud-de-dinheirofama-e-trabalhos-de-scarewareransomware) pra detalhes completos do HUD.
 
 > **Engine:** Godot 4  
 > **Arquivo da cena:** `res://Scenes/Escritorio.tscn` *(ou equivalente)*
@@ -116,6 +117,17 @@ func _on_pressed() -> void:
 **Script:** `painel_upgrades.gd` | **class_name:** `PainelUpgrades`
 
 UI que desenha dinamicamente as 5 linhas de upgrade — ver seção [3.6](#36-sistema-de-upgrades-pc-assistente-e-ia) pra detalhes completos. Começa oculto (`hide()` no `_ready()`), mostrado por `BtnUpgrades`.
+
+> **Ordem de desenho (v4.3):** `abrir()` chama `move_to_front()` antes do `show()`. Sem isso, o `BtnLivro` (que vem depois do painel na árvore) era desenhado por cima do painel aberto. Qualquer nó novo adicionado ao Escritório depois do painel teria o mesmo problema.
+
+#### `BtnLivro` — `TextureButton` (v4.2, novo)
+**Script:** `btn_abrir_livro.gd`
+
+Livro fechado sobre a mesa. Ao clicar, abre o `LivroDicas` pelo grupo `livro_dicas` (sem referência no Inspetor), permitindo consultar o manual **antes do expediente**, sem pressão de tempo. O hover clareia o sprite. Arte do sprite ainda pendente.
+
+#### `LivroDicas` — instância de `LivroDicas.tscn` (v4.2, novo)
+
+Cena reutilizável do livro (`CanvasLayer`, layer 10), a mesma instanciada na `Tela.tscn` — ver seção [3.3](#33-livro-de-ajuda-livrodicas). Começa oculta.
 
 ### Fluxo de Navegação
 
@@ -206,8 +218,6 @@ Exibe a imagem do quadro de cortiça com o papel "Política de qualidade" fixado
 #### `TB_Tutorial_1` — `TextureButton`
 **Script:** `tb_tutorial_1.gd`
 
-Botão visível sobre o quadro (representando o papel fixado). Ao ser pressionado, exibe o `Layer_Tutorial_1`.
-
 ```gdscript
 extends TextureButton
 
@@ -218,13 +228,8 @@ func _on_pressed() -> void:
 		layer_tutorial.show()
 ```
 
-> **Nota:** Este botão acessa o `CanvasLayer` via caminho relativo `$"../Layer_Tutorial_1"`. O script geral da cena também conecta este botão via `@export` — ambos produzem o mesmo efeito. Futuramente pode ser unificado para evitar redundância.
-
 #### `Layer_Tutorial_1` — `CanvasLayer`
-Camada de sobreposição que exibe o conteúdo do tutorial por cima da cena. Começa **oculto** (`hide()` no `_ready`) e é exibido apenas quando o jogador interage.
-
-- Filho: `TextureRect` com o visual do tutorial (controles, guias, etc.)
-- Fechado com **clique direito** pelo handler de `_input` no script geral.
+Camada de sobreposição que exibe o conteúdo do tutorial por cima da cena. Começa **oculto** e é exibido apenas quando o jogador interage.
 
 ### Fluxo de Navegação
 
@@ -286,8 +291,7 @@ Node2D                         ← Script principal (Main_select_script.gd)
 
 Os **Lembretes** são post-its fixados na tela do computador que representam tarefas recebidas pelo jogador. Cada um sorteia seus dados aleatoriamente a partir de `DadosJogo.banco_de_trabalhos` (Autoload).
 
-##### `Lembrete` — `TextureButton`
-**Script:** `lembrete.gd`
+A cena **Tela** (`res://Scenes/Tela.tscn`) é onde o loop principal de gameplay ocorre. O jogador visualiza um site suspeito na tela do computador e interage com ele para identificar problemas de segurança.
 
 ```gdscript
 signal foi_clicado(titulo, descricao, recompensa, lembrete_clicado)
@@ -313,45 +317,11 @@ func _on_lembrete_foi_clicado(titulo, descricao, recompensa, lembrete_clicado):
 ##### `PainelTrabalho` — `Panel`
 **Script:** `painel_trabalho.gd`
 
-Painel centralizado na tela que exibe os detalhes do trabalho sorteado.
-
-```gdscript
-signal trabalho_aceito(recompensa: int)
-```
-
-| Ação do jogador | Resultado |
-|---|---|
-| Clica em **Aceitar** | Emite `trabalho_aceito`, fecha painel, remove o post-it da cena (`queue_free`) |
-| Clica em **Ignorar** | Fecha o painel, post-it permanece na tela |
-| Clique direito sobre o painel | Fecha o painel (`fechar()`) |
-
-- Posicionamento: calculado dinamicamente para sempre aparecer no centro da viewport.
-- `z_index = 101` — fica acima do Lembrete (`z_index 100`).
+Post-its clicáveis com tarefas aleatórias, substituídos pelo sistema de expedição.
 
 #### Sistema do Livro de Dicas (acesso)
 
-O **Livro de Dicas** é um guia in-game de consulta durante o gameplay (diferente do tutorial do Quadro, que é pré-gameplay). Ele é instanciado dinamicamente e exibido centralizado na tela. *(conteúdo detalhado na seção [3.3](#33-livro-de-ajuda-livrodicas))*
-
-##### `BtnAbrirLivro` — `TextureButton`
-**Script:** `btn_abrir_livro.gd`
-
-| Comportamento | Detalhe |
-|---|---|
-| 1º clique | Instancia `LivroInstrucao.tscn` dentro do `CenterContainer` e chama `abrir_livro()` |
-| 2º clique (livro aberto) | Destroi a instância com `queue_free()` |
-| `@export` necessários | `cena_livro: PackedScene` e `container_central: CenterContainer` devem ser atribuídos no Inspetor |
-
-##### `LivroDicas` — `TextureRect`
-**Script:** `livro_dicas.gd` | **class_name:** `LivroDicas`
-
-Livro paginado carregado a partir de `res://Scripts/conteudo_livro.gd`. Cada página tem `titulo`, `descricao` e `solucao`.
-
-| Elemento | Função |
-|---|---|
-| `BtnAnterior` / `BtnProximo` | Navega entre páginas; se escondem na primeira/última página |
-| `abrir_livro()` | Reseta para página 0, ativa `MOUSE_FILTER_STOP` e exibe |
-| Clique direito | Fecha o livro e reativa `MOUSE_FILTER_IGNORE` |
-| Tamanho | 80% da viewport (`custom_minimum_size = tamanho_tela * 0.8`) |
+*(conteúdo detalhado na seção [3.3](#33-livro-de-ajuda-livrodicas))*
 
 #### Sistema de Inspeção (visão geral)
 
@@ -510,88 +480,55 @@ ModuloInspecao
 - Todos os alvos são `ColorRect` **invisíveis por padrão** — só ficam visíveis quando o jogador acerta a inspeção sobre um alvo problemático.
 - A verificação é feita por colisão de retângulos (`get_global_rect().has_point(...)`) entre a posição do clique e a área do alvo.
 
-#### Design Futuro: Variação por Dificuldade
-
-A estrutura atual com `Alvo1`, `Alvo2`, `Alvo3` fixos é o caso-base (dificuldade inicial). O plano de design prevê:
-
-| Aspecto | Comportamento planejado |
-|---|---|
-| **Quantidade de alvos** | Aumenta conforme a dificuldade do trabalho (mais áreas clicáveis = mais lugares para checar) |
-| **Quantidade de alvos problemáticos** | Pode haver mais de 1 alvo suspeito em trabalhos mais difíceis |
-| **Distribuição/sorteio** | Provavelmente precisará de um sistema que sorteie dinamicamente quais `ColorRect` são "problemáticos" a cada rodada, em vez de fixar isso na cena |
-
-> **Implicação técnica:** o array `alvos_neutros` em `gerenciador_inspecao.gd` (atualmente fixo como `[$Alvo2, $Alvo3]`) provavelmente precisará ser refatorado para algo dinâmico — por exemplo, receber a lista de alvos problemáticos vs. neutros a partir dos dados do trabalho sorteado (`DadosJogo.banco_de_trabalhos`), em vez de hardcoded por nome de nó.
+> ⚠️ A descrição original (`Alvo1`/`Alvo2`/`Alvo3` fixos) foi substituída pelo sistema de grid dinâmico (`AlvoInspecao`/`TrabalhoInspecao`/`AreaAlvo`), documentado na seção [3.4](#34-sistema-de-trabalho-diagnóstico-e-veredito-diferido).
 
 ---
 
 ### 3.3 Livro de Ajuda (LivroDicas)
 
-O **Livro de Ajuda** é um manual de consulta disponível durante o expediente, na cena **Tela**, acessado por um botão no canto inferior direito (`BtnAbrirLivro`). Diferente do tutorial do Quadro (que ensina controles e mecânicas), este livro contém o **catálogo dos problemas de segurança** que o jogador pode encontrar durante o trabalho — cada capítulo é dividido em três partes: nome do problema, como identificar e como resolver.
+Manual de consulta sobre os problemas de segurança, redesenhado na **v4.2** no estilo do livro de regras de *Papers, Please* (paleta própria, azul-acinzentada). É uma **cena reutilizável** (`LivroDicas.tscn`, raiz `CanvasLayer`, layer 10) usada em dois momentos:
 
-O jogador pode abrir e fechar o livro **quantas vezes quiser** durante o expediente, sem penalidade.
+- **Escritório** (antes do expediente): pelo livro fechado sobre a mesa (`BtnLivro`).
+- **Tela** (durante o expediente): pelo `BtnAbrirLivro`.
 
-> A estrutura técnica do botão (`btn_abrir_livro.gd`) e do componente (`livro_dicas.gd`) já foi documentada na seção 3.1. Esta seção foca no **conteúdo** do livro, detalhado pelo arquivo `conteudo_livro.gd`.
+Ambos usam `btn_abrir_livro.gd`, que acha o livro pelo grupo `livro_dicas`. O jogador abre e fecha **quantas vezes quiser, sem penalidade** (custo de consulta continua indefinido; os sinais `aberto`/`fechado` são o gancho).
 
-#### Estrutura Interna do Livro
+#### Estrutura do conteúdo
 
-```
-LivroDicas (TextureRect)
-├── LabelTitulo      ← Nome do problema (ex: "Capítulo 1 — Phishing")
-├── LabelProblema     ← Texto explicando como identificar o problema
-├── LabelSolucao      ← Texto explicando como agir/resolver
-├── BtnProximo        ← Avança para o próximo capítulo
-└── BtnAnterior       ← Volta para o capítulo anterior
-```
+3 níveis: **capítulo → subcapítulo → partes** (Reconhecer / Proteger). São **10 capítulos e 34 subcapítulos** (`ConteudoLivro.CAPITULOS`): Golpes por Mensagem, Fraudes Financeiras, Identidade Falsa, Sites e Downloads Maliciosos, Malware, Engenharia Social, Segurança Física, Contas e Acesso, Sistemas e Redes, Privacidade e Dados. Tabela completa no `netetive_changelog.md` (v4.2).
 
-Cada página é populada a partir de um dicionário com três chaves: `titulo`, `descricao` (identificação do problema) e `solucao` (como agir).
+O **diagnóstico acontece no nível do capítulo** (o jogador não erra por confundir Phishing com Smishing — ambos são "Golpes por Mensagem"); o subcapítulo é o detalhe ensinado no livro e na dica. `DadosJogo` lê `ConteudoLivro.CAPITULOS` por auxiliares estáticos (`total_capitulos()`, `titulo_capitulo()`, `titulos_capitulos()`); `PAGINAS` foi removido.
 
-#### Fonte de Dados — `conteudo_livro.gd`
+#### Navegação (duas páginas)
 
-**Classe:** `ConteudoLivro` (`extends RefCounted`)
-
-Contém o array `PAGINAS: Array[Dictionary]` com **10 capítulos** atualmente implementados, cobrindo temas de segurança digital:
-
-| # | Capítulo | Tema |
+| Estado | Esquerda | Direita |
 |---|---|---|
-| 1 | Phishing | E-mails falsos pedindo dados/ação urgente |
-| 2 | Perfil Falso | Identificação de contas falsas em redes sociais |
-| 3 | Site Malicioso | Verificação de URLs e cadeado de segurança |
-| 4 | Ransomware | Sequestro de arquivos por malware |
-| 5 | Engenharia Social | Manipulação via telefone/mensagem se passando por suporte |
-| 6 | Senha Fraca | Boas práticas de criação de senha |
-| 7 | Wi-Fi Público | Riscos de redes abertas e uso de VPN |
-| 8 | Atualização Ignorada | Importância de manter sistemas atualizados |
-| 9 | Permissões Excessivas | Revisão de permissões de apps |
-| 10 | Vazamento de Dados | Resposta a vazamentos (ex: haveibeenpwned) |
+| Índice | Capa (escudo com cadeado, pintada no fundo) | Lista dos 10 capítulos |
+| Subcapítulos | Lista dos subcapítulos | Resumo do capítulo |
+| Texto | Lista dos subcapítulos | Texto do subcapítulo (aba Reconhecer ou Proteger) |
 
-Cada capítulo segue o padrão narrativo: contextualização do problema em tom de conversa ("Sabe aquele e-mail que parece ser do seu banco...") seguido de um bloco prático "Como agir:" com passos objetivos.
+Abas laterais **Índice / Reconhecer / Proteger** (um único sprite; a aba atual fica na cor cheia e as outras escurecidas — **sem deslocamento**, removido na v4.3). **Clique direito** volta um nível e fecha o livro quando já está no índice. A API `abrir_em(capitulo, sub, aba)` deixa a dica do Investigar abrir o livro direto no tópico certo (ainda não ligada).
 
-> **Observação:** apesar do comentário no código mencionar "12 capítulos estruturados", o array contém atualmente **10 capítulos** (índices 0–9).
+#### Integração técnica
 
-> **Atualização:** `PAGINAS` foi alterado de `var` (membro de instância) para `const`, permitindo acesso estático (`ConteudoLivro.PAGINAS`) sem precisar instanciar a classe. Isso passou a ser necessário porque o novo sistema de diagnóstico (seção 3.4) lê `PAGINAS` diretamente a partir de `DadosJogo.gd`.
+- Registra-se nos grupos `popups` (o cursor virtual devolve o cursor nativo enquanto o livro está aberto — `CanvasLayer.visible` é o que `esta_com_popup_aberto()` lê) e `livro_dicas`.
+- Camada 10: acima do `CanvasLayer` da Tela, abaixo do cursor virtual (4096).
+- A `Raiz` (`Control`, Full Rect, `mouse_filter = Stop`) impede cliques atravessando o livro; por isso o clique direito é tratado em `_input`.
+- O nó `Livro` é escalado 2× sobre uma arte de 480×320; fonte em `TAMANHO_FONTE = 11` (valor que ficou legível em jogo) e `texture_filter = Nearest`.
 
-#### Relação com o Sistema de Inspeção
+#### Ajustes visuais da v4.3
 
-> ⚠️ **Nota de manutenção:** a tabela abaixo descreve o estado **anterior** à seção 3.4 — os dois bancos de dados já passaram a se referenciar via `AlvoInspecao.capitulo_relacionado`, que aponta para um índice em `ConteudoLivro.PAGINAS`. A vinculação direta que era apenas uma ideia de design já está implementada.
+- **Botões de capítulo/subcapítulo:** `SIZE_EXPAND_FILL` + `autowrap_mode = WORD_SMART` + `clip_text`, com margens verticais de 1 px e `separation = 2` nas listas. Antes (`SHRINK_BEGIN`) cada botão crescia até caber o texto inteiro e vazava da página. `VBoxIndice`/`VBoxSubcapitulos` precisam de uma **largura definida** no Inspetor para o `EXPAND_FILL` ter limite.
+- **Abas — texto:** o rótulo (`Label`) de cada aba é girado 90° em torno do próprio centro, com a caixa do tamanho da aba (comprimento = altura, espessura = largura). A fonte desce até o maior tamanho (máx. `TAMANHO_FONTE`) em que o texto cabe, então as três abas ficam iguais.
+- **Abas — corte:** `_trazer_aba_para_frente()` chama `move_to_front()`, `z_index = 10` e desliga `clip_contents` em todos os `Control` pais. A causa do corte era um irmão desenhado depois da aba e/ou um pai com *Clip Contents* ligado.
 
-Atualmente, os capítulos do livro (problemas de segurança como phishing, perfil falso, site malicioso etc.) são conceitualmente diferentes dos "trabalhos" do `DadosJogo.banco_de_trabalhos`, que tratam de manutenção técnica genérica (remover vírus, limpar disco, atualizar drivers). Os dois bancos de dados ainda não compartilham uma referência cruzada direta:
-
-| Sistema | Fonte | Conteúdo |
-|---|---|---|
-| Lembretes/Trabalhos | `DadosJogo.banco_de_trabalhos` | Tarefas de manutenção (título, descrição, recompensa) |
-| Livro de Ajuda | `ConteudoLivro.PAGINAS` | Catálogo educativo de ameaças de segurança (título, problema, solução) |
-
-> **Nota de design:** pode ser interessante, no futuro, vincular cada `Alvo` problemático do Módulo de Inspeção a um capítulo específico do livro — assim o jogador consulta exatamente o capítulo relevante para o problema que está enfrentando, em vez de navegar por todos os 10 capítulos.
+> **Status:** abas e botões corrigidos na v4.3 (confirmado por print); abertura nas duas cenas, clique direito e convivência com o cursor virtual seguem sem validação completa (ver `netetive_status.md`).
 
 ---
 
 ### 3.4 Sistema de Trabalho, Diagnóstico e Veredito Diferido
 
-Esta seção documenta a arquitetura **atual** (v3) do loop de trabalho, que substitui o sistema de post-its (`Lembrete`/`PainelTrabalho`, seção 3.1) e o sistema de alvos fixos (`Alvo1`/`Alvo2`/`Alvo3`, seção 3.2). Passou por três iterações de design ao longo do desenvolvimento — a seção "Histórico de versões" no final resume o que mudou entre elas.
-
-#### Visão geral do fluxo (versão atual)
-
-Todo o ciclo de um trabalho — inspecionar, diagnosticar, ignorar áreas conhecidas, e encerrar — acontece dentro de um **único popup contextual** (`NovaAba`) que abre no ponto onde o jogador clica. Não existe mais navegação de volta à lista de trabalhos pra nenhuma dessas ações; a lista de trabalhos ativos serve só pra **selecionar** qual trabalho inspecionar no momento.
+Arquitetura atual (v3.1) do loop de trabalho. Todo o ciclo — inspecionar, diagnosticar, ignorar, encerrar — acontece dentro de um único popup contextual (`NovaAba`).
 
 ```
 GerenciadorExpediente libera um trabalho (horário do dia bateu)
@@ -662,136 +599,43 @@ NovaAba abre com 5 botões sempre presentes:
    → SÓ AQUI o certo/errado e a recompensa de cada trabalho são revelados
 ```
 
-**Regra de "acerto" combinado:** um trabalho só conta como bem-sucedido se **os dois** critérios forem verdadeiros — achar o alvo suspeito correto **e** escolher a categoria certa no diagnóstico. Se o jogador clicar em "Encerrar" sem nunca ter diagnosticado, `diagnostico_correto` fica no valor padrão (`false`), então o trabalho conta como errado — não trava o jogo, só garante que pular o diagnóstico tem consequência.
+**Regra de acerto combinado:** achar o alvo suspeito **e** escolher a categoria certa no diagnóstico.
 
-#### Sistema de grid (substitui posição/tamanho livre em pixels)
+#### Sistema de grid
 
-A tela do site deixou de usar `AlvoInspecao.posicao`/`tamanho` livres em pixels. Agora a área da imagem (`ImagemBase`, um `TextureRect`) é dividida numa grade fixa de **3 colunas × N linhas** (5 por padrão, configurável por trabalho via `TrabalhoInspecao.linhas_grid`).
+Grade de M colunas × N linhas (mínimo 3×3), configurável por trabalho (`TrabalhoInspecao.linhas_grid`/`colunas_grid`). Quadrantes de tamanho uniforme (sem compensação adaptativa desde a v3.5). Ver seção [3.8](#38-grid-mn-e-múltiplos-alvos-suspeitos).
 
-```
-Índice do quadrante = linha * 3 + coluna   (0-based)
+#### Botão Investigar
 
-Linha 0:  [ 0][ 1][ 2]
-Linha 1:  [ 3][ 4][ 5]
-Linha 2:  [ 6][ 7][ 8]
-Linha 3:  [ 9][10][11]
-Linha 4:  [12][13][14]
-```
-
-- **Largura:** sempre fixa em 1/3 da largura da área de referência — nunca varia.
-- **Altura:** cada *linha inteira* (as 3 colunas juntas) compartilha a mesma altura. Um `AlvoInspecao` pode forçar uma altura específica pra sua linha via `altura_real`; as linhas sem alvo forçado dividem igualmente o espaço vertical restante, garantindo que a soma de todas as linhas sempre preencha 100% da área de referência (compensação adaptativa).
-- **Quadrantes sem `AlvoInspecao` explícito no `TrabalhoInspecao.alvos`** viram automaticamente alvos `NEUTRO` — ou seja, os 15 quadrantes da grade são **todos** clicáveis/inspecionáveis, não só os que têm problema definido.
-- **`area_referencia`** (`@export var area_referencia: Control` em `GerenciadorInspecao`) define o retângulo que a grade cobre — aponta pro `ImagemBase` (`TextureRect`), não pro viewport inteiro, senão a grade fica maior que a imagem do site.
-
-#### Resources (arquitetura de grid)
-
-##### `AlvoInspecao` — `Resource`
-```gdscript
-class_name AlvoInspecao
-extends Resource
-
-enum Tipo { SUSPEITO, NEUTRO }
-
-@export var tipo: Tipo = Tipo.NEUTRO
-@export var quadrante: int = 0        # índice: linha * 3 + coluna (0-based)
-@export var altura_real: float = 0.0  # altura em px que a LINHA INTEIRA deve assumir; 0 = automática
-@export var capitulo_relacionado: int = -1
-@export var dica: String = ""         # texto curto mostrado pelo botão Investigar (só pra SUSPEITO)
-```
-
-##### `TrabalhoInspecao` — `Resource`
-```gdscript
-class_name TrabalhoInspecao
-extends Resource
-
-@export var titulo: String
-@export var descricao: String
-@export var recompensa_base: int = 0
-@export var dificuldade: int = 1
-@export var recompensa_fama: int = 10
-@export var imagem_site: Texture2D
-@export var alvos: Array[AlvoInspecao] = []
-@export var linhas_grid: int = 5   # colunas são sempre 3 (constante em GerenciadorInspecao)
-```
-
-##### `AreaAlvo` — `Area2D`
-```gdscript
-class_name AreaAlvo
-extends Area2D
-
-var dados: AlvoInspecao
-var tamanho_quadrante: Vector2 = Vector2.ZERO   # calculado pelo grid, não vem do Resource
-var foi_encontrado: bool = false
-var ignorado: bool = false
-var ja_inspecionado_negativo: bool = false
-```
-
-##### `TrabalhoAgendado` — `RefCounted`
-```gdscript
-class_name TrabalhoAgendado
-extends RefCounted
-
-var trabalho: TrabalhoInspecao
-var horario_aparicao: float = 0.0
-var recompensa_dinheiro: int = 0
-var apareceu: bool = false
-var aceito: bool = false
-var concluido: bool = false
-var investigar_usado: bool = false   # controla o limite de 1 dica (botão Investigar) por trabalho
-```
-
-`investigar_usado` fica aqui — na ocorrência do trabalho, não em `AreaAlvo`/`GerenciadorInspecao` — de propósito: como o jogador pode trocar de trabalho ativo e voltar depois, guardar esse limite num objeto efêmero (recriado toda vez que `montar_alvos()` roda) resetaria o limite indevidamente. `TrabalhoAgendado` persiste durante toda a vida do trabalho no expediente.
-
-##### `ResultadoTrabalho` — `Resource`
-Sem alterações desde a v1 — continua guardando o veredito combinado de uma ocorrência de trabalho, com `agendado` sem `@export` (`TrabalhoAgendado` é `RefCounted`, não `Resource`).
+5º botão da `NovaAba`, dá uma dica textual limitada (1 uso por trabalho) via `AlvoInspecao.dica`.
 
 #### Módulo de dados separado — `banco_de_trabalhos.gd`
 
-A definição dos `TrabalhoInspecao` (textos, imagem, alvos) foi extraída de `DadosJogo.gd` pra um módulo próprio, `BancoDeTrabalhos` (`class_name`, `static func`, sem precisar ser Autoload). `DadosJogo.gd` ficou responsável só por **estado em runtime** (dinheiro, agenda do dia, resultados pendentes) — não por dados estáticos de conteúdo. `DadosJogo._ready()` chama `BancoDeTrabalhos.criar_todos()`.
+Definição estática dos trabalhos, extraída de `DadosJogo.gd` — que cuida só de estado em runtime.
 
-Como consequência dessa reorganização, **4 dos 5 trabalhos foram removidos temporariamente** do banco — só "Remover Cavalo de Tróia" está migrado pro sistema de grid (com `quadrante`/`altura_real`/`dica` calibrados). Os outros 4 ainda usavam o `posicao`/`tamanho` antigo, que não existe mais em `AlvoInspecao`, e dependem de arte de site que ainda não foi produzida. Serão adicionados de volta em `banco_de_trabalhos.gd` conforme a arte de cada um ficar pronta e os índices de quadrante forem calibrados manualmente (mesmo processo de calibração visual já documentado nos aprendizados do projeto).
+##### Trabalhos (v4.3: 11, um por capítulo)
 
-#### `NovaAba` — popup unificado (substitui o `PainelDiagnostico` separado)
+Os capítulos 0, 1, 2, 5, 6, 7, 8 e 9 do livro não tinham nenhum trabalho; a v4.3 adiciona um para cada. Todos usam o grid **3 colunas × 5 linhas** (exceto Ransomware, 3×3), com 1 alvo suspeito, e o índice do quadrante é `linha * 3 + coluna`.
 
-O `PainelDiagnostico` (`Control` solto, com `@export` em dois scripts diferentes) foi **descontinuado** — toda a interação de diagnóstico passou a viver dentro do próprio `NovaAba`, o popup que já existia pra "Inspecionar". A estrutura interna de `NovaAba` hoje é:
+| Trabalho | Cap. | Subcapítulo | Quadrante(s) | Elemento suspeito | Recompensa base |
+|---|---|---|---|---|---|
+| Site duvidoso | 3 | Site Malicioso | `[0]` | Endereço do site | 150 |
+| Alerta estranho | 3 | Scareware | `[7, 10]` | Botão verde de download | 150 |
+| Remover Ransomware | 4 | Ransomware | `[4]` (grid 3×3) | Botão "COMO PAGAR" | 200 |
+| Encomenda retida | 0 | Smishing | `[7]` | Link na mensagem de celular | 150 |
+| Boleto estranho | 1 | Pix/boleto falso | `[3]` | Nome do beneficiário | 200 |
+| Login clonado | 2 | Typosquatting | `[1]` | Endereço com letra trocada | 150 |
+| Pendrive esquecido | 5 | Baiting | `[11]` | Pendrive com etiqueta de dinheiro | 150 |
+| Mesa sem dono | 6 | Tela desbloqueada | `[5]` | Post-it ao lado do monitor | 150 |
+| Cadastro frágil | 7 | Senha fraca | `[10]` | Campo de senha aceito com barra de força vazia | 150 |
+| Café com Wi-Fi | 8 | Wi-Fi público | `[6]` | Rede aberta com sinal máximo | 200 |
+| Foto de primeiro dia | 9 | Oversharing | `[5, 10]` | Monitor ao fundo e crachá | 150 |
 
-```
-NovaAba
-├── VBoxPadrao
-│   ├── BtnInspecionar
-│   ├── BtnInvestigar
-│   ├── BtnDiagnosticar
-│   ├── BtnIgnorar
-│   └── BtnEncerrar
-└── VBoxDiagnostico   ← populado em runtime, posicionado ao lado de VBoxPadrao
-```
-
-`painel_diagnostico.gd` continua no projeto como arquivo órfão (sem uso) — candidato a remoção junto com a próxima limpeza técnica.
-
-#### Botão Investigar — dica limitada por trabalho
-
-Além dos 4 botões da v3, a `NovaAba` ganhou um 5º: **Investigar**. Ele funciona de forma independente de Diagnosticar — pode ser clicado a qualquer momento, em qualquer quadrante, e responde de 3 formas diferentes dependendo do estado daquele quadrante específico:
-
-| Estado do quadrante clicado | Resposta do Investigar |
-|---|---|
-| Ainda não inspecionado | "Preciso investigar." |
-| Neutro, já inspecionado sem sucesso | "Nada de interessante nesta parte." |
-| Suspeito, já encontrado | Texto de `AlvoInspecao.dica` |
-
-Só o terceiro caso **consome** o limite de uso (1 dica por trabalho, gravado em `TrabalhoAgendado.investigar_usado`) — os dois primeiros não entregam informação nenhuma, então não contam contra o limite. A resposta aparece no `MensagemModal` (método novo `mostrar_texto()`, sem a etapa "Verificando..." — é instantânea).
-
-O campo `dica` foi colocado em `AlvoInspecao` (não em `TrabalhoInspecao`), porque a dica é específica do problema, não do trabalho como um todo — importante caso o suporte a múltiplos alvos suspeitos por trabalho seja implementado no futuro, já que cada um poderá ter sua própria dica.
-
-#### Correções de bug feitas durante esta iteração
-
-- **Clique bloqueado no alvo revelado:** o `ColorRect` verde criado por `_revelar_alvo()` nascia com `mouse_filter` padrão (`MOUSE_FILTER_STOP`), bloqueando cliques futuros sobre aquele ponto. Corrigido forçando `mouse_filter = Control.MOUSE_FILTER_IGNORE` nesse `ColorRect`.
-- **Quadrado revelado (e imagem do site antiga) ficavam na tela após "Encerrar":** `_on_confirmar_encerramento()` não chamava `limpar_alvos()` nem resetava `site_textura.texture`, então o feedback visual do trabalho anterior persistia até o jogador selecionar outro trabalho. Corrigido chamando `gerenciador_inspecao.limpar_alvos()` e `site_textura.texture = null` no fechamento.
-- **`INTEGER_DIVISION` warning em `montar_alvos()`:** divisão `indice / COLUNAS_GRID` sem tipo explícito, porque `mapa_alvos` é um `Dictionary` sem tipo declarado (as chaves vêm como `Variant`). Corrigido com `var linha: int = int(indice) / COLUNAS_GRID` + `@warning_ignore("integer_division")`, deixando explícito que o truncamento é intencional.
-- **Grid não seguia a posição real da imagem:** `montar_alvos()` calculava todos os quadrantes a partir de `(0, 0)`, ignorando a `Position` real de `ImagemBase` (`TextureRect`) na cena — se a imagem não nascesse exatamente na origem do mundo, o grid ficava do tamanho certo mas deslocado da imagem visível. Corrigido somando `area_referencia.global_position` como origem de todo o cálculo de posição dos quadrantes.
-
-#### Ponto em aberto: estado por quadrante não persiste ao trocar de trabalho
-
-`foi_encontrado`, `ignorado` e `ja_inspecionado_negativo` vivem no `AreaAlvo`, que é recriado do zero toda vez que `montar_alvos()` roda — inclusive quando o jogador troca de trabalho ativo na lista e depois volta pro mesmo trabalho. Isso reseta silenciosamente o progresso visual por quadrante, incluindo `_algum_alvo_suspeito_encontrado` (que libera o Diagnosticar globalmente). Só `investigar_usado` está protegido disso, por morar no `TrabalhoAgendado` (que persiste enquanto o trabalho está ativo). Ainda não resolvido — a solução, se vier a incomodar na prática, é migrar esses três campos de `AreaAlvo` pra um dicionário indexado por quadrante dentro do próprio `TrabalhoAgendado`.
+- **Arte:** as 8 imagens novas são geradas no Gemini com prompts que pedem o mínimo de texto (barras cinzas no lugar de palavras; só o boleto e o endereço do login mantêm uma linha curta, porque o erro é o próprio texto). Formato final: **480×320 (3:2), PNG**, em `res://Sprites/Trabalhos/` com nomes em minúsculas e `_` (`encomenda_retida.png`, `boleto_estranho.png`, ...). Na geração saíram em tamanhos variados (1264×848, 1024×687 e 1376×768) e em JPG, então precisam ser recortados/reduzidos e convertidos.
+- **Carregamento:** os 8 sprites novos usam `_carregar_imagem()` (`ResourceLoader.exists()` + `load()`), que avisa no Output com o caminho exato em vez de quebrar o script, como o `preload()` fazia. Os 3 trabalhos antigos continuam com `preload`.
+- **Helper `_montar()`:** monta um trabalho de 1 alvo a partir de título, descrição, recompensa, imagem, quadrantes, capítulo e dica.
+- **Quadrantes:** foram calculados a partir dos prompts, não conferidos nas imagens finais. Conferir traçando 3×5 em cada imagem e ajustar o número em `_montar(...)` se o elemento caiu em outra célula.
+- **Diagnóstico por capítulo:** o título e a descrição de cada trabalho evitam termos como "phishing" ou "golpe" para não vazar a resposta, e cada um aponta para um único capítulo.
 
 ---
 
@@ -891,57 +735,19 @@ RelatorioDia (Control)              ← res://Scenes/RelatorioDia.tscn
 
 ### 3.6 Sistema de Upgrades: PC, Assistente e IA
 
-Sistema de progressão acessível **só no Escritório**, fora do loop de expediente (`BtnUpgrades` → `PainelUpgrades`). Design fechado em várias rodadas de conversa com o usuário — a versão final tem **5 linhas**, organizadas em **3 categorias automatizadas** (PC, Assistente, IA), cada linha com **4 tiers sequenciais** (só pode comprar o tier N+1 depois de já ter o tier N).
+5 linhas em 3 categorias (PC, Assistente-Quantidade/Treinamento, IA-Capacidade/Eficiência), cada uma com 4 tiers sequenciais. `DadosJogo.comprar_upgrade()` é a única porta de entrada pra avançar um tier.
 
-#### Tabela de valores (v3.3)
+---
 
-| Categoria | Linha | Efeito por tier | Pré-requisito | Upkeep/dia |
-|---|---|---|---|---|
-| PC | única | Popup de verificação: 4s → 3s → 2s → 1s → **instantâneo** | nenhum | não |
-| Assistente | Quantidade | Nº de assistentes simultâneos: 2 → 3 → 4 → 5 | nenhum (linha de entrada) | não (upkeep já embutido no Treinamento) |
-| Assistente | Treinamento | Tempo/trabalho: 120→105→90→75 min. Taxa de sucesso: 70%→80%→90%→100% | 🔒 Quantidade tier 1 | sim — upkeep_base(tier) × nº de assistentes |
-| IA | Capacidade | Trabalhos processados por noite: 1→2→3→4 | nenhum (linha de entrada) | sim — fixo por tier |
-| IA | Eficiência | % da recompensa entregue: 35%→50%→65%→80%→95% | 🔒 IA Capacidade tier 1 | sim — fixo por tier |
+### 3.7 Sistema de Fama
 
-Taxa de sucesso da IA é **fixa em 75%** (não sobe por tier — só Eficiência muda quanto ela entrega de recompensa por trabalho resolvido).
+Recurso permanente, paralelo ao dinheiro, que controla a quantidade de trabalhos que aparecem por dia (`CalculadoraFama`, curva de raiz quadrada) **e**, desde a v4.0, também gate a de quais tiers de modificadores de dificuldade podem aparecer nos trabalhos (ver seção [3.10](#310-sistema-de-modificadores-de-dificuldade-e-cursor-virtual)).
 
-> ⚠️ **Nota histórica:** o pré-requisito entre as duas linhas do Assistente foi **invertido em runtime**, depois de já implementado e testado em jogo. A primeira versão do design tinha Treinamento como linha de entrada e Quantidade bloqueada até Treinamento tier 1 — o usuário testou e pediu a inversão (Quantidade como entrada, Treinamento bloqueado até Quantidade tier 1). Como a validação de pré-requisito é genérica (só olha `LinhaUpgrade.chave_pre_requisito`), a mudança foi só trocar essa atribuição de lugar em `banco_de_upgrades.gd`, sem tocar em nenhum outro arquivo.
+---
 
-#### Estrutura de dados
+### 3.8 Grid M×N e Múltiplos Alvos Suspeitos
 
-##### `TierUpgrade` — `Resource`
-```gdscript
-class_name TierUpgrade
-extends Resource
-
-@export var preco: int = 0
-@export var valor_efeito: float = 0.0
-@export var valor_efeito_secundario: float = 0.0   # só usado pelo Treinamento (taxa de sucesso)
-@export var upkeep: float = 0.0                      # custo diário; no Treinamento é "por assistente"
-@export var descricao: String = ""
-```
-Um degrau individual — dumb data, sem lógica própria. O *significado* de `valor_efeito`/`valor_efeito_secundario` muda por linha (documentado no cabeçalho do arquivo e na tabela acima).
-
-##### `LinhaUpgrade` — `Resource`
-```gdscript
-class_name LinhaUpgrade
-extends Resource
-
-@export var chave: String = ""
-@export var nome: String = ""
-@export var tiers: Array[TierUpgrade] = []
-@export var chave_pre_requisito: String = ""   # vazio = sem pré-requisito
-
-var tier_atual: int = 0   # progresso do jogador — 0 = nenhum tier comprado ainda
-```
-Diferente de `BancoDeTrabalhos`/`TrabalhoInspecao`, aqui **não** existe separação entre definição estática e estado runtime — cada jogador só tem uma instância de cada linha (não é sorteada nem repetida), então `tier_atual` vive dentro do próprio Resource. Helpers: `esta_no_maximo()`, `proximo_tier()`, `tier_comprado(indice)`, `valor_efeito_atual(valor_base)`, `valor_efeito_secundario_atual(valor_base)`, `upkeep_atual()` — todos leem `tier_atual` na hora, sem cache externo.
-
-##### `BancoDeUpgrades` — módulo estático (`static func`, sem Autoload)
-Mesmo padrão de `BancoDeTrabalhos`: monta as 5 `LinhaUpgrade` com os valores fechados da tabela acima. Constantes `CHAVE_PC`, `CHAVE_ASSISTENTE_TREINAMENTO`, `CHAVE_ASSISTENTE_QUANTIDADE`, `CHAVE_IA_CAPACIDADE`, `CHAVE_IA_EFICIENCIA` identificam cada linha globalmente, usadas por todo o resto do sistema pra evitar strings soltas espalhadas pelo código.
-
-##### `DadosJogo.gd` — integração
-```gdscript
-var upgrades: Dictionary = {}   # String -> LinhaUpgrade
+Colunas configuráveis por trabalho (`colunas_grid`), quadrantes uniformes (sem compensação adaptativa), `AlvoInspecao.quadrantes: Array[int]` permitindo um alvo cobrir vários quadrantes, e múltiplos alvos `SUSPEITO` por trabalho desde que compartilhem o mesmo capítulo.
 
 func _ready() -> void:
 	banco_de_trabalhos = BancoDeTrabalhos.criar_todos()
@@ -957,9 +763,9 @@ func obter_linha_upgrade(chave: String) -> LinhaUpgrade:
 ```
 `comprar_upgrade()` é a **única porta de entrada** pra avançar uma linha — nenhum outro script incrementa `tier_atual` ou debita `dinheiro_jogador` diretamente. Isso mantém a validação centralizada, evitando que `painel_upgrades.gd` (UI) precise reimplementar as regras de negócio.
 
-#### Efeito do PC — sincronização entre dois timers
+---
 
-O upgrade do PC reduz o tempo do popup de verificação (`MensagemModal`), mas **dois** timers independentes dependem desse valor: o texto do popup (`mensagem_modal_scpt.gd`) e a revelação da cor do quadrante (`gerenciador_inspecao.gd`). Pra evitar dessincronia, `MensagemModal` expõe `tempo_total_atual()` publicamente, e `GerenciadorInspecao` lê o mesmo valor em vez de manter sua própria cópia:
+### 3.10 Sistema de Modificadores de Dificuldade e Cursor Virtual
 
 ```gdscript
 # mensagem_modal_scpt.gd
@@ -976,9 +782,9 @@ func _tempo_verificacao_atual() -> float:
 ```
 No tier 4 (`valor_efeito = 0.0`), ambos os `await get_tree().create_timer(...)` são pulados inteiramente (`if tempo > 0.0`) — verificação e revelação acontecem no mesmo frame do clique em "Inspecionar".
 
-#### Assistente — fila com tempo simulado
+> **Nota v4.1:** a implementação do Labirinto descrita abaixo (geração, colisão, revelação por proximidade) foi documentada já na v4.0, mas só foi de fato persistida nos arquivos reais do projeto nesta rodada — até então o modificador não tinha nenhum efeito de jogo (não entrava nem no sorteio). Ver `netetive_changelog.md` v4.1 e `netetive_scripts.md` pras notas completas sobre o que foi corrigido.
 
-`gerenciador_assistente.gd` (`Node`, filho de `ModuloTrabalho`, irmão de `GerenciadorExpediente`/`GerenciadorTrabalho`/`CoordenadorTrabalho`) mantém uma fila de trabalhos delegados pelo jogador:
+#### Estrutura em tiers
 
 ```
 Jogador clica "Delegar" num item de VBoxAtivos (gerenciador_trabalho.gd)
@@ -1007,11 +813,8 @@ GerenciadorAssistente.delegar()
 				│   (remove de VBoxAtivos — mesmo destino final do "Encerrar" manual)
 				└─ toast: "Assistente: '<título>' concluído com sucesso/erro."
 ```
-Todos os valores (tempo por trabalho, taxa de sucesso, capacidade simultânea) são lidos **sob demanda** de `DadosJogo.obter_linha_upgrade()` a cada chamada — nunca cacheados em variável própria. Isso significa que comprar um tier novo no meio do expediente já afeta o próximo trabalho delegado, sem precisar reiniciar nada.
 
-#### IA — resolução overnight
-
-`gerenciador_ia_noturna.gd` (`class_name GerenciadorIANoturna`, `extends RefCounted`, **sem nó na árvore** — `static func`, mesmo espírito de `BancoDeUpgrades`) roda **uma única vez**, chamada por `Main_select_script._on_expediente_encerrado()` antes da troca de cena pra `RelatorioDia.tscn`:
+Cada trabalho sorteado no dia (`DadosJogo.sortear_agenda_do_dia()`) rola aleatoriamente a quantidade (0 até o teto permitido), escolhe tipos sem repetir, e sorteia um nível pra cada um. O teto de nível também cresce com o tier desbloqueado:
 
 ```
 GerenciadorExpediente.expediente_encerrado dispara
@@ -1035,9 +838,9 @@ get_tree().change_scene_to_file("res://Scenes/RelatorioDia.tscn")
 ```
 Os resultados da IA aparecem no `RelatorioDia` misturados com os do jogador/Assistente, diferenciados só pelo texto `"Resolvido pela IA (noturno)"` no campo Diagnóstico.
 
-#### Upkeep — desconto diário no relatório
+**T3 tem uma regra especial:** só 1 dos 3 modificadores de T3 pode aparecer por trabalho (Caos, Travamento, Labirinto competem pelo mesmo slot).
 
-`calculadora_upkeep.gd` (`class_name CalculadoraUpkeep`, `static func`, sem nó) isola a fórmula de custo diário, pra `RelatorioDia` não precisar conhecê-la:
+#### `ModificadorAtivo` (Resource-like, `RefCounted`)
 
 ```gdscript
 static func calcular_total() -> int:
@@ -1050,130 +853,103 @@ static func _upkeep_assistente() -> int:
 ```
 `relatorio_dia.gd.montar_relatorio()` desconta esse total **antes** de creditar: `DadosJogo.dinheiro_jogador += total_dinheiro - upkeep_total` — pode deixar o saldo **negativo de propósito** (dívida realista, decisão de design confirmada com o usuário). O resumo no `LabelResumo` mostra os três números separados: ganhos do dia, manutenção descontada, saldo final.
 
-#### `PainelUpgrades` — UI de compra
+enum Tipo {
+	DESCONHECIDO, CONEXAO_LENTA, MAIS_OPCOES, ARMADILHA, MOUSE_GRANDE,
+	AO_CONTRARIO, MISDIRECAO, TEMPO_LIMITADO, COPIAS, CAOS, LABIRINTO,
+	MOUSE_RAPIDO, TRAVAMENTO,
+}
+
+var tipo: Tipo
+var nivel: int = 1
+var sub_modificadores: Array[ModificadorAtivo] = []   # só usado por CAOS
+```
+
+#### Os 13 modificadores
+
+| Modificador | Tier | Efeito |
+|---|---|---|
+| **Desconhecido** | T1 | O cartão em Disponíveis mostra só "???" no título e "R$ ???" na recompensa, sem descrição — uma vez aceito, o cartão em Ativos mostra tudo normalmente |
+| **Conexão Lenta** | T1 | `+0.5s × nível` no tempo de verificação, somado ao efeito do upgrade PC (nunca substitui) |
+| **Mais Opções** | T1 | `+1 opção × nível` no popup de diagnóstico (base 3, teto 6) |
+| **Armadilha** | T1 | `nível` quadrantes-armadilha sorteados entre os neutros (nunca o suspeito); inspecionar um deles trava o cursor por 1s |
+| **Mouse Grande** | T1 | Cursor cresce `+100% × nível`; ponto de clique sempre na ponta superior-esquerda do sprite, nunca no centro |
+| **Ao Contrário** | T1 (nível único) | `site_textura.flip_h = true` + índices de quadrante espelhados na mesma direção, pra o alvo suspeito continuar batendo com o ponto certo na imagem invertida |
+| **Misdireção** | T2 | `nível` quadrantes-chamariz — neutros que fingem acerto visual no `MensagemModal`, mas nunca contam como erro extra pro jogador |
+| **Tempo Limitado** | T2 | Prazo de `6h / nível` a partir do aceite; se expirar sem diagnóstico feito, fecha automaticamente como erro; **nunca** volta pra Disponíveis se o jogador trocar de trabalho no meio — fecha direto como interrompido |
+| **Cópias** | T2 | `nível` cursores falsos opacos, puramente visuais (sem colisão de clique), com passeio aleatório próprio |
+| **Mouse Rápido** | T2 | Surtos periódicos (6–10s, duram 2s) de velocidade `×(1 + 0.35×nível)` |
+| **Caos** | T3 | Injeta 3 modificadores aleatórios de T1/T2 (exceto Desconhecido) em nível 1 — conta como 1 slot só pro teto de quantidade |
+| **Travamento** | T3 | Mesmo sistema de surto do Mouse Rápido, mas com multiplicador `0.0` (congelamento total) |
+| **Labirinto** | T3 | Ver subseção própria abaixo |
+
+*(Confusão foi cogitado e chegou a ser implementado nesta mesma janela de desenvolvimento, mas foi removido do jogo antes de ser lançado — substituído por Travamento no slot de T3.)*
+
+**Bônus de recompensa:** taxa fixa por tier × nível (T1 = 3%, T2 = 5%, T3 = 20%) + bônus de combo (`+5%` por modificador além do primeiro), aplicado tanto no dinheiro quanto na fama ganha, sem teto máximo.
+
+#### `CalculadoraModificadores` (novo, `static func`, sem nó)
+
+Centraliza sorteio, tetos de nível/quantidade e cálculo de bônus — mesmo padrão de `CalculadoraFama`/`CalculadoraUpkeep`. Todas as constantes (taxas, limiares de fama, magnitudes por nível) isoladas no topo do arquivo pra calibrar sem tocar em mais nada.
+
+#### Labirinto — o modificador mais complexo do sistema
+
+O único modificador que restringe **fisicamente** o movimento do cursor, não só velocidade/visual.
+
+**Geração (`gerador_labirinto.gd`, novo):** recursive backtracker (busca em profundidade randomizada) — garante uma árvore geradora sobre o grid de quadrantes, ou seja, conectividade total: sempre existe exatamente 1 caminho entre dois quadrantes quaisquer. A regra "todo quadrante mantém pelo menos 1 lado bloqueado dos disponíveis" é aplicada como **preferência**, nunca como veto — se a única forma de conectar um quadrante de canto (que só tem 2 lados possíveis) exigir abrir os dois, isso é permitido; conectividade total nunca é sacrificada pela estética.
+
+**Colisão de movimento (`GerenciadorInspecao.restringir_movimento_labirinto()`):** processa eixo X e depois eixo Y separadamente — se o destino desejado ainda está dentro da célula atual naquele eixo, libera direto; se cruzaria pra célula vizinha, checa se o lado correspondente está bloqueado antes de permitir, senão trava exatamente na fronteira (com uma pequena margem de segurança contra ambiguidade de arredondamento). Isso permite "deslizar" ao longo de uma parede quando só um dos dois eixos está bloqueado, em vez de travar o movimento inteiro.
+
+**Revelação por proximidade (`desenho_labirinto.gd`, novo):** as paredes bloqueadas só ficam visíveis (com fade suave) dentro de um raio de distância do cursor — o jogador nunca vê o labirinto inteiro de antemão, só descobre as paredes conforme se aproxima delas.
+
+#### `GerenciadorCursorVirtual` (novo Autoload)
+
+Necessário porque vários modificadores (Mouse Grande, Cópias, Mouse Rápido, Travamento, Labirinto) exigem controle sobre o cursor que o sistema operacional não entrega nativamente. Funciona em dois modos:
 
 ```
-PainelUpgrades (Panel)
-├── LabelDinheiro (Label)
-├── ScrollContainer (ScrollContainer)
-│   └── VBoxLinhas (VBoxContainer)
-└── BtnFechar (Button)
+COSMÉTICO (padrão, sempre ativo em qualquer cena — Escritório, Quadro,
+           Tela, RelatorioDia)
+  → Input.mouse_mode = HIDDEN
+  → sprite segue get_viewport().get_mouse_position() 1:1
+  → nunca prende o cursor na janela
+
+CAPTURA (só quando o trabalho aberto tem Mouse Rápido, Travamento ou
+         Labirinto)
+  → Input.mouse_mode = CONFINED_HIDDEN
+  → sprite segue posicao_logica, acumulada por delta de movimento
+  → Input.warp_mouse() realinha o cursor real do SO sempre que a
+    posição lógica precisa ser corrigida (velocidade alterada, ou
+    parede do labirinto bloqueando)
 ```
 
-`painel_upgrades.gd` é **UI pura** — só desenha o estado atual (lido via `DadosJogo.obter_linha_upgrade()`) e delega o clique de compra pra `DadosJogo.comprar_upgrade()`, remontando a lista inteira depois (atualiza saldo, preços e desbloqueios de uma vez, sem lógica condicional espalhada). Pra cada linha, mostra:
-- `🔒 Bloqueada até comprar "<linha pré-requisito>" tier 1` — se `chave_pre_requisito` não atendido;
-- `✅ Tier máximo atingido` — se `esta_no_maximo()`;
-- descrição do próximo tier + botão "Comprar (R$ X)" (desabilitado se `dinheiro_jogador < preco`) — caso contrário.
+> ⚠️ **Nota técnica:** o modo certo é `CONFINED_HIDDEN`, não `CAPTURED`. `CAPTURED` existe pra câmeras estilo FPS e trava a posição *reportada* no centro da tela, entregando só deltas relativos — usar ele aqui causava um bug real onde a posição lógica era corrompida de volta pro centro toda vez que um popup fechava (porque a resincronização lia essa posição travada, não a real). `CONFINED_HIDDEN` esconde e confina o cursor sem esse problema.
 
-`btn_upgrades.gd` (`TextureButton` no Escritório) só chama `painel_upgrades.abrir()`, conectado ao sinal `pressed` pelo editor — mesmo padrão de `Quadro_avisos`/`Iniciar.gd`.
+**Pausa automática durante popups:** checagem tree-wide via `GerenciadorInspecao.esta_com_popup_aberto()` (olha `NovaAba`, `MensagemModal`, e qualquer nó no grupo `"popups"` — o `ConfirmationDialog` de encerramento precisa ser adicionado manualmente a esse grupo em `coordenador_trabalho.gd._ready()`, senão o cursor continua capturado por baixo do diálogo e o jogador não consegue clicar OK/Cancel).
 
----
+**Ponto de clique sempre na ponta:** `sprite_cursor.centered = false` faz o canto superior-esquerdo da textura corresponder à posição de clique real — importante pro Mouse Grande crescer sem desalinhar onde o clique realmente acontece.
 
-### 3.7 Sistema de Fama
+#### `BadgeModificador.tscn` (novo, cena própria)
 
-Recurso permanente novo, paralelo ao `dinheiro_jogador` — não é gasto em nada, só cresce, e controla a **quantidade de trabalhos que aparecem por dia**. Fecha o sistema de trabalho ligando a progressão do jogador ao ritmo de novos casos.
-
-#### Como se ganha fama
-
-Todo trabalho que o jogador acerta (achar o alvo suspeito **e** diagnosticar certo) tem uma recompensa de fama fixa, já existente desde a v1 mas nunca usada até agora: `TrabalhoInspecao.recompensa_fama` (padrão `10`). Essa fama é creditada junto com o dinheiro, no `RelatorioDia`, no fim do expediente:
-
-| Origem do resultado | Fama ganha |
-|---|---|
-| Jogador (manual, via `NovaAba`) | Cheia, se acertar (`ResultadoTrabalho.finalizar()`) |
-| Assistente (`gerenciador_assistente.gd`) | Cheia, se acertar — mesma lógica de `finalizar()`, sem upgrade próprio que reduza fama |
-| IA (`gerenciador_ia_noturna.gd`, overnight) | Reduzida pela mesma % de Eficiência que já reduz o dinheiro — trabalho malfeito rende menos reputação, não só menos grana |
-
-#### `ResultadoTrabalho` — campo novo
+Ícone do modificador (`TextureRect`, `Expand Mode = Ignore Size` — crítico, sem isso a resolução nativa do PNG vira o tamanho mínimo do badge inteiro) + número do nível sobreposto no canto inferior-direito (`Label`, sem moldura), com tooltip mostrando o nome completo. Precisou virar cena própria depois de repetidas tentativas de montar tudo dinamicamente em código — o `size_flags` padrão de um `Control` novo faz ele esticar pra preencher o `HBoxContainer` inteiro se não for travado explicitamente pra `SIZE_SHRINK_CENTER`.
 
 ```gdscript
-@export var fama_ganha: int = 0
-
-func finalizar() -> void:
-	acertou_no_geral = achou_alvo_correto and diagnostico_correto
-	recompensa = agendado.recompensa_dinheiro if acertou_no_geral else 0
-	fama_ganha = agendado.trabalho.recompensa_fama if acertou_no_geral else 0
-```
-Como `finalizar()` já é chamado por todo caminho que passa por `DadosJogo.finalizar_trabalho()` (jogador manual, Assistente), esses dois ganham fama **automaticamente**, sem nenhuma mudança adicional nos respectivos arquivos. Só `gerenciador_ia_noturna.gd` define `fama_ganha` manualmente (porque aplica a % de Eficiência, que `finalizar()` não conhece).
-
-#### `CalculadoraFama` — a curva não-linear
-
-```gdscript
-class_name CalculadoraFama
-extends RefCounted
-
-const TRABALHOS_BASE_PADRAO := 6
-const FATOR_CRESCIMENTO := 1.0
-
-static func calcular_quantidade_trabalhos_dia(fama: int, base: int = TRABALHOS_BASE_PADRAO) -> int:
-	var fama_efetiva: int = max(0, fama)
-	var bonus := int(floor(sqrt(float(fama_efetiva)) * FATOR_CRESCIMENTO))
-	return base + bonus
-```
-`static func`, sem nó na árvore — mesmo espírito de `BancoDeUpgrades`/`CalculadoraUpkeep`/`GerenciadorIANoturna`. **Design pedido:** quanto menos fama, mais rápido a quantidade de trabalhos cresce; quanto mais fama, mais devagar. A raiz quadrada entrega isso sozinha, sem nenhum `if`/condicional extra — a derivada de `sqrt(x)` cai naturalmente conforme `x` cresce, então cada ponto de fama adicional rende cada vez menos trabalhos novos.
-
-**Curva de referência** (fator `1.0`, base `6`):
-
-| Fama | Trabalhos/dia |
-|---|---|
-| 0 | 6 |
-| 25 | 11 |
-| 100 | 16 |
-| 400 | 26 |
-| 900 | 36 |
-
-Cada `+5` trabalhos exige progressivamente mais fama (25 → depois +75 → depois +125...) — retornos decrescentes por design.
-
-#### Integração em `GerenciadorExpediente`
-
-```gdscript
-@export var trabalhos_base_dia: int = 6   # mínimo garantido/dia — cresce com fama
-
-func iniciar_expediente() -> void:
-	var quantidade_hoje := CalculadoraFama.calcular_quantidade_trabalhos_dia(DadosJogo.fama_jogador, trabalhos_base_dia)
-	DadosJogo.sortear_agenda_do_dia(quantidade_hoje, quantidade_trabalhos_iniciais)
+# badge_modificador.gd — chamado ANTES do nó entrar na árvore
+# (logo após instantiate(), sem add_child() ainda), então usa
+# get_node() em vez de @onready (que só resolve em _ready(),
+# disparado só quando o nó entra na SceneTree de verdade).
+func configurar(mod: ModificadorAtivo) -> void:
+	var icone := get_node_or_null("Icone") as TextureRect
+	icone.texture = load(mod.caminho_icone())
 	...
 ```
-O antigo `@export var quantidade_trabalhos_dia: int` (fixo) virou `trabalhos_base_dia` (o mínimo/base) — a quantidade real usada em `sortear_agenda_do_dia()` é recalculada a cada `iniciar_expediente()`, lendo `DadosJogo.fama_jogador` na hora. `quantidade_trabalhos_iniciais` (quantos já aparecem prontos às 8h) **não** escala com fama — continua fixo, só o total do dia cresce.
 
-#### `RelatorioDia` — exibição em 3 labels
+Um **HUD de Prazo** (v4.1, novo) complementa o Tempo Limitado: uma caixinha fixa no canto superior direito da tela (`VBoxPrazosHud`, fora do menu de Disponíveis/Ativos), com contagem regressiva ao vivo por trabalho ativo, usando o `StyleBox` do tema do jogo. Fica visível mesmo com o menu fechado, e muda de laranja pra vermelho quando falta 1h ou menos.
 
-A partir da v3.4, o resumo do dia deixou de ser uma única string longa e virou 3 labels separados:
-
-```
-RelatorioDia (Control)
-├── LabelResumo (Label)      ← texto fixo "Dia concluído"
-├── LabelDinheiro (Label)    ← "R$ %d" — só o dinheiro ganho no dia
-├── LabelFama (Label)        ← "+%d fama" — só a fama ganha no dia
-├── ScrollContainer (ScrollContainer)
-│   └── VBoxResultados (VBoxContainer)
-└── BtnVoltar (Button)
-```
-O cálculo interno não mudou — soma de `resultado.recompensa`/`resultado.fama_ganha` por trabalho, desconto de upkeep (só no dinheiro; fama não tem upkeep, só cresce), crédito em `DadosJogo.dinheiro_jogador`/`DadosJogo.fama_jogador`. Cada linha individual em `VBoxResultados` (`_criar_linha()`) também passou a mostrar a fama ganha naquele trabalho específico, ao lado da recompensa em dinheiro.
+Ver `netetive_scripts.md` (apêndice v4.1) pro código completo de todos os arquivos citados nesta seção.
 
 ---
 
-## Histórico de versões do Sistema de Trabalho
+### 3.11 HUD de Dinheiro/Fama
 
-**v1 — Diagnóstico na lista de trabalhos:** cada item em `VBoxAtivos` tinha 3 botões (Título/Selecionar, Diagnosticar, Terminar trabalho). `Diagnosticar` abria um `PainelDiagnostico` flutuante e separado da inspeção. `Terminar trabalho` só habilitava depois de diagnosticar.
-
-**v2 — Diagnóstico dentro do popup de clique:** o diagnóstico saiu da lista de trabalhos e passou a abrir dentro da própria `NovaAba`, mas só **depois de achar o alvo certo** (a `NovaAba` reabria em outro "modo", sem o botão Inspecionar). Foi identificado nessa etapa que essa regra travaria o trabalho indefinidamente se o jogador nunca achasse o alvo certo.
-
-**v3 — Popup único e sistema de grid:** todos os 4 botões (Inspecionar, Diagnosticar, Ignorar, Encerrar) ficam sempre visíveis juntos no mesmo popup, com Diagnosticar apenas desabilitado até algum alvo suspeito ser achado em qualquer ponto do trabalho — nunca trava de vez. "Terminar trabalho" saiu da lista de trabalhos definitivamente, virando "Encerrar" dentro do popup, com confirmação via `ConfirmationDialog` mostrando o diagnóstico atual. Paralelamente, o sistema de posicionamento de alvos foi inteiramente trocado de pixels livres pra um grid de 3×N quadrantes com compensação de altura adaptativa.
-
-**v3.1 — Botão Investigar:** 5º botão adicionado ao popup, dando uma dica textual limitada (1 uso por trabalho) sobre o problema do quadrante clicado, com 3 respostas possíveis dependendo do estado daquele quadrante. Campo `dica: String` novo em `AlvoInspecao`. Também corrigido nesta etapa: o grid não estava respeitando a posição real de `ImagemBase` na cena, calculando tudo a partir de `(0,0)` em vez de `area_referencia.global_position`.
-
-**v3.2 — Ciclo do Dia (atual):** fecha o loop de ponta a ponta. Corrigido o clique duplo pra entrar num trabalho (aceitar já emite `trabalho_selecionado` direto). `ResultadoTrabalho` ganhou `tentativas_certas`/`tentativas_erradas`/`hora_inicio`/`hora_fim`, alimentados por `CoordenadorTrabalho` a cada inspeção, usando o relógio simulado de `GerenciadorExpediente`. Nova tela `RelatorioDia.tscn`/`relatorio_dia.gd`, disparada por `Main_select_script` quando o expediente encerra — é aqui que `dinheiro_jogador` finalmente é creditado. Botão "Iniciar Dia" no Escritório reaproveitou o `Iniciar.gd` já existente, sem mudanças de código. Ver seção [3.5](#35-ciclo-do-dia-iniciar-dia-e-relatório-de-fim-de-expediente) para o fluxo completo.
-
-
----
-
-### 3.8 HUD de Dinheiro/Fama e Trabalhos de Scareware/Ransomware
-
-Esta seção documenta o trabalho de trazer duas features de branches paralelas (`score_system` e `trabalho_malware`) pra dentro da `Sistema-upgrade`. As duas branches partiram de um ponto do projeto anterior ao grid/Investigar/upgrades, então o conteúdo foi **recriado adaptado**, não mesclado diretamente — histórico completo da decisão em `netetive_changelog.md` v3.5.
-
-#### HUD permanente de Dinheiro/Fama (`Scores.tscn`)
-
-Diferente do `RelatorioDia` (que só mostra os números uma vez, no fim do dia), o HUD fica **sempre visível no Escritório**, mostrando o total acumulado de `dinheiro_jogador`/`fama_jogador`.
+HUD permanente no Escritório (`Scores.tscn`, nó `Score`), mostrando o total acumulado de `dinheiro_jogador` e `fama_jogador`. Diferente do `RelatorioDia`, que mostra só o que foi ganho no dia.
 
 ```
 Score (instância de Scores.tscn)
@@ -1187,118 +963,11 @@ Score (instância de Scores.tscn)
 				└── contador_fama (Label)
 ```
 
-##### `hud_manager.gd` — `Node`
-
-```gdscript
-extends Node
-
-@onready var contador_dinheiro: Label = $control/container_dinheiro/icone_dinheiro/contador_dinheiro
-@onready var contador_fama: Label = $control/container_fama/icone_fama/contador_fama
-
-var _ultimo_dinheiro: int = -1
-var _ultima_fama: int = -1
-
-
-func _ready() -> void:
-	_atualizar_se_mudou()
-
-
-func _process(_delta: float) -> void:
-	_atualizar_se_mudou()
-
-
-func _atualizar_se_mudou() -> void:
-	if DadosJogo.dinheiro_jogador != _ultimo_dinheiro:
-		_ultimo_dinheiro = DadosJogo.dinheiro_jogador
-		atualizar_dinheiro(_ultimo_dinheiro)
-
-	if DadosJogo.fama_jogador != _ultima_fama:
-		_ultima_fama = DadosJogo.fama_jogador
-		atualizar_fama(_ultima_fama)
-
-
-func atualizar_fama(nova_fama: int) -> void:
-	if contador_fama != null:
-		contador_fama.text = str(nova_fama)
-
-
-func atualizar_dinheiro(novo_dinheiro: int) -> void:
-	if contador_dinheiro != null:
-		contador_dinheiro.text = "R$ %d" % novo_dinheiro
-```
-
-**Por que polling em `_process()` em vez de sinal:** `DadosJogo` (autoload já existente) não emite nenhum sinal quando `dinheiro_jogador`/`fama_jogador` mudam — não foi criado um sinal novo pra não alterar um arquivo que é prioridade/base (`DadosJogo.gd` já está estabilizado pelo Sistema de Upgrades e Fama). O HUD compara o valor atual com o último valor visto a cada frame e só atualiza o texto quando muda de verdade, evitando redesenhar à toa.
-
-**Efeito colateral esperado, não é bug:** como o crédito de dinheiro/fama só acontece dentro de `RelatorioDia.montar_relatorio()`, uma vez por dia, o HUD fica parado o expediente inteiro e só salta pro valor final quando o relatório é fechado — não é "ao vivo" trabalho a trabalho. Isso é intencional, preserva o veredito escondido até o fim do dia (mesma decisão de design da v1).
-
-##### `icone_dinheiro.gd` — `TextureRect`
-
-```gdscript
-extends TextureRect
-
-@export var carteira_de_dinheiro_1: CompressedTexture2D
-@export var carteira_de_dinheiro_2: CompressedTexture2D
-@export var icone_dinheiro: TextureRect
-
-var _ultimo_dinheiro: int = -1
-
-
-func _ready() -> void:
-	atualizar_aparencia()
-
-
-func _process(_delta: float) -> void:
-	if DadosJogo.dinheiro_jogador != _ultimo_dinheiro:
-		_ultimo_dinheiro = DadosJogo.dinheiro_jogador
-		atualizar_aparencia()
-
-
-func atualizar_aparencia() -> void:
-	if icone_dinheiro == null:
-		push_warning("IconeDinheiro: icone_dinheiro não atribuído no Inspetor.")
-		return
-
-	if DadosJogo.dinheiro_jogador > 0:
-		icone_dinheiro.texture = carteira_de_dinheiro_2
-	else:
-		icone_dinheiro.texture = carteira_de_dinheiro_1
-```
-
-Troca o sprite da carteira (vazia/cheia) dependendo se o jogador tem saldo positivo — mesma lógica visual da branch original, só trocando a fonte do dado.
-
-**`Global` (autoload da branch `score_system`) foi descartado por completo** — não foi adicionado ao `project.godot`. Ele tinha `money: float`/`fame: int` com sinais próprios (`altered_money`/`fame_received`), duplicando o que `DadosJogo.dinheiro_jogador`/`fama_jogador` já fazem. Ter os dois autoloads coexistindo criaria duas fontes de verdade pro mesmo dado.
-
-##### Bug corrigido na integração
-
-`Node not found` nos dois `@onready` de `hud_manager.gd` — o caminho relativo original (copiado da branch `score_system`, `$control/container/container_dinheiro/...`) não batia com a estrutura real da cena, que não tinha o nível `container` (`MarginContainer`) intermediário entre `control` e `container_dinheiro`. Corrigido ajustando o caminho pra bater com a hierarquia real.
-
-> ⚠️ **Recomendação ainda não aplicada:** trocar os `@onready var ... = $caminho/...` por Unique Names (`%contador_dinheiro`/`%contador_fama`) evitaria esse tipo de erro se a hierarquia interna do HUD mudar de novo no futuro — mesmo padrão de fragilidade de caminho relativo já catalogado várias vezes neste projeto (ver "Observações Gerais" no final do documento).
-
-#### Trabalhos novos: Scareware e Ransomware
-
-A branch `trabalho_malware` trouxe a ideia de um trabalho novo ("Remover ransomware"), mas com uma imagem que na verdade retratava **scareware** (falso alerta de vírus com botão de download disfarçado), não ransomware em ação. Em vez de forçar isso num único trabalho ambíguo, virou **dois trabalhos separados**, representando dois estágios do mesmo golpe — a isca e a consequência.
-
-##### Capítulo novo no Livro de Ajuda — "Scareware"
-
-O capítulo 6, antes "Senha Fraca", foi **substituído** por "Scareware" em `ConteudoLivro.PAGINAS` (índice `5`):
-
-> Conteúdo antigo de "Senha Fraca" não foi descartado do histórico — só removido do array ativo. Candidato a virar um 11º capítulo futuro, se quiser recuperar esse conteúdo em vez de deixá-lo de fora.
-
-##### `_criar_trabalho_scareware()` — novo em `banco_de_trabalhos.gd`
-
-Site com alerta falso de vírus, contador regressivo e botão de download disfarçado de "Safe Browser". `capitulo_relacionado` aponta pro capítulo novo (índice `5`, Scareware).
-
-##### `_criar_trabalho_ransomware()` — novo em `banco_de_trabalhos.gd`
-
-Site redesenhado durante esta rodada pra retratar ransomware de verdade — lista de arquivos criptografados (`.locked`/`.encrypted`/`.crypt`), valor de resgate em Bitcoin, endereço de carteira, instruções de pagamento passo a passo. `capitulo_relacionado` aponta pro capítulo "Ransomware" já existente (índice `3`), que agora bate literalmente com o conteúdo da imagem (diferente do trabalho antigo da `trabalho_malware`, que usava esse mesmo capítulo pra uma imagem de scareware).
-
-Ver `netetive_scripts.md` seção correspondente pro código completo das duas funções e os valores de `quadrante`/`altura_real`/`dica` usados.
-
-> ⚠️ **Pendente:** `quadrante`/`altura_real` dos dois trabalhos novos são **estimativas iniciais**, calculadas por proporção da imagem original (fração de largura/altura, não pixels absolutos) — ainda não calibradas em jogo com o processo padrão do projeto (`print()` temporário em `montar_alvos()`, clicando no ponto certo da imagem em execução).
->
-> ⚠️ **Nenhum dos dois trabalhos reaproveitou a cena solta `Tela_baixar_ransomware.tscn`** da branch `trabalho_malware` — ela tinha os três `@export` do `CoordenadorTrabalho` vazios e usava a arquitetura antiga (sem grid). Só o asset de imagem original foi aproveitado (pro trabalho de Scareware); a imagem de Ransomware foi redesenhada do zero nesta rodada.
->
-> ⚠️ **Bug evitado, não herdado:** a função de trabalho original da `trabalho_malware` existia no código mas nunca tinha sido incluída no array retornado por `criar_todos()`/`_ready()` — o trabalho nunca era sorteado de fato no jogo. Confirmado que as duas funções novas estão incluídas desta vez.
+- **Polling:** `hud_manager.gd` lê `DadosJogo.dinheiro_jogador`/`fama_jogador` em `_process()` e só atualiza o texto quando o valor muda. `DadosJogo` não emite sinal para esses campos, e criar um alteraria um arquivo já estabilizado.
+- **Atualização só no fim do dia:** o crédito de dinheiro e fama só acontece em `RelatorioDia.montar_relatorio()`, então o HUD fica parado durante o expediente e salta ao fechar o relatório. É intencional (preserva o veredito escondido até o fim do dia).
+- **`icone_dinheiro.gd`:** troca o sprite da carteira (vazia/cheia) conforme o saldo seja positivo.
+- **Sem autoload `Global`:** o autoload da branch `score_system` (`money`/`fame` próprios) foi descartado, para não duplicar a fonte de verdade de `DadosJogo`.
+- **Pendente:** trocar os `@onready` por caminho relativo (`$control/...`) por Unique Names (`%contador_dinheiro`/`%contador_fama`), evitando o erro `Node not found` se a hierarquia mudar.
 
 ---
 
@@ -1312,6 +981,10 @@ Ver `netetive_scripts.md` seção correspondente pro código completo das duas f
 | Quadro de avisos interativo | ✅ Implementado |
 | Transição para loop de gameplay | ✅ Implementado |
 | Cafeteira com texto de boas-vindas | ✅ Implementado |
+| Sistema de Upgrades (`BtnUpgrades`/`PainelUpgrades`) | ✅ Implementado |
+| Livro fechado clicável (`BtnLivro`) + instância do `LivroDicas` | 🟡 Instância abre o livro (print); arte do livro fechado pendente |
+| `PainelUpgrades` desenhado acima do `BtnLivro` (`move_to_front()`) | 🟡 Corrigido na v4.3; confirmar em jogo |
+| HUD de dinheiro/fama (`Score`) | ✅ Implementado |
 | Outras interações no escritório | 🔲 A implementar |
 
 ### 2. Quadro de Avisos
@@ -1327,195 +1000,78 @@ Ver `netetive_scripts.md` seção correspondente pro código completo das duas f
 | Conteúdo do tutorial (textos de controles/guias) | 🔲 A expandir |
 | Mais papéis/botões no quadro | 🔲 A implementar |
 
-### 3.1–3.4 Tela de Gameplay
+### 3.1–3.9 Tela de Gameplay
 
 | Funcionalidade | Status |
 |---|---|
-| Site suspeito exibido na tela | ✅ Implementado |
-| Sistema de expedição (GerenciadorExpediente) com agenda do dia | ✅ Implementado |
-| Menu de trabalhos Disponíveis/Ativos (GerenciadorTrabalho) | ✅ Implementado |
-| Alvos dinâmicos via `AlvoInspecao`/`TrabalhoInspecao`/`AreaAlvo` | ✅ Implementado |
-| Sinal `inspecao_concluida` emitido corretamente | ✅ Implementado (corrigido nesta rodada) |
-| Diagnóstico por múltipla escolha (categoria do problema) | ✅ Implementado |
-| Diagnóstico disponível a qualquer momento (sem travar o trabalho) | ✅ Implementado |
-| Botão "Terminar trabalho" com veredito combinado (alvo + diagnóstico) | ✅ Implementado |
-| Resultado revelado apenas no fim do dia | ✅ Implementado (v3.2 — `RelatorioDia.tscn`) |
-| Livro de Dicas paginado | ✅ Implementado |
-| Múltiplos alvos suspeitos por cena | 🔲 A implementar |
-| Pontuação / recompensa visível ao jogador | ✅ Implementado (v3.2 — na tela `RelatorioDia`) |
-| Condição de fim de dia / loop completo | ✅ Implementado (v3.2 — ciclo Escritório → expediente → relatório → Escritório) |
+| Sistema de expedição, menu de trabalhos, grid dinâmico, diagnóstico, veredito diferido | ✅ Implementado (ver detalhes em `netetive_status.md`) |
+| Ciclo do dia completo (Escritório → expediente → relatório → Escritório) | ✅ Implementado |
+| Sistema de Upgrades (PC/Assistente/IA) | ✅ Implementado |
+| Sistema de Fama | ✅ Implementado |
+| Grid M×N + múltiplos alvos suspeitos | ✅ Implementado |
+| Sistema de Áudio | ✅ Implementado |
+| Livro de Dicas redesenhado (`LivroDicas.tscn`, 10 capítulos / 34 subcapítulos, `CAPITULOS`) | 🟡 Código entregue (v4.2); validação em jogo incompleta |
+| Diagnóstico lendo `CAPITULOS` (`PAGINAS` removido) | 🟡 Não validado em jogo |
+| Livro: botões dentro da página, abas com texto igual e sem corte, sem deslocamento da aba ativa | ✅ Corrigido (v4.3, confirmado por print) |
+| 8 trabalhos novos em `banco_de_trabalhos.gd` (caps 0, 1, 2, 5, 6, 7, 8, 9) | 🟡 Código entregue; imagens finais e quadrantes ainda não conferidos em jogo |
+| Imagens dos 8 trabalhos novos (480×320 PNG em `Sprites/Trabalhos/`) | 🔲 Geradas no Gemini; falta recortar, converter, renomear e conferir o grid |
+| Segundo trabalho nos capítulos 0, 3 e 4 (Vishing, QR Code, Cavalo de Tróia) | 🔲 Opcional, não iniciado |
 
-### 3.2 Módulo de Inspeção
-
-| Funcionalidade | Status |
-|---|---|
-| Alvos dinâmicos (`AreaAlvo`/`Area2D`) por trabalho | ✅ Implementado |
-| Detecção de clique por `Area2D`/`CollisionShape2D` | ✅ Implementado |
-| Feedback visual ao acertar o alvo suspeito | ✅ Implementado |
-| Variação de quantidade de alvos por dificuldade | 🔲 A implementar |
-| Variação de quais alvos são problemáticos por dificuldade | 🔲 A implementar |
-| Sorteio dinâmico de alvos suspeitos/neutros | 🔲 A implementar |
-
-### 3.3 Livro de Ajuda
+### 3.10 Sistema de Modificadores de Dificuldade e Cursor Virtual (v4.1)
 
 | Funcionalidade | Status |
 |---|---|
-| Estrutura paginada do livro (título, problema, solução) | ✅ Implementado |
-| 10 capítulos de conteúdo educativo | ✅ Implementado |
-| Navegação entre páginas (anterior/próximo) | ✅ Implementado |
-| Abrir/fechar livremente durante o expediente | ✅ Implementado |
-| `PAGINAS` acessível estaticamente (`const`) | ✅ Implementado |
-| Vínculo entre capítulos do livro e alvos da inspeção (`capitulo_relacionado`) | ✅ Implementado |
-| Expansão para 12+ capítulos (mencionado em comentário) | 🔲 A implementar |
-
-### 3.4 Sistema de Trabalho / Diagnóstico / Veredito Diferido
-
-| Funcionalidade | Status |
-|---|---|
-| `ResultadoTrabalho` (Resource) | ✅ Implementado |
-| `PainelDiagnostico` (Control) | 🗑️ Descontinuado — diagnóstico migrou pra dentro da `NovaAba` (v2/v3) |
-| `DadosJogo.resultados_pendentes` / `resultados_do_dia` | ✅ Implementado |
-| `DadosJogo.titulo_capitulo_correto()` / `gerar_opcoes_diagnostico()` | ✅ Implementado |
-| Popup único (`NovaAba`) com Inspecionar/Investigar/Diagnosticar/Ignorar/Encerrar | ✅ Implementado (v3.1) |
-| Diagnosticar desbloqueado ao achar qualquer alvo suspeito (sem travar) | ✅ Implementado |
-| Investigar — dica limitada (1×/trabalho) via `AlvoInspecao.dica` | ✅ Implementado (v3.1) |
-| Ignorar/Designorar por quadrante clicado | ✅ Implementado |
-| Encerrar com `ConfirmationDialog` mostrando o diagnóstico atual | ✅ Implementado |
-| Botão "Terminar trabalho" na lista de Ativos | 🗑️ Removido — substituído por "Encerrar" no popup |
-| Bug de clique bloqueado no alvo revelado (`mouse_filter`) | ✅ Corrigido |
-| Limpeza de alvos/imagem ao encerrar trabalho | ✅ Corrigido |
-| Grid não seguia a posição real de `ImagemBase` (origem fixa em 0,0) | ✅ Corrigido (v3.1) |
-| Sistema de grid (3 colunas × N linhas, compensação de altura) | ✅ Implementado |
-| `banco_de_trabalhos.gd` — módulo de dados separado de `DadosJogo` | ✅ Implementado |
-| Trabalhos migrados pro sistema de grid | 🔲 3 de 5 ("Remover Cavalo de Tróia", "Identificar Scareware" v3.5, "Remover Ransomware" v3.5; ainda faltam 2 dos originais removidos — sem arte calibrada) |
-| Estado por quadrante persistindo ao trocar de trabalho ativo | 🔲 Não resolvido (ver "Ponto em aberto" na seção 3.4) |
-| Tela de resumo de fim de expediente | ✅ Implementado (v3.2 — `RelatorioDia.tscn`/`relatorio_dia.gd`) |
-| Crédito de `dinheiro_jogador` a partir de `resultados_do_dia` | ✅ Implementado (v3.2 — creditado em `RelatorioDia.montar_relatorio()`) |
-
-### 3.5 Ciclo do Dia (v3.2)
-
-| Funcionalidade | Status |
-|---|---|
-| Botão "Iniciar Dia" no Escritório | ✅ Implementado (reaproveitando `Iniciar.gd`, sem mudança de código) |
-| Reset automático do estado do dia ao carregar `Tela.tscn` | ✅ Implementado (via `sortear_agenda_do_dia()`, já existente) |
-| Correção do clique duplo pra entrar no trabalho | ✅ Corrigido (`_on_disponivel_pressionado()` emite `trabalho_selecionado` direto) |
-| `ResultadoTrabalho.tentativas_certas`/`tentativas_erradas` | ✅ Implementado |
-| `ResultadoTrabalho.hora_inicio`/`hora_fim`/`tempo_gasto_minutos()` | ✅ Implementado |
-| `CoordenadorTrabalho` integrado ao relógio simulado (`gerenciador_expediente`) | ✅ Implementado |
-| `RelatorioDia.tscn` — tela de resumo detalhado | ✅ Implementado |
-| Disparo automático do relatório ao fim do expediente | ✅ Implementado (`Main_select_script._on_expediente_encerrado()`) |
-| Carregamento de `RelatorioDia.tscn` por `PackedScene` (`@export`) em vez de string de caminho | 🔲 Pendente — hoje usa string, já causou erro de carregamento |
-
-### 3.6 Sistema de Upgrades (v3.3)
-
-| Funcionalidade | Status |
-|---|---|
-| `TierUpgrade`/`LinhaUpgrade` (Resources) | ✅ Implementado |
-| `BancoDeUpgrades` — módulo de dados estático | ✅ Implementado |
-| `DadosJogo.upgrades` + `comprar_upgrade()` + `obter_linha_upgrade()` | ✅ Implementado |
-| PC — reduz tempo do popup de verificação (4s → instantâneo) | ✅ Implementado |
-| Sincronização entre `MensagemModal` e `GerenciadorInspecao` (mesmo tempo) | ✅ Implementado (corrigido — timers estavam dessincronizados) |
-| Assistente — Quantidade (linha de entrada) | ✅ Implementado |
-| Assistente — Treinamento (bloqueada até Quantidade tier 1) | ✅ Implementado |
-| `GerenciadorAssistente` — fila com tempo simulado + resolução automática | ✅ Implementado |
-| Botão "Delegar" em `VBoxDisponiveis` (condicional, só se Assistente disponível) | ✅ Implementado (corrigido — Delegar saiu de Ativos, decisão passou a ser tomada antes de Iniciar) |
-| Botão "Encerrar" em `VBoxAtivos` (equivalente ao Encerrar do popup `NovaAba`) | ✅ Implementado |
-| IA — Capacidade (linha de entrada) | ✅ Implementado |
-| IA — Eficiência (bloqueada até Capacidade tier 1) | ✅ Implementado |
-| `GerenciadorIANoturna` — resolução overnight dos trabalhos sobrados | ✅ Implementado |
-| `CalculadoraUpkeep` — upkeep diário (Assistente + IA) | ✅ Implementado |
-| Desconto de upkeep no `RelatorioDia`, saldo pode ficar negativo | ✅ Implementado |
-| `PainelUpgrades`/`BtnUpgrades` no Escritório | ✅ Implementado |
-| Upgrade de "Precisão" pra IA (taxa de sucesso por tier) | 🔲 Não implementado — taxa da IA é fixa em 75% |
-| Indicador visual de assistentes ocupados na UI | 🔲 Não implementado |
-| Persistência da fila do Assistente entre sessões | 🔲 Não implementado |
-| Valores de preço/upkeep balanceados por playtesting | 🔲 Pendente — valores atuais são placeholder fechados por design, não testados em jogo real |
-
-### 3.8 HUD de Dinheiro/Fama e Trabalhos de Scareware/Ransomware (v3.5)
-
-| Funcionalidade | Status |
-|---|---|
-| HUD permanente (`Scores.tscn`/`hud_manager.gd`) no Escritório | ✅ Implementado |
-| `icone_dinheiro.gd` — troca de sprite da carteira por saldo | ✅ Implementado |
-| HUD lendo `DadosJogo` em vez do autoload `Global` (descartado) | ✅ Implementado |
-| HUD atualizando em tempo real, trabalho a trabalho | ❌ Não é o comportamento — só atualiza no fim do dia, por design (veredito diferido) |
-| Capítulo "Scareware" no `ConteudoLivro.PAGINAS` (substitui "Senha Fraca") | ✅ Implementado |
-| Trabalho "Identificar Scareware" em `banco_de_trabalhos.gd` | ✅ Implementado |
-| Trabalho "Remover Ransomware" em `banco_de_trabalhos.gd` | ✅ Implementado |
-| `quadrante`/`altura_real` calibrados em jogo (Scareware/Ransomware) | 🔲 Pendente — só estimativa por proporção da imagem |
-| Conteúdo antigo de "Senha Fraca" realocado (11º capítulo) | 🔲 Não decidido — removido do array ativo, não descartado |
-| Unique Names no HUD (evitar caminho relativo frágil) | 🔲 Pendente — ainda usa `$caminho` |
-
-### 3.7 Sistema de Fama (v3.4)
-
-| Funcionalidade | Status |
-|---|---|
-| `CalculadoraFama` — curva não-linear (raiz quadrada) | ✅ Implementado |
-| `DadosJogo.fama_jogador` | ✅ Implementado |
-| `ResultadoTrabalho.fama_ganha` + cálculo em `finalizar()` | ✅ Implementado |
-| Fama do jogador manual e do Assistente (cheia, se acertar) | ✅ Implementado |
-| Fama da IA reduzida pela % de Eficiência | ✅ Implementado |
-| `GerenciadorExpediente.trabalhos_base_dia` + cálculo dinâmico via `CalculadoraFama` | ✅ Implementado |
-| `RelatorioDia` — labels separados (`LabelResumo`/`LabelDinheiro`/`LabelFama`) | ✅ Implementado |
-| `quantidade_trabalhos_iniciais` escalando com fama | 🔲 Não implementado — só o total do dia escala, quantidade inicial às 8h continua fixa |
-| Indicador de fama fora do `RelatorioDia` (ex: Escritório) | 🔲 Não implementado |
-| Curva balanceada por playtesting real | 🔲 Pendente — `FATOR_CRESCIMENTO` é placeholder |
+| Estrutura de tiers (T1/T2/T3) desbloqueada por fama | ✅ Implementado |
+| Sorteio de modificadores por trabalho (`CalculadoraModificadores`) | ✅ Implementado |
+| Bônus de recompensa (dinheiro e fama) por tier/nível + combo | ✅ Implementado |
+| Desconhecido, Conexão Lenta, Mais Opções, Armadilha, Ao Contrário, Misdireção | ✅ Implementado |
+| Tempo Limitado (prazo + fechamento automático/por interrupção) | ✅ Implementado |
+| Mouse Grande, Cópias, Mouse Rápido, Travamento (cursor virtual) | ✅ Implementado |
+| Caos (injeção de sub-modificadores) | ✅ Implementado |
+| Labirinto (geração + colisão + revelação por proximidade) | ✅ Implementado de fato na v4.1 — documentado desde a v4.0, mas sem efeito de jogo até esta rodada |
+| Confusão | 🗑️ Implementado e depois removido — substituído por Travamento |
+| Badges visuais (ícone + nível) nos cartões | ✅ Implementado (`BadgeModificador.tscn`) |
+| `GerenciadorCursorVirtual` (Autoload, cosmético + captura) | ✅ Implementado, incluindo pausa correta (`VISIBLE`) durante popups (v4.1) |
+| HUD de Prazo (contagem regressiva do Tempo Limitado, canto superior direito) | ✅ Implementado (v4.1) |
+| Ícone dedicado pro Travamento | ✅ Implementado (v4.1, `travamento.png`) |
+| Combinações entre modificadores testadas em playtesting real | 🔲 Pendente — agora que o Labirinto funciona de verdade, é a prioridade da próxima rodada |
+| Calibração de taxas/limiares/magnitudes por playtesting | 🔲 Pendente — valores atuais são placeholders de design |
 
 ---
 
 ## 5. Observações Gerais para Desenvolvimento Futuro
 
 ### Escritório
-- Pode receber mais elementos interativos conforme o jogo evolui (ex: computador, telefone, documentos na mesa).
-- O `Label` "Comece o dia!" na Cafeteira pode futuramente ser substituído por um sistema de diálogo ou tutorial introdutório.
-- Avaliar se `Iniciar.gd` e `texture_button-Quadro.gd` devem ser unificados ou mantidos separados conforme a cena `Tela.tscn` for desenvolvida.
+- Pode receber mais elementos interativos conforme o jogo evolui.
+- Avaliar se `Iniciar.gd` e `texture_button-Quadro.gd` devem ser unificados.
 
 ### Quadro de Avisos
-- O conteúdo do `Layer_Tutorial_1 > TextureRect` pode ser expandido para incluir múltiplas páginas (ex: paginação com setas, como o `LivroDicas`).
-- O atalho de teclado `ui_accept` (Espaço/Enter) pode ser removido ou rebatizado quando o jogo tiver um sistema de input customizado consolidado.
-- Avaliar se a dupla conexão do botão (via `@export` no script geral + `@onready` no script do botão) deve ser simplificada para uma única abordagem.
+- Conteúdo do tutorial pode ser expandido pra múltiplas páginas.
+- **Tutorial planejado (ainda não implementado):** páginas só de imagem, com texto desenhado na própria arte (etiquetas sobre o print do Escritório, como "Comece o dia!" e "Leia o guia"), mais várias telas de gameplay (loop básico, Investigar, Ignorar e Livro de Dicas). Sempre revisável no Quadro e também acessível por uma tela inicial, que ainda será construída.
 
 ### Tela de Gameplay
-- `button-inspecionar.gd` é uma versão anterior do sistema de inspeção (acessa `caixa_selecao` diretamente e usa `$NovaAba` por caminho). Pode ser removido quando o `GerenciadorInspecao` estiver consolidado.
-- `CaixaDeSelecao.gd` está intencionalmente vazio — toda lógica de posição/dimensão fica no `GerenciadorInspecao`. Isso é correto e deve ser mantido. **Confirmado nesta sessão:** o nó `CaixaSelecao` usa de fato esse arquivo (`res://Scripts/Tela/CaixaDeSelecao.gd`). Existe também um `caixa_selecao.gd` (minúsculo) com conteúdo diferente — captura de clique via `_unhandled_input`, redundante com `area_clique_inspecao.gd` — mas confirmado **não anexado** a nenhum nó ativo, candidato a remoção.
-- `DadosJogo` (Autoload) já concentra tanto o banco de trabalhos quanto o sistema de resultados diferidos — vale manter essa centralização conforme o jogo cresce, em vez de espalhar estado em outros singletons.
+- `DadosJogo` (Autoload) já concentra banco de trabalhos e resultados diferidos — manter essa centralização conforme o jogo cresce.
 
-### Módulo de Inspeção
-- Ao implementar a variação por dificuldade, considerar gerar múltiplos `AreaAlvo` problemáticos por trabalho (o suporte a múltiplos alvos suspeitos simultâneos ainda não existe — hoje `titulo_capitulo_correto()` assume um único alvo `SUSPEITO` por trabalho e usaria o primeiro que encontrar).
-- O `gerenciador_inspecao.gd` precisará receber a informação de dificuldade do trabalho atual para decidir quantos alvos problemáticos gerar.
+### Trabalhos (v4.3)
+- **`preload()` quebra o projeto inteiro se o arquivo não existir ou não foi importado.** Por isso os 8 trabalhos novos usam `_carregar_imagem()`. Se o Output mostrar "imagem não encontrada", confira pasta, nome (minúsculas, sem espaço nem acento, o Godot diferencia maiúsculas), extensão real do arquivo (renomear `.jpg` para `.png` não converte) e se o import terminou.
+- **Todas as imagens do mesmo tamanho:** a imagem é esticada na área de inspeção e o grid assume 3:2. A foto de primeiro dia saiu em 16:9 (1376×768) e precisa de recorte para 3:2 mantendo crachá e monitor dentro do quadro.
+- **Elementos pequenos:** em 480×320 cada célula tem 160×64 px; pendrive e post-it precisam ficar inteiros dentro de uma única célula.
+- **Ransomware é o único em 3×3.** Padronizar em 3×5 exigiria recalibrar o quadrante e a arte.
+- **Recompensas:** 150 para a maioria; 200 para Ransomware, Boleto estranho e Café com Wi-Fi (mais difíceis). Placeholder, como o resto da calibração.
 
-### Livro de Ajuda
-- O comentário "12 capítulos" no código sugere que mais 2 capítulos estavam planejados; vale confirmar se serão adicionados.
-- Como o livro pode ser aberto quantas vezes o jogador quiser, ele funciona como uma mecânica de "consulta sem penalidade" — isso deve ser levado em conta no balanceamento de dificuldade (ex: se haverá um custo de tempo ou recompensa reduzida por consultar o livro).
-- Há um pequeno erro de digitação no Capítulo 5 ("... pelo golpista **and** reporta.") — um "and" em inglês no meio do texto em português. Corrigir quando for mexer no arquivo novamente.
+### Livro de Ajuda (v4.2)
+- **Cena reutilizável:** `LivroDicas.tscn` é instanciada em `Escritorio.tscn` e `Tela.tscn`; o script `livro_dicas.gd` só pode ficar anexado ao nó raiz (`CanvasLayer`) — anexá-lo a um botão gera o erro "Script inherits from native type 'CanvasLayer'". Botões usam `btn_abrir_livro.gd`.
+- **Diagnóstico no nível do capítulo:** "Site duvidoso" e "Alerta estranho" (Scareware) agora compartilham a mesma resposta correta (Sites e Downloads Maliciosos). Se a distinção importar no diagnóstico, avaliar o diagnóstico em dois passos (capítulo + subcapítulo) como evolução futura; o campo `subcapitulo_relacionado` em `AlvoInspecao` deixaria o caminho preparado.
+- **Mais Opções:** com 10 capítulos o teto de 6 opções continua válido; se os capítulos forem reduzidos de novo, limitar o teto ao número de capítulos.
+- **Textos:** 24 dos 34 subcapítulos têm texto novo e curto — revisar tom e conteúdo.
+- **Custo de consulta ao livro** ainda não definido — decisão consciente de deixar pra depois (ganchos: sinais `aberto`/`fechado`).
+- **Abas (v4.3):** a ordem de desenho e o `clip_contents` dos pais foram a causa do corte; se uma aba nova for adicionada ao livro, passe por `_trazer_aba_para_frente()` e `_ajustar_rotulo_aba()`. O sprite da aba ainda está na lista de arte pendente (Piskel, 20×68).
+- **Se o livro virar Autoload no futuro:** hoje cada cena tem sua instância, então o estado (capítulo aberto) não persiste entre Escritório e Tela; Autoload existiria em todas as cenas (Quadro, Relatório).
 
-### Sistema de Trabalho / Diagnóstico (v3 — grid + popup unificado)
-- ~~**Tela de resumo de fim de expediente ainda não existe.**~~ ✅ Resolvido na v3.2 — ver seção 3.5. `RelatorioDia.tscn` itera `DadosJogo.resultados_do_dia` e credita `dinheiro_jogador`.
-- ~~**Decisão de design pendente:** hoje `marcar_trabalho_concluido()` não credita mais dinheiro nenhum durante o expediente...~~ ✅ Resolvido: o crédito acontece em `RelatorioDia.montar_relatorio()`, mantendo o resultado escondido até o fim do dia — confirmado como comportamento desejado.
-- **Suporte a múltiplos alvos suspeitos por trabalho** vai exigir repensar `titulo_capitulo_correto()`/`gerar_opcoes_diagnostico()`, que hoje assumem um único alvo `SUSPEITO`.
-- Vale revisar se `mensagem_modal_scpt.gd` (feedback textual "Verificando.../Alvo detectado!") deveria mudar de texto agora que achar o alvo não fecha mais o trabalho — hoje ele ainda comunica "Alvo detectado!" como se fosse um resultado final, o que pode confundir o jogador dado que o veredito de verdade só vem depois do diagnóstico e do fim do dia.
-- **`painel_diagnostico.gd` está órfão** desde a migração pro popup unificado (v2/v3) — candidato a remoção junto com a próxima limpeza técnica, como os outros scripts legados já catalogados.
-- **4 dos 5 trabalhos foram removidos temporariamente** de `banco_de_trabalhos.gd` por não terem arte de site calibrada pro sistema de grid. Precisam ser recriados (não só reabilitados) com `quadrante`/`altura_real` calibrados manualmente conforme a arte de cada site for produzida.
-- **`area_referencia` precisa apontar pro `ImagemBase`** (`TextureRect`), não pro viewport inteiro — se ficar sem preencher no Inspetor, o grid é calculado do tamanho da janela inteira em vez do tamanho real da imagem do site, e nenhum clique bate certo com os quadrantes visuais.
-- **Cuidado com `Stretch Mode` em `ImagemBase`:** se estiver configurado como `Keep Aspect` (em vez de `Scale`) e a proporção da imagem não bater exatamente com o `Control`, pode sobrar espaço vazio nas bordas (letterboxing) — o grid ficaria alinhado ao `Control`, mas visualmente desalinhado da imagem renderizada. Ainda não confirmado se isso afeta o projeto atual.
-
-### Ciclo do Dia (v3.2 — Iniciar Dia + Relatório)
-- **Trocar o caminho de string por `PackedScene`:** `Main_select_script._on_expediente_encerrado()` hoje carrega `"res://Scenes/RelatorioDia.tscn"` como string literal — já causou `Cannot open file`/`Failed loading resource` em runtime por divergência de nome/pasta. Recomendação: `@export var cena_relatorio: PackedScene`, arrastando a cena no Inspetor, elimina esse risco porque o Godot atualiza a referência sozinho se o arquivo for movido/renomeado. O mesmo vale considerar pro `Iniciar.gd` (`"res://Scenes/Tela.tscn"`) e pro `BtnVoltar` de `RelatorioDia` (`"res://Scenes/Escritorio.tscn"`), embora esses dois ainda não tenham dado erro na prática.
-- **`relatorio_dia.gd` usa `get_node_or_null()` em vez de `$caminho`** de propósito — qualquer nó da estrutura (`LabelResumo`, `ScrollContainer/VBoxResultados`, `BtnVoltar`) que estiver com nome errado gera um `push_warning()` específico dizendo qual falta, em vez de um erro fatal que impede a cena inteira de carregar. Vale manter esse padrão em outras cenas que ainda usam `$caminho` direto, especialmente as que dependem de estrutura montada manualmente no editor (mais propensas a divergir do que o script espera).
-- **Nenhuma tela de "Dia X" ou histórico entre dias existe ainda** — `RelatorioDia` mostra só o dia que acabou de terminar; não há registro persistente de dias anteriores. Se o design quiser progressão entre dias (ex: múltiplos dias de expediente, não só um loop único), isso ainda precisa ser desenhado.
-- **`TrabalhoAgendado.investigar_usado` não é resetado entre dias** — como `trabalhos_do_dia` é recriado do zero a cada `sortear_agenda_do_dia()` (novos objetos `TrabalhoAgendado.new()`), isso não chega a ser um bug hoje, mas vale ter em mente se algum dia `TrabalhoAgendado` passar a persistir entre dias (ex: trabalhos recorrentes).
-- **Testar o fluxo completo com duração real reduzida** — pra validar o relatório sem esperar ~2min15s por rodada de teste, considerar aumentar temporariamente `minutos_por_segundo_real` no Inspetor do `GerenciadorExpediente` (ex: `20.0` → dia inteiro em ~27s), sem precisar mexer em código.
-
-### Sistema de Upgrades (v3.3 — PC, Assistente, IA)
-- **Valores de preço/upkeep/efeito são placeholder** — fechados por rodadas de design conversado, nunca testados em jogo real com uma economia funcionando de ponta a ponta (poucos trabalhos calibrados no `banco_de_trabalhos.gd` hoje). Provável que precisem de ajuste depois que houver mais trabalhos e alguns dias de playtesting real.
-- **Taxa de sucesso da IA é fixa (75%)** — cogitada uma linha de "Precisão" pra IA no design, mas descartada por ora. Se quiser adicionar depois, o padrão já está pronto: seria só uma 3ª linha em `banco_de_upgrades.gd` com `chave_pre_requisito = CHAVE_IA_CAPACIDADE`, e `gerenciador_ia_noturna.gd` passaria a ler a taxa de `DadosJogo.obter_linha_upgrade()` em vez da constante `TAXA_SUCESSO_IA`.
-- **Sem indicador de "assistentes ocupados agora" na UI** — o jogador só descobre que delegar funcionou pelo botão virar "Delegado..." e pelo toast quando termina; não há um contador visual tipo "2/3 ocupados" em lugar nenhum.
-- **Resultados da IA não têm destaque visual no `RelatorioDia`** — aparecem misturados com os do jogador/Assistente, diferenciados só pelo texto no campo Diagnóstico ("Resolvido pela IA (noturno)"). Pode confundir se o jogador não ler com atenção; um ícone ou cor diferenciando a origem do resultado (jogador/Assistente/IA) ajudaria.
-- **Fila do Assistente não persiste entre sessões** — se o jogo fechar com trabalhos ainda na fila (`_fila_espera`/`_em_andamento` de `gerenciador_assistente.gd`), esse estado se perde. Mesma categoria de limitação que já existe hoje pra `resultados_pendentes` em geral (nada no projeto persiste em disco ainda).
-- **`chave_pre_requisito` foi invertida uma vez em runtime** (Assistente — ver seção 3.6) — episódio serviu de validação de que a arquitetura genérica de pré-requisito (`DadosJogo.comprar_upgrade()`/`painel_upgrades.gd` lendo só a string, sem hardcode de qual linha é qual) realmente permite esse tipo de ajuste tardio sem quebrar nada. Vale lembrar desse padrão se mais inversões de design surgirem depois de implementado.
-
-### Sistema de Fama (v3.4)
-- **`FATOR_CRESCIMENTO` (`calculadora_fama.gd`) é placeholder** — a curva de raiz quadrada foi escolhida pela forma (retornos decrescentes naturais), mas o fator `1.0` nunca foi testado em jogo real ao longo de vários dias seguidos. Se a progressão de trabalhos/dia parecer rápida ou lenta demais na prática, é o único número que precisa mudar — nenhum outro arquivo depende do valor exato.
-- **`quantidade_trabalhos_iniciais` não escala com fama** — só `trabalhos_base_dia` (o total do dia) passa pela curva de `CalculadoraFama`. Quantos trabalhos já aparecem prontos às 8h continua fixo. Se, na prática, os trabalhos extras de fama alta demorarem demais pra aparecer ao longo do dia (poucos no início, muitos "sobrando" pro fim), pode valer revisitar essa proporção.
-- **Sem indicador de fama fora do `RelatorioDia`** — mesmo padrão de observação já feito pro dinheiro/upgrades: não há nenhum lugar (Escritório, HUD) mostrando `fama_jogador` fora do momento em que o relatório do dia é exibido.
-- **Assistente sempre entrega fama cheia, IA sempre reduzida** — decisão implícita do design (Assistente não tem upgrade de "qualidade" que afete fama, só a IA tem Eficiência). Vale confirmar se isso é intencional a longo prazo ou se o Assistente também deveria ter alguma penalidade de fama em caso de erro (hoje: erro do Assistente = 0 fama e 0 dinheiro, igual já era antes da fama existir).
+### Sistema de Modificadores (v4.1)
+- **Combinações não testadas** — Cópias + Labirinto, Mouse Rápido + Labirinto, e outras combinações de T2+T3 no mesmo trabalho ainda não passaram por uma rodada dedicada de playtesting. Decisão consciente de não travar regras de exclusão adicionais até ter mais dados de jogo real — agora que o Labirinto tem efeito de jogo de verdade (v4.1), essa é a prioridade natural da próxima rodada.
+- **Labirinto é o modificador com mais superfície de bug** — qualquer mudança futura no sistema de cursor virtual (novo modificador de mouse, por exemplo) deve ser testada especificamente em conjunto com Labirinto, já que ele depende da colisão de movimento estar sincronizada corretamente com o resto do pipeline de input.
+- **Ícones dos modificadores** — confirmar que os 13 arquivos em `res://Sprites/Modificadores/` continuam com os nomes exatos esperados por `ModificadorAtivo.caminho_icone()` caso a pasta seja reorganizada no futuro.
+- **`GerenciadorCursorVirtual` usa `CONFINED_HIDDEN`, não `CAPTURED`** — qualquer refatoração futura desse sistema deve preservar essa escolha; usar `CAPTURED` reintroduz o bug de posição corrompida ao fechar popups.
+- **Documentação à frente do código é um risco real** — a v4.0 descrevia o Labirinto e a correção do warp counter como "✅ Implementado", mas nenhum dos dois tinha sido salvo de fato no projeto, o que só foi descoberto ao testar o modificador em jogo. Pra evitar repetir isso: sempre que uma sessão de chat gerar código extenso pra colar manualmente, confirmar com um teste em jogo (não só revisão visual) antes de marcar como ✅ na documentação.
+- **Limpeza de legado (v4.1)** — removidos do projeto `lembrete.gd`, `painel_trabalho.gd`, `button-inspecionar.gd`, `mensagem_modal.gd`, `painel_diagnostico.gd`, `CaixaDeSelecao.gd`, `caixa_selecao.gd`, e os nós `Alvo1`/`CaixaSelecao`/`TimerLembrete`/instância duplicada de `GerenciadorCursorVirtual`. Todos confirmados órfãos antes da remoção (sem referências no sistema atual).

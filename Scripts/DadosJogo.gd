@@ -6,7 +6,7 @@ extends Node
 var banco_de_trabalhos: Array[TrabalhoInspecao] = []
 
 var dinheiro_jogador: int = 100
-var fama_jogador: int = 10000   # cresce com trabalhos concluídos; controla quantidade_trabalhos_dia (ver GerenciadorExpediente + CalculadoraFama)
+var fama_jogador: int = 1   # cresce com trabalhos concluídos; controla quantidade_trabalhos_dia (ver GerenciadorExpediente + CalculadoraFama)
 
 # ---------------------------------------------------------------------
 # Sistema de upgrades (PC, Assistente, IA)
@@ -129,10 +129,10 @@ func resetar_resultados_do_dia() -> void:
 
 # Percorre TODOS os alvos SUSPEITO do trabalho (pode haver mais de um,
 # desde que compartilhem o mesmo tema/capítulo) e devolve o título do
-# capítulo do LivroDicas correspondente. Se dois alvos suspeitos do
-# mesmo trabalho apontarem pra capítulos diferentes — erro de calibração,
-# já que o design fecha "1 problema só por trabalho" — avisa no editor
-# em vez de escolher silenciosamente um dos dois.
+# capítulo do livro correspondente. Se dois alvos suspeitos do mesmo
+# trabalho apontarem pra capítulos diferentes — erro de calibração, já que
+# o design fecha "1 problema só por trabalho" — avisa no editor em vez de
+# escolher silenciosamente um dos dois.
 func titulo_capitulo_correto(trabalho: TrabalhoInspecao) -> String:
 	if trabalho == null:
 		return ""
@@ -150,10 +150,10 @@ func titulo_capitulo_correto(trabalho: TrabalhoInspecao) -> String:
 		push_warning("DadosJogo: trabalho '%s' não tem alvo SUSPEITO." % trabalho.titulo)
 		return ""
 
-	if indice_encontrado >= 0 and indice_encontrado < ConteudoLivro.PAGINAS.size():
-		return ConteudoLivro.PAGINAS[indice_encontrado].get("titulo", "")
+	if indice_encontrado >= 0 and indice_encontrado < ConteudoLivro.total_capitulos():
+		return ConteudoLivro.titulo_capitulo(indice_encontrado)
 
-	push_warning("DadosJogo: capitulo_relacionado %d fora do range de ConteudoLivro.PAGINAS." % indice_encontrado)
+	push_warning("DadosJogo: capitulo_relacionado %d fora do range de ConteudoLivro.CAPITULOS." % indice_encontrado)
 	return ""
 
 
@@ -166,8 +166,7 @@ func gerar_opcoes_diagnostico(trabalho: TrabalhoInspecao, quantidade: int = 3) -
 		opcoes.append(correta)
 
 	var titulos_disponiveis: Array[String] = []
-	for pagina in ConteudoLivro.PAGINAS:
-		var titulo: String = pagina.get("titulo", "")
+	for titulo in ConteudoLivro.titulos_capitulos():
 		if titulo != "" and titulo != correta:
 			titulos_disponiveis.append(titulo)
 

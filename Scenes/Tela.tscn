@@ -4,10 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://cq6r74v0jf6xr" path="res://Sprites/Computador tela LCD.png" id="1_2m0fk"]
 [ext_resource type="Texture2D" uid="uid://b63c5sgaj3dsl" path="res://Sprites/background-Pc.jpg" id="3_w1jdw"]
 [ext_resource type="Theme" uid="uid://btb15t1ftymvc" path="res://Temas/12.tres" id="7_otqlo"]
+[ext_resource type="PackedScene" uid="uid://dbgntenlpqicl" path="res://Scenes/LivroDicas.tscn" id="9_otqlo"]
 [ext_resource type="PackedScene" uid="uid://jtkkvoxesbp6" path="res://Scenes/modulo_inspecao.tscn" id="10_2ep5m"]
 [ext_resource type="PackedScene" uid="uid://di8ebtlmueqde" path="res://Scenes/modulo_trabalho.tscn" id="12_mkaev"]
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="14_fgk2u"]
-[ext_resource type="PackedScene" uid="uid://b2r2i0l2rix7l" path="res://Scenes/LivroInstrucao.tscn" id="14_syxfj"]
 [ext_resource type="Script" uid="uid://cn13lwsqcwowk" path="res://Scripts/Tela/btn_abrir_livro.gd" id="15_3mv3w"]
 
 [node name="Node2D" type="Node2D" unique_id=1409207445]
@@ -57,7 +57,6 @@ offset_right = 1145.0
 offset_bottom = 647.0
 texture_normal = ExtResource("14_fgk2u")
 script = ExtResource("15_3mv3w")
-cena_livro = ExtResource("14_syxfj")
 
 [node name="VBoxPrazosHud" type="VBoxContainer" parent="CanvasLayer" unique_id=1673080912]
 anchors_preset = 1
@@ -87,6 +86,9 @@ visible = false
 [node name="CoordenadorTrabalho" parent="ModuloTrabalho" index="3" unique_id=1240996018 node_paths=PackedStringArray("gerenciador_inspecao", "site_textura")]
 gerenciador_inspecao = NodePath("../../ModuloInspecao/AreaCliqueInspecao/GerenciadorInspecao")
 site_textura = NodePath("../../Sprite2D/ImagemBase")
+
+[node name="LivroDicas" parent="." unique_id=727300142 instance=ExtResource("9_otqlo")]
+visible = false
 
 [editable path="ModuloInspecao"]
 [editable path="ModuloTrabalho"]
