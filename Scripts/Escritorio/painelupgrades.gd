@@ -50,6 +50,7 @@ func _ready() -> void:
 
 func abrir() -> void:
 	montar_linhas()
+	move_to_front()
 	show()
 
 

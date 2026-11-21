@@ -1,0 +1,192 @@
+[gd_scene format=3 uid="uid://dbgntenlpqicl"]
+
+[ext_resource type="Script" uid="uid://bkmkw6g7st63n" path="res://Scripts/Tela/livro_dicas.gd" id="1_3axlh"]
+[ext_resource type="Texture2D" uid="uid://b5kk575cna03e" path="res://Sprites/livro_primeira_folha.jpg" id="2_l533k"]
+[ext_resource type="Texture2D" uid="uid://u7ieg8iq05nr" path="res://Sprites/Livro_aba.png" id="3_v0o06"]
+[ext_resource type="Theme" uid="uid://hsun7wgylrc1" path="res://Temas/tema_botoes.tres" id="4_wc6xw"]
+
+[node name="LivroDicas" type="CanvasLayer" unique_id=727300142]
+layer = 10
+script = ExtResource("1_3axlh")
+
+[node name="Raiz" type="Control" parent="." unique_id=293097041]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Escurecer" type="ColorRect" parent="Raiz" unique_id=758844532]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.1764706)
+
+[node name="Livro" type="Control" parent="Raiz" unique_id=1798646856]
+clip_contents = true
+custom_minimum_size = Vector2(480, 320)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -160.0
+offset_right = 240.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.75, 1.75)
+pivot_offset = Vector2(240, 160)
+mouse_filter = 2
+
+[node name="Fundo" type="TextureRect" parent="Raiz/Livro" unique_id=159767821]
+custom_minimum_size = Vector2(480, 320)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("2_l533k")
+expand_mode = 1
+
+[node name="PaginaVazia" type="ColorRect" parent="Raiz/Livro" unique_id=1089229789]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 14.0
+offset_top = 5.0
+offset_right = 223.0
+offset_bottom = 317.0
+mouse_filter = 2
+color = Color(0.8745098, 0.91764706, 0.9411765, 1)
+
+[node name="VBoxSubcapitulos" type="VBoxContainer" parent="Raiz/Livro" unique_id=439124059]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 250)
+layout_mode = 0
+offset_left = 26.0
+offset_top = 34.0
+offset_right = 196.0
+offset_bottom = 284.0
+mouse_filter = 0
+
+[node name="Titulo" type="Label" parent="Raiz/Livro" unique_id=1877814708]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(167, 28)
+layout_mode = 0
+offset_left = 261.7143
+offset_top = 28.0
+offset_right = 465.14285
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(0, 0, 0.5019608, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="VBoxIndice" type="VBoxContainer" parent="Raiz/Livro" unique_id=1987100690]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 277.0
+offset_top = 68.0
+offset_right = 444.0
+offset_bottom = 296.0
+
+[node name="Texto" type="RichTextLabel" parent="Raiz/Livro" unique_id=250172123]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 277.0
+offset_top = 68.0
+offset_right = 444.0
+offset_bottom = 296.0
+mouse_filter = 1
+theme_override_colors/default_color = Color(0, 0, 0.5019608, 1)
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
+
+[node name="AbaIndice" type="TextureButton" parent="Raiz/Livro" unique_id=1448094807]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 466.0
+offset_top = 20.0
+offset_right = 486.0
+offset_bottom = 88.0
+texture_normal = ExtResource("3_v0o06")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="LabelIndice" type="Label" parent="Raiz/Livro/AbaIndice" unique_id=730152966]
+layout_mode = 0
+offset_left = 23.0
+offset_right = 91.0
+offset_bottom = 23.0
+rotation = 1.5707964
+theme_override_colors/font_color = Color(0, 0, 0.5019608, 1)
+theme_override_font_sizes/font_size = 9
+text = "Indice"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="AbaReconhecer" type="TextureButton" parent="Raiz/Livro" unique_id=1879656309]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 466.0
+offset_top = 92.0
+offset_right = 486.0
+offset_bottom = 160.0
+texture_normal = ExtResource("3_v0o06")
+ignore_texture_size = true
+
+[node name="LabelReconhecer" type="Label" parent="Raiz/Livro/AbaReconhecer" unique_id=1993746821]
+layout_mode = 0
+offset_left = 23.0
+offset_right = 91.0
+offset_bottom = 23.0
+rotation = 1.5707964
+theme_override_colors/font_color = Color(0, 0, 0.5019608, 1)
+theme_override_font_sizes/font_size = 9
+text = "Reconhecer"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="AbaProteger" type="TextureButton" parent="Raiz/Livro" unique_id=1016962178]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 0
+offset_left = 466.0
+offset_top = 164.0
+offset_right = 486.0
+offset_bottom = 232.0
+texture_normal = ExtResource("3_v0o06")
+ignore_texture_size = true
+
+[node name="LabelProteger" type="Label" parent="Raiz/Livro/AbaProteger" unique_id=1894869134]
+layout_mode = 0
+offset_left = 20.0
+offset_right = 88.0
+offset_bottom = 20.0
+rotation = 1.5707964
+theme_override_colors/font_color = Color(0, 0, 0.5019608, 1)
+theme_override_font_sizes/font_size = 14
+text = "Proteger"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="BtnFechar" type="Button" parent="Raiz/Livro" unique_id=41224369]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 449.00003
+offset_top = 4.0000005
+offset_right = 475.00003
+offset_bottom = 35.0
+scale = Vector2(0.65, 0.65)
+theme = ExtResource("4_wc6xw")
+theme_override_font_sizes/font_size = 6
+text = "X"

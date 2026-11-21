@@ -2,8 +2,10 @@
 
 [ext_resource type="Texture2D" uid="uid://28n5f3qbruy7" path="res://Sprites/Gemini_Generated_Image_k67wwvk67wwvk67w.png" id="1_47xpm"]
 [ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="2_dcnhq"]
-[ext_resource type="Script" uid="uid://ce3ay4sspmeii" path="res://Scripts/texture_button-Quadro.gd" id="3_kv7mu"]
-[ext_resource type="Script" uid="uid://dv78l2ckhn3v" path="res://Scripts/Iniciar.gd" id="4_dcnhq"]
+[ext_resource type="Script" uid="uid://ce3ay4sspmeii" path="res://Scripts/Escritorio/texture_button-Quadro.gd" id="3_kv7mu"]
+[ext_resource type="Script" uid="uid://dv78l2ckhn3v" path="res://Scripts/Escritorio/Iniciar.gd" id="4_dcnhq"]
+[ext_resource type="Texture2D" uid="uid://dfx3nwrv78feg" path="res://Sprites/livro_estatico.jpg" id="5_qtyot"]
+[ext_resource type="Script" uid="uid://cn13lwsqcwowk" path="res://Scripts/Tela/btn_abrir_livro.gd" id="6_i0jdo"]
 
 [node name="Node2D" type="Node2D" unique_id=772582035]
 
@@ -50,6 +52,16 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
 text = "Comece o dia!"
+
+[node name="TextureButton" type="TextureButton" parent="." unique_id=760771242]
+visibility_layer = 7
+offset_left = 377.99997
+offset_top = 372.99997
+offset_right = 1642.0
+offset_bottom = 1221.0
+scale = Vector2(0.1, 0.1)
+texture_normal = ExtResource("5_qtyot")
+script = ExtResource("6_i0jdo")
 
 [connection signal="pressed" from="Quadro_avisos" to="Quadro_avisos" method="_on_pressed"]
 [connection signal="pressed" from="Cafeteira" to="Cafeteira" method="_on_pressed"]

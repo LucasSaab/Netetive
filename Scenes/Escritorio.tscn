@@ -1,13 +1,18 @@
 [gd_scene format=3 uid="uid://bfj610dpgmmi7"]
 
-[ext_resource type="Texture2D" uid="uid://28n5f3qbruy7" path="res://Sprites/Gemini_Generated_Image_k67wwvk67wwvk67w.png" id="1_qucxe"]
-[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="2_rsnx6"]
+[ext_resource type="Texture2D" uid="uid://cudtdnw4s68mt" path="res://Sprites/Escritorio.jpg" id="1_qdhbh"]
+[ext_resource type="Texture2D" uid="uid://rvbxjvqdo62r" path="res://Sprites/Quadro.png" id="2_xtao4"]
 [ext_resource type="Script" uid="uid://ce3ay4sspmeii" path="res://Scripts/Escritorio/texture_button-Quadro.gd" id="3_qucxe"]
+[ext_resource type="Texture2D" uid="uid://cr13n6dh24ty2" path="res://Sprites/Cafeteira.png" id="4_qin2m"]
 [ext_resource type="Script" uid="uid://dv78l2ckhn3v" path="res://Scripts/Escritorio/Iniciar.gd" id="4_rsnx6"]
 [ext_resource type="Script" uid="uid://cydl2owd05yh0" path="res://Scripts/Escritorio/btn_upgrades.gd" id="5_8lfxk"]
 [ext_resource type="Theme" uid="uid://btb15t1ftymvc" path="res://Temas/12.tres" id="6_843fw"]
 [ext_resource type="Script" uid="uid://tkv87jc1y5od" path="res://Scripts/Escritorio/painelupgrades.gd" id="6_agita"]
+[ext_resource type="Texture2D" uid="uid://b5fv3u1rlgn3e" path="res://Sprites/Tela_PC.png" id="7_7pxlk"]
 [ext_resource type="PackedScene" uid="uid://ddgrpiijkvrc7" path="res://Scenes/Scores.tscn" id="8_843fw"]
+[ext_resource type="Texture2D" uid="uid://cu4qb0kkiivrj" path="res://Sprites/livro_estatico.png" id="9_qblfu"]
+[ext_resource type="Script" uid="uid://cn13lwsqcwowk" path="res://Scripts/Tela/btn_abrir_livro.gd" id="10_qblfu"]
+[ext_resource type="PackedScene" uid="uid://dbgntenlpqicl" path="res://Scenes/LivroDicas.tscn" id="11_qblfu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_agita"]
 draw_center = false
@@ -17,7 +22,7 @@ draw_center = false
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1432055408]
 position = Vector2(576.99994, 325)
 scale = Vector2(0.86250937, 0.80750006)
-texture = ExtResource("1_qucxe")
+texture = ExtResource("1_qdhbh")
 metadata/_edit_lock_ = true
 
 [node name="TextureRect" type="TextureRect" parent="Sprite2D" unique_id=624437573]
@@ -35,37 +40,37 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Quadro_avisos" type="TextureButton" parent="." unique_id=709997482]
-offset_left = 293.0
-offset_top = 215.0
-offset_right = 421.0
-offset_bottom = 343.0
+offset_left = 180.0
+offset_top = 166.0
+offset_right = 1260.0
+offset_bottom = 814.0
+scale = Vector2(0.35, 0.35)
 action_mode = 0
-texture_normal = ExtResource("2_rsnx6")
+texture_normal = ExtResource("2_xtao4")
 script = ExtResource("3_qucxe")
+metadata/_edit_lock_ = true
 
 [node name="Cafeteira" type="TextureButton" parent="." unique_id=42442695]
-offset_left = 44.0
-offset_top = 271.0
-offset_right = 172.0
-offset_bottom = 399.0
+offset_left = -8.0
+offset_top = 255.0
+offset_right = 1072.0
+offset_bottom = 903.0
+scale = Vector2(0.22, 0.22)
 action_mode = 0
-texture_normal = ExtResource("2_rsnx6")
+texture_normal = ExtResource("4_qin2m")
 script = ExtResource("4_rsnx6")
-
-[node name="Label" type="Label" parent="Cafeteira" unique_id=500432906]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-text = "Comece o dia!"
+metadata/_edit_lock_ = true
 
 [node name="BtnUpgrades" type="TextureButton" parent="." unique_id=1036206567 node_paths=PackedStringArray("painel_upgrades")]
-offset_left = 508.0
-offset_top = 285.0
-offset_right = 668.0
-offset_bottom = 370.0
-texture_normal = ExtResource("2_rsnx6")
+offset_left = 450.0
+offset_top = 264.0
+offset_right = 1530.0
+offset_bottom = 912.0
+scale = Vector2(0.25, 0.25)
+texture_normal = ExtResource("7_7pxlk")
 script = ExtResource("5_8lfxk")
 painel_upgrades = NodePath("../Painelupgrades")
+metadata/_edit_lock_ = true
 
 [node name="Painelupgrades" type="Panel" parent="." unique_id=172688701]
 visible = false
@@ -102,6 +107,19 @@ offset_bottom = 566.0
 text = "Voltar"
 
 [node name="Score" parent="." unique_id=1420922170 instance=ExtResource("8_843fw")]
+
+[node name="AbrirLivro" type="TextureButton" parent="." unique_id=523158383]
+offset_left = 371.0
+offset_top = 365.0
+offset_right = 1635.0
+offset_bottom = 1213.0
+scale = Vector2(0.1, 0.1)
+texture_normal = ExtResource("9_qblfu")
+script = ExtResource("10_qblfu")
+metadata/_edit_lock_ = true
+
+[node name="LivroDicas" parent="." unique_id=727300142 instance=ExtResource("11_qblfu")]
+visible = false
 
 [connection signal="pressed" from="Quadro_avisos" to="Quadro_avisos" method="_on_pressed"]
 [connection signal="pressed" from="Cafeteira" to="Cafeteira" method="_on_pressed"]
