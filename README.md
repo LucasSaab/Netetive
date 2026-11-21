@@ -46,14 +46,14 @@ Node2D
 │   │   └── VBoxLinhas
 │   └── BtnFechar
 └── Score                     ← v3.5, novo: instância de Scores.tscn, HUD permanente de dinheiro/fama
-    └── HUD (hud_manager.gd)
-        └── control
-            ├── container_dinheiro
-            │   └── icone_dinheiro (icone_dinheiro.gd)
-            │       └── contador_dinheiro (Label)
-            └── container_fama
-                └── icone_fama
-                    └── contador_fama (Label)
+	└── HUD (hud_manager.gd)
+		└── control
+			├── container_dinheiro
+			│   └── icone_dinheiro (icone_dinheiro.gd)
+			│       └── contador_dinheiro (Label)
+			└── container_fama
+				└── icone_fama
+					└── contador_fama (Label)
 ```
 
 > **v3.5:** o nó `Score` é uma instância de `Scores.tscn` — ver seção [3.8](#38-hud-de-dinheirofama-e-trabalhos-de-scarewareransomware) pra detalhes completos do HUD.
@@ -78,7 +78,7 @@ Botão interativo representado visualmente pelo quadro de cortiça na parede. Ao
 extends TextureButton
 
 func _on_pressed() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Quadro.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Quadro.tscn")
 ```
 
 | Evento | Ação |
@@ -94,7 +94,7 @@ Elemento presente no canto esquerdo da tela. Exibe o texto **"Comece o dia!"** v
 extends TextureButton
 
 func _on_pressed() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Tela.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Tela.tscn")
 ```
 
 #### `BtnUpgrades` — `TextureButton` (v3.3, novo)
@@ -108,8 +108,8 @@ extends TextureButton
 @export var painel_upgrades: Control   # arraste o nó PainelUpgrades aqui no Inspetor
 
 func _on_pressed() -> void:
-    if painel_upgrades != null and painel_upgrades.has_method("abrir"):
-        painel_upgrades.abrir()
+	if painel_upgrades != null and painel_upgrades.has_method("abrir"):
+		painel_upgrades.abrir()
 ```
 
 #### `PainelUpgrades` — `Panel` (v3.3, novo)
@@ -121,9 +121,9 @@ UI que desenha dinamicamente as 5 linhas de upgrade — ver seção [3.6](#36-si
 
 ```
 [Escritório]
-     │
-     │  Jogador clica no Quadro_avisos
-     ▼
+	 │
+	 │  Jogador clica no Quadro_avisos
+	 ▼
 [Quadro.tscn]  ←── início do loop de gameplay
 ```
 
@@ -145,7 +145,7 @@ Node2D                        ← Script geral da cena (Script_geral_quadro.gd)
 │   └── TextureRect           ← Fundo visual: foto do quadro de cortiça
 ├── TB_Tutorial_1             ← Botão interativo: abre o tutorial (tb_tutorial_1.gd)
 └── Layer_Tutorial_1          ← CanvasLayer que contém o painel do tutorial
-    └── TextureRect           ← Conteúdo visual do tutorial (instruções, controles, etc.)
+	└── TextureRect           ← Conteúdo visual do tutorial (instruções, controles, etc.)
 ```
 
 > **Engine:** Godot 4  
@@ -165,32 +165,32 @@ extends Node2D
 @export var layer_tutorial: CanvasLayer
 
 func _ready() -> void:
-    # Garante que o tutorial começa oculto
-    if layer_tutorial != null:
-        layer_tutorial.hide()
-    # Conecta o sinal do botão manualmente (evita dupla conexão)
-    if botao_tutorial != null and not botao_tutorial.pressed.is_connected(_on_botao_tutorial_pressionado):
-        botao_tutorial.pressed.connect(_on_botao_tutorial_pressionado)
+	# Garante que o tutorial começa oculto
+	if layer_tutorial != null:
+		layer_tutorial.hide()
+	# Conecta o sinal do botão manualmente (evita dupla conexão)
+	if botao_tutorial != null and not botao_tutorial.pressed.is_connected(_on_botao_tutorial_pressionado):
+		botao_tutorial.pressed.connect(_on_botao_tutorial_pressionado)
 
 func _on_botao_tutorial_pressionado() -> void:
-    if layer_tutorial != null:
-        layer_tutorial.show()
+	if layer_tutorial != null:
+		layer_tutorial.show()
 
 func _input(event: InputEvent) -> void:
-    # Atalho de teclado: Barra de Espaço abre o tutorial
-    if event.is_action_pressed("ui_accept"):
-        if layer_tutorial != null:
-            layer_tutorial.show()
-    # Clique direito: fecha tutorial SE aberto, senão volta ao escritório
-    if event.is_action_pressed("clique_direito"):
-        if layer_tutorial != null and layer_tutorial.visible:
-            layer_tutorial.hide()
-            get_viewport().set_input_as_handled()
-        else:
-            voltar_para_escritorio()
+	# Atalho de teclado: Barra de Espaço abre o tutorial
+	if event.is_action_pressed("ui_accept"):
+		if layer_tutorial != null:
+			layer_tutorial.show()
+	# Clique direito: fecha tutorial SE aberto, senão volta ao escritório
+	if event.is_action_pressed("clique_direito"):
+		if layer_tutorial != null and layer_tutorial.visible:
+			layer_tutorial.hide()
+			get_viewport().set_input_as_handled()
+		else:
+			voltar_para_escritorio()
 
 func voltar_para_escritorio() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")
 ```
 
 | Ação do jogador | Resultado |
@@ -214,8 +214,8 @@ extends TextureButton
 @onready var layer_tutorial: CanvasLayer = $"../Layer_Tutorial_1"
 
 func _on_pressed() -> void:
-    if layer_tutorial != null:
-        layer_tutorial.show()
+	if layer_tutorial != null:
+		layer_tutorial.show()
 ```
 
 > **Nota:** Este botão acessa o `CanvasLayer` via caminho relativo `$"../Layer_Tutorial_1"`. O script geral da cena também conecta este botão via `@export` — ambos produzem o mesmo efeito. Futuramente pode ser unificado para evitar redundância.
@@ -230,16 +230,16 @@ Camada de sobreposição que exibe o conteúdo do tutorial por cima da cena. Com
 
 ```
 [Escritório]
-     │  Clica no Quadro_avisos
-     ▼
+	 │  Clica no Quadro_avisos
+	 ▼
 [Quadro]  ──── Clica em TB_Tutorial_1 ou pressiona Espaço ────► [Layer_Tutorial_1 visível]
-     │                                                                    │
-     │                                                         Clique direito
-     │                                                                    │
-     │◄───────────────────────────────────────────────────────────────────┘
-     │
-     │  Clique direito (tutorial fechado)
-     ▼
+	 │                                                                    │
+	 │                                                         Clique direito
+	 │                                                                    │
+	 │◄───────────────────────────────────────────────────────────────────┘
+	 │
+	 │  Clique direito (tutorial fechado)
+	 ▼
 [Escritório]
 ```
 
@@ -268,16 +268,16 @@ Node2D                         ← Script principal (Main_select_script.gd)
 ├── TimerLembrete               ← Timer para controlar ciclo dos lembretes
 ├── BtnAbrirLivro               ← Botão que abre/fecha o LivroDicas (btn_abrir_livro.gd)
 └── CanvasLayer                ← Camada de sobreposição para elementos UI
-    ├── CenterContainer        ← Centraliza o LivroDicas na tela
-    └── ModuloInspecao         ← Contém toda a lógica de inspeção de elementos
-        ├── AreaCliqueInspecao ← Captura cliques na tela (area_clique_inspecao.gd)
-        ├── GerenciadorInspecao← Lógica central de inspeção (gerenciador_inspecao.gd)
-        │   ├── NovaAba        ← Menu contextual de clique (nova_aba_script.gd)
-        │   ├── MensagemModal  ← Resultado da inspeção (mensagem_modal_scpt.gd)
-        │   ├── Alvo1          ← ColorRect oculto: região suspeita real (CaixaDeSelecao.gd)
-        │   ├── Alvo2          ← ColorRect neutro (não suspeito)
-        │   └── Alvo3          ← ColorRect neutro (não suspeito)
-        └── PainelModal        ← Versão alternativa do modal (mensagem_modal.gd)
+	├── CenterContainer        ← Centraliza o LivroDicas na tela
+	└── ModuloInspecao         ← Contém toda a lógica de inspeção de elementos
+		├── AreaCliqueInspecao ← Captura cliques na tela (area_clique_inspecao.gd)
+		├── GerenciadorInspecao← Lógica central de inspeção (gerenciador_inspecao.gd)
+		│   ├── NovaAba        ← Menu contextual de clique (nova_aba_script.gd)
+		│   ├── MensagemModal  ← Resultado da inspeção (mensagem_modal_scpt.gd)
+		│   ├── Alvo1          ← ColorRect oculto: região suspeita real (CaixaDeSelecao.gd)
+		│   ├── Alvo2          ← ColorRect neutro (não suspeito)
+		│   └── Alvo3          ← ColorRect neutro (não suspeito)
+		└── PainelModal        ← Versão alternativa do modal (mensagem_modal.gd)
 ```
 
 > **Arquivo da cena:** `res://Scenes/Tela.tscn`
@@ -307,7 +307,7 @@ Recebe o sinal `foi_clicado` do Lembrete e repassa os dados ao `PainelTrabalho`.
 
 ```gdscript
 func _on_lembrete_foi_clicado(titulo, descricao, recompensa, lembrete_clicado):
-    painel_trabalho.abrir(lembrete_clicado, titulo, descricao, recompensa)
+	painel_trabalho.abrir(lembrete_clicado, titulo, descricao, recompensa)
 ```
 
 ##### `PainelTrabalho` — `Panel`
@@ -376,16 +376,16 @@ Coordena toda a lógica de inspeção: abertura da `NovaAba`, verificação de c
 **Fluxo de inspeção:**
 ```
 Jogador clica na área
-        │
-        ▼
+		│
+		▼
 AreaCliqueInspecao.registrar_clique_na_area(pos)
-        │
-        ▼
+		│
+		▼
 NovaAba aparece próxima ao clique
-        │
+		│
 Jogador clica em "Inspecionar"
-        │
-        ▼
+		│
+		▼
 _on_botao_inspecionar_pressed()
   ├── Verifica se pos está sobre Alvo1 (suspeito) ou Alvo2/3 (neutros)
   ├── MensagemModal.mostrar(resultado)
@@ -434,9 +434,9 @@ Script raiz da cena. Atualmente atua como ponto de entrada e delegador: os geren
 
 ```gdscript
 func _on_btn_abrir_livro_pressed() -> void:
-    var instancia_livro = cena_livro.instantiate()
-    add_child(instancia_livro)
-    instancia_livro.abrir_livro()
+	var instancia_livro = cena_livro.instantiate()
+	add_child(instancia_livro)
+	instancia_livro.abrir_livro()
 ```
 
 > **Nota:** `_on_botao_inspecionar_pressed()` está vazio no script principal — a lógica de inspeção foi migrada para o `GerenciadorInspecao`.
@@ -445,29 +445,29 @@ func _on_btn_abrir_livro_pressed() -> void:
 
 ```
 [Tela carrega]
-      │
-      ├── PainelTrabalho ─── hide()
-      ├── LivroDicas ─────── hide() (instanciado sob demanda)
-      ├── NovaAba ─────────── hide()
-      └── MensagemModal ───── hide()
+	  │
+	  ├── PainelTrabalho ─── hide()
+	  ├── LivroDicas ─────── hide() (instanciado sob demanda)
+	  ├── NovaAba ─────────── hide()
+	  └── MensagemModal ───── hide()
 
 [Durante o gameplay]
 
   Post-it (Lembrete) clicado
-      │
-      └─► GerenciadorTrabalho → PainelTrabalho.abrir()
-               ├── Aceitar → trabalho_aceito + post-it some
-               └── Ignorar → painel fecha
+	  │
+	  └─► GerenciadorTrabalho → PainelTrabalho.abrir()
+			   ├── Aceitar → trabalho_aceito + post-it some
+			   └── Ignorar → painel fecha
 
   Clique na tela (AreaCliqueInspecao)
-      │
-      └─► NovaAba aparece → "Inspecionar"
-               └─► GerenciadorInspecao verifica alvos
-                        └─► MensagemModal exibe resultado (4s total)
-                                 └─► Alvo1 muda de cor se acertou
+	  │
+	  └─► NovaAba aparece → "Inspecionar"
+			   └─► GerenciadorInspecao verifica alvos
+						└─► MensagemModal exibe resultado (4s total)
+								 └─► Alvo1 muda de cor se acertou
 
   BtnAbrirLivro clicado
-      └─► LivroDicas instanciado/destruido no CenterContainer
+	  └─► LivroDicas instanciado/destruido no CenterContainer
 ```
 
 ---
@@ -485,16 +485,16 @@ Atualmente a cena trabalha com **3 alvos fixos** (`Alvo1`, `Alvo2`, `Alvo3`), ma
 ```
 ModuloInspecao
 └── AreaCliqueInspecao         ← Captura cliques do jogador na tela (Control)
-    └── GerenciadorInspecao    ← Lógica de verificação dos alvos (Node)
-        ├── NovaAba            ← Menu contextual "Inspecionar" (TextureRect)
-        │   └── VBoxContainer
-        │       └── Button     ← Botão que confirma a inspeção
-        ├── MensagemModal      ← Feedback textual da inspeção (Control)
-        │   └── Label          ← Texto: "Verificando...", "Alvo detectado!", etc.
-        ├── Alvo1               ← ColorRect: alvo suspeito (ou neutro, dependendo do sorteio)
-        ├── Alvo2               ← ColorRect: alvo neutro
-        ├── Alvo3               ← ColorRect: alvo neutro
-        └── CaixaSelecao        ← ColorRect auxiliar (script vazio; ver seção 3.1)
+	└── GerenciadorInspecao    ← Lógica de verificação dos alvos (Node)
+		├── NovaAba            ← Menu contextual "Inspecionar" (TextureRect)
+		│   └── VBoxContainer
+		│       └── Button     ← Botão que confirma a inspeção
+		├── MensagemModal      ← Feedback textual da inspeção (Control)
+		│   └── Label          ← Texto: "Verificando...", "Alvo detectado!", etc.
+		├── Alvo1               ← ColorRect: alvo suspeito (ou neutro, dependendo do sorteio)
+		├── Alvo2               ← ColorRect: alvo neutro
+		├── Alvo3               ← ColorRect: alvo neutro
+		└── CaixaSelecao        ← ColorRect auxiliar (script vazio; ver seção 3.1)
 ```
 
 > Esta estrutura corresponde exatamente ao que já foi documentado na seção 3.1 (scripts `area_clique_inspecao.gd`, `gerenciador_inspecao.gd`, `nova_aba_script.gd`, `mensagem_modal_scpt.gd`, `CaixaDeSelecao.gd`). Esta seção foca no **papel de design** dos alvos dentro do módulo.
@@ -595,68 +595,68 @@ Todo o ciclo de um trabalho — inspecionar, diagnosticar, ignorar áreas conhec
 
 ```
 GerenciadorExpediente libera um trabalho (horário do dia bateu)
-        │
-        ▼
+		│
+		▼
 Item aparece em VBoxDisponiveis (GerenciadorTrabalho)
-        │  jogador clica → aceita direto
-        ▼
+		│  jogador clica → aceita direto
+		▼
 DadosJogo.iniciar_resultado_pendente(agendado)   ← abre um ResultadoTrabalho "em branco"
 Item some de Disponíveis, aparece em VBoxAtivos com 1 controle: [Título/Selecionar]
-        │
-        │  jogador clica no título → trabalho_selecionado(agendado)
-        ▼
+		│
+		│  jogador clica no título → trabalho_selecionado(agendado)
+		▼
 CoordenadorTrabalho monta a grade de inspeção (imagem do site + 15 AreaAlvo do grid)
-        │
-        │  jogador clica em QUALQUER ponto da imagem do site
-        ▼
+		│
+		│  jogador clica em QUALQUER ponto da imagem do site
+		▼
 NovaAba abre com 5 botões sempre presentes:
    [Inspecionar]     ← desabilitado só se este ponto for um alvo NEUTRO já checado antes
    [Investigar]      ← desabilitado depois do 1º uso que revela dica real no trabalho
    [Diagnosticar]    ← desabilitado até ALGUM alvo suspeito ter sido encontrado no trabalho
    [Ignorar]/[Designorar]  ← alterna por ponto clicado, disponível mesmo sem inspecionar
    [Encerrar]        ← sempre disponível
-        │
-        ├─ Inspecionar → GerenciadorInspecao.verificar_clique()
-        │      ├─ acertou (achou o alvo suspeito) → revela visualmente,
-        │      │    marca achou_alvo_correto = true no resultado pendente,
-        │      │    libera o botão Diagnosticar em QUALQUER ponto do trabalho
-        │      └─ neutro → marca esse quadrante como "já checado, sem nada"
-        │           (Inspecionar fica desabilitado se clicar de novo ali)
-        │
-        ├─ Investigar → resposta instantânea no MensagemModal, 3 casos:
-        │      ├─ quadrante ainda não inspecionado → "Preciso investigar."
-        │      ├─ neutro já checado sem nada → "Nada de interessante nesta parte."
-        │      └─ suspeito já encontrado → texto de AlvoInspecao.dica
-        │           (consome o único uso permitido por trabalho, gravado
-        │           em TrabalhoAgendado.investigar_usado — só os dois
-        │           primeiros casos NÃO consomem, por não revelarem nada)
-        │
-        ├─ Diagnosticar → abre submenu AO LADO com múltipla escolha
-        │      (opções geradas por DadosJogo.gerar_opcoes_diagnostico:
-        │      categoria certa do capítulo do LivroDicas + distratores)
-        │      │  jogador escolhe uma opção
-        │      ▼
-        │      diagnostico_escolhido(opcao) → CoordenadorTrabalho grava
-        │      diagnostico_correto no resultado pendente
-        │
-        ├─ Ignorar/Designorar → alterna AreaAlvo.ignorado (não afeta o veredito,
-        │      é só uma marcação visual/mental pro jogador — "já chequei aqui")
-        │
-        └─ Encerrar → ConfirmationDialog mostra o diagnóstico atual escolhido
-               (ou avisa que nenhum diagnóstico foi feito ainda)
-                    │  jogador confirma
-                    ▼
-               DadosJogo.finalizar_trabalho(agendado)
-                  → resultado.finalizar(): acertou_no_geral = achou_alvo_correto AND diagnostico_correto
-                  → resultado move de resultados_pendentes para resultados_do_dia
-               GerenciadorTrabalho.marcar_trabalho_concluido(agendado)
-                  → remove o item de VBoxAtivos
-               GerenciadorInspecao.limpar_alvos() + site_textura.texture = null
-                  → limpa a tela pro próximo trabalho
-               Toast "Trabalho encerrado." aparece por 2s
-                  (SEM revelar se acertou ou errou)
-        │
-        ▼
+		│
+		├─ Inspecionar → GerenciadorInspecao.verificar_clique()
+		│      ├─ acertou (achou o alvo suspeito) → revela visualmente,
+		│      │    marca achou_alvo_correto = true no resultado pendente,
+		│      │    libera o botão Diagnosticar em QUALQUER ponto do trabalho
+		│      └─ neutro → marca esse quadrante como "já checado, sem nada"
+		│           (Inspecionar fica desabilitado se clicar de novo ali)
+		│
+		├─ Investigar → resposta instantânea no MensagemModal, 3 casos:
+		│      ├─ quadrante ainda não inspecionado → "Preciso investigar."
+		│      ├─ neutro já checado sem nada → "Nada de interessante nesta parte."
+		│      └─ suspeito já encontrado → texto de AlvoInspecao.dica
+		│           (consome o único uso permitido por trabalho, gravado
+		│           em TrabalhoAgendado.investigar_usado — só os dois
+		│           primeiros casos NÃO consomem, por não revelarem nada)
+		│
+		├─ Diagnosticar → abre submenu AO LADO com múltipla escolha
+		│      (opções geradas por DadosJogo.gerar_opcoes_diagnostico:
+		│      categoria certa do capítulo do LivroDicas + distratores)
+		│      │  jogador escolhe uma opção
+		│      ▼
+		│      diagnostico_escolhido(opcao) → CoordenadorTrabalho grava
+		│      diagnostico_correto no resultado pendente
+		│
+		├─ Ignorar/Designorar → alterna AreaAlvo.ignorado (não afeta o veredito,
+		│      é só uma marcação visual/mental pro jogador — "já chequei aqui")
+		│
+		└─ Encerrar → ConfirmationDialog mostra o diagnóstico atual escolhido
+			   (ou avisa que nenhum diagnóstico foi feito ainda)
+					│  jogador confirma
+					▼
+			   DadosJogo.finalizar_trabalho(agendado)
+				  → resultado.finalizar(): acertou_no_geral = achou_alvo_correto AND diagnostico_correto
+				  → resultado move de resultados_pendentes para resultados_do_dia
+			   GerenciadorTrabalho.marcar_trabalho_concluido(agendado)
+				  → remove o item de VBoxAtivos
+			   GerenciadorInspecao.limpar_alvos() + site_textura.texture = null
+				  → limpa a tela pro próximo trabalho
+			   Toast "Trabalho encerrado." aparece por 2s
+				  (SEM revelar se acertou ou errou)
+		│
+		▼
 [Fim do expediente — GerenciadorExpediente]
    → tela de resumo do dia itera DadosJogo.resultados_do_dia
    → SÓ AQUI o certo/errado e a recompensa de cada trabalho são revelados
@@ -803,55 +803,55 @@ Esta seção documenta a camada mais externa do loop de gameplay (v3.2) — o qu
 
 ```
 [Escritório]
-     │  Jogador clica em Iniciar.gd (reaproveitado, sem mudança de código)
-     ▼
+	 │  Jogador clica em Iniciar.gd (reaproveitado, sem mudança de código)
+	 ▼
 get_tree().change_scene_to_file("res://Scenes/Tela.tscn")
-     │
-     ▼
+	 │
+	 ▼
 [Tela.tscn carrega]
-     │
-     ▼
+	 │
+	 ▼
 Main_select_script._ready()
-     ├── gerenciador_expediente.iniciar_expediente()
-     │        └── DadosJogo.sortear_agenda_do_dia(...)
-     │             └── reseta trabalhos_do_dia / trabalhos_concluidos_hoje
-     │                 / resultados_pendentes / resultados_do_dia
-     └── conecta gerenciador_expediente.expediente_encerrado → _on_expediente_encerrado()
+	 ├── gerenciador_expediente.iniciar_expediente()
+	 │        └── DadosJogo.sortear_agenda_do_dia(...)
+	 │             └── reseta trabalhos_do_dia / trabalhos_concluidos_hoje
+	 │                 / resultados_pendentes / resultados_do_dia
+	 └── conecta gerenciador_expediente.expediente_encerrado → _on_expediente_encerrado()
 
 [Expediente rodando — 8h a 17h simuladas]
-     │
-     │  (jogador aceita/inspeciona/diagnostica/encerra trabalhos,
-     │   ver fluxo completo na seção 3.4 — cada ciclo agora também
-     │   grava hora_inicio/hora_fim e tentativas_certas/erradas)
-     │
-     ▼
+	 │
+	 │  (jogador aceita/inspeciona/diagnostica/encerra trabalhos,
+	 │   ver fluxo completo na seção 3.4 — cada ciclo agora também
+	 │   grava hora_inicio/hora_fim e tentativas_certas/erradas)
+	 │
+	 ▼
 GerenciadorExpediente._process(): hora_atual >= HORA_FIM_EXPEDIENTE
-     │
-     ▼
+	 │
+	 ▼
 _encerrar_expediente() → expediente_encerrado.emit()
-     │
-     ▼
+	 │
+	 ▼
 Main_select_script._on_expediente_encerrado()
-     │
-     ▼
+	 │
+	 ▼
 get_tree().change_scene_to_file("res://Scenes/RelatorioDia.tscn")
-     │
-     ▼
+	 │
+	 ▼
 [RelatorioDia.tscn carrega]
-     │
-     ▼
+	 │
+	 ▼
 RelatorioDia._ready() → montar_relatorio()
-     ├── itera DadosJogo.resultados_do_dia
-     ├── monta 1 linha por trabalho: veredito (✅/❌), alvo encontrado,
-     │   diagnóstico escolhido (+ se correto), tentativas certas/erradas,
-     │   tempo gasto (hora_fim - hora_inicio), recompensa
-     └── DadosJogo.dinheiro_jogador += total_dinheiro   ← só aqui é creditado
-     │
-     │  Jogador clica em BtnVoltar
-     ▼
+	 ├── itera DadosJogo.resultados_do_dia
+	 ├── monta 1 linha por trabalho: veredito (✅/❌), alvo encontrado,
+	 │   diagnóstico escolhido (+ se correto), tentativas certas/erradas,
+	 │   tempo gasto (hora_fim - hora_inicio), recompensa
+	 └── DadosJogo.dinheiro_jogador += total_dinheiro   ← só aqui é creditado
+	 │
+	 │  Jogador clica em BtnVoltar
+	 ▼
 get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")
-     │
-     ▼
+	 │
+	 ▼
 [Escritório — pronto pra Iniciar Dia de novo]
 ```
 
@@ -944,16 +944,16 @@ Mesmo padrão de `BancoDeTrabalhos`: monta as 5 `LinhaUpgrade` com os valores fe
 var upgrades: Dictionary = {}   # String -> LinhaUpgrade
 
 func _ready() -> void:
-    banco_de_trabalhos = BancoDeTrabalhos.criar_todos()
-    upgrades = BancoDeUpgrades.criar_todas()
+	banco_de_trabalhos = BancoDeTrabalhos.criar_todos()
+	upgrades = BancoDeUpgrades.criar_todas()
 
 func comprar_upgrade(chave: String) -> bool:
-    # valida: linha existe -> não está no máximo -> pré-requisito atendido -> saldo suficiente
-    # só então: debita dinheiro_jogador, incrementa linha.tier_atual
-    ...
+	# valida: linha existe -> não está no máximo -> pré-requisito atendido -> saldo suficiente
+	# só então: debita dinheiro_jogador, incrementa linha.tier_atual
+	...
 
 func obter_linha_upgrade(chave: String) -> LinhaUpgrade:
-    return upgrades.get(chave, null)
+	return upgrades.get(chave, null)
 ```
 `comprar_upgrade()` é a **única porta de entrada** pra avançar uma linha — nenhum outro script incrementa `tier_atual` ou debita `dinheiro_jogador` diretamente. Isso mantém a validação centralizada, evitando que `painel_upgrades.gd` (UI) precise reimplementar as regras de negócio.
 
@@ -964,15 +964,15 @@ O upgrade do PC reduz o tempo do popup de verificação (`MensagemModal`), mas *
 ```gdscript
 # mensagem_modal_scpt.gd
 func tempo_total_atual() -> float:
-    var linha := DadosJogo.obter_linha_upgrade(BancoDeUpgrades.CHAVE_PC)
-    return linha.valor_efeito_atual(4.0) if linha != null else 4.0
+	var linha := DadosJogo.obter_linha_upgrade(BancoDeUpgrades.CHAVE_PC)
+	return linha.valor_efeito_atual(4.0) if linha != null else 4.0
 
 # gerenciador_inspecao.gd
 func _tempo_verificacao_atual() -> float:
-    if mensagem_modal != null and mensagem_modal.has_method("tempo_total_atual"):
-        return mensagem_modal.tempo_total_atual()
-    # fallback: lê a linha PC direto, se mensagem_modal não estiver atribuído
-    ...
+	if mensagem_modal != null and mensagem_modal.has_method("tempo_total_atual"):
+		return mensagem_modal.tempo_total_atual()
+	# fallback: lê a linha PC direto, se mensagem_modal não estiver atribuído
+	...
 ```
 No tier 4 (`valor_efeito = 0.0`), ambos os `await get_tree().create_timer(...)` são pulados inteiramente (`if tempo > 0.0`) — verificação e revelação acontecem no mesmo frame do clique em "Inspecionar".
 
@@ -982,30 +982,30 @@ No tier 4 (`valor_efeito = 0.0`), ambos os `await get_tree().create_timer(...)` 
 
 ```
 Jogador clica "Delegar" num item de VBoxAtivos (gerenciador_trabalho.gd)
-        │  emite delegar_solicitado(agendado) — não conhece GerenciadorAssistente
-        ▼
+		│  emite delegar_solicitado(agendado) — não conhece GerenciadorAssistente
+		▼
 CoordenadorTrabalho._on_delegar_solicitado()
-        │  chama gerenciador_assistente.delegar(agendado)
-        ▼
+		│  chama gerenciador_assistente.delegar(agendado)
+		▼
 GerenciadorAssistente.delegar()
-        ├─ garante ResultadoTrabalho pendente (caso o jogador nunca tenha
-        │   aberto a inspeção desse trabalho)
-        ├─ se há slot livre (capacidade = linha Quantidade): processa direto
-        └─ senão: entra na fila FIFO (_fila_espera)
-        │
-        ▼  [a cada frame, _process() compara hora_atual com hora_conclusao_prevista]
-        │
+		├─ garante ResultadoTrabalho pendente (caso o jogador nunca tenha
+		│   aberto a inspeção desse trabalho)
+		├─ se há slot livre (capacidade = linha Quantidade): processa direto
+		└─ senão: entra na fila FIFO (_fila_espera)
+		│
+		▼  [a cada frame, _process() compara hora_atual com hora_conclusao_prevista]
+		│
    Ao vencer o horário:
-        ├─ sorteia acerto pela taxa de sucesso do Treinamento
-        ├─ fecha o ResultadoTrabalho direto (sem passar pela NovaAba)
-        ├─ puxa o próximo da fila de espera, se houver
-        └─ emite trabalho_assistente_concluido(agendado, acertou)
-                │
-                ▼
-        CoordenadorTrabalho._on_assistente_concluido()
-                ├─ gerenciador_trabalho.marcar_trabalho_concluido(agendado)
-                │   (remove de VBoxAtivos — mesmo destino final do "Encerrar" manual)
-                └─ toast: "Assistente: '<título>' concluído com sucesso/erro."
+		├─ sorteia acerto pela taxa de sucesso do Treinamento
+		├─ fecha o ResultadoTrabalho direto (sem passar pela NovaAba)
+		├─ puxa o próximo da fila de espera, se houver
+		└─ emite trabalho_assistente_concluido(agendado, acertou)
+				│
+				▼
+		CoordenadorTrabalho._on_assistente_concluido()
+				├─ gerenciador_trabalho.marcar_trabalho_concluido(agendado)
+				│   (remove de VBoxAtivos — mesmo destino final do "Encerrar" manual)
+				└─ toast: "Assistente: '<título>' concluído com sucesso/erro."
 ```
 Todos os valores (tempo por trabalho, taxa de sucesso, capacidade simultânea) são lidos **sob demanda** de `DadosJogo.obter_linha_upgrade()` a cada chamada — nunca cacheados em variável própria. Isso significa que comprar um tier novo no meio do expediente já afeta o próximo trabalho delegado, sem precisar reiniciar nada.
 
@@ -1015,22 +1015,22 @@ Todos os valores (tempo por trabalho, taxa de sucesso, capacidade simultânea) s
 
 ```
 GerenciadorExpediente.expediente_encerrado dispara
-        ▼
+		▼
 Main_select_script._on_expediente_encerrado()
-        ├─ GerenciadorIANoturna.processar_noite(hora_fim_expediente)
-        │      ├─ se IA Capacidade tier < 1: não faz nada
-        │      ├─ coleta "trabalhos sobrados": agendado.apareceu == true E
-        │      │   (nunca aceito OU aceito mas nunca concluído), EXCLUINDO
-        │      │   qualquer um que já tenha resultado pendente em outro
-        │      │   lugar (ex: ainda na fila do Assistente — a IA não "rouba"
-        │      │   um trabalho que já está sendo tratado)
-        │      ├─ embaralha e processa até a capacidade da linha (1-4/noite)
-        │      └─ por trabalho: sorteia acerto a 75% fixo, aplica % de
-        │          Eficiência sobre a recompensa, grava direto em
-        │          DadosJogo.resultados_do_dia (sem passar por
-        │          resultados_pendentes — não há hora_inicio real de
-        │          expediente, é tudo simulado de uma vez, à noite)
-        ▼
+		├─ GerenciadorIANoturna.processar_noite(hora_fim_expediente)
+		│      ├─ se IA Capacidade tier < 1: não faz nada
+		│      ├─ coleta "trabalhos sobrados": agendado.apareceu == true E
+		│      │   (nunca aceito OU aceito mas nunca concluído), EXCLUINDO
+		│      │   qualquer um que já tenha resultado pendente em outro
+		│      │   lugar (ex: ainda na fila do Assistente — a IA não "rouba"
+		│      │   um trabalho que já está sendo tratado)
+		│      ├─ embaralha e processa até a capacidade da linha (1-4/noite)
+		│      └─ por trabalho: sorteia acerto a 75% fixo, aplica % de
+		│          Eficiência sobre a recompensa, grava direto em
+		│          DadosJogo.resultados_do_dia (sem passar por
+		│          resultados_pendentes — não há hora_inicio real de
+		│          expediente, é tudo simulado de uma vez, à noite)
+		▼
 get_tree().change_scene_to_file("res://Scenes/RelatorioDia.tscn")
 ```
 Os resultados da IA aparecem no `RelatorioDia` misturados com os do jogador/Assistente, diferenciados só pelo texto `"Resolvido pela IA (noturno)"` no campo Diagnóstico.
@@ -1041,12 +1041,12 @@ Os resultados da IA aparecem no `RelatorioDia` misturados com os do jogador/Assi
 
 ```gdscript
 static func calcular_total() -> int:
-    return _upkeep_assistente() + _upkeep_ia_capacidade() + _upkeep_ia_eficiencia()
+	return _upkeep_assistente() + _upkeep_ia_capacidade() + _upkeep_ia_eficiencia()
 
 static func _upkeep_assistente() -> int:
-    # upkeep_atual(Treinamento) × quantidade de assistentes (linha Quantidade)
-    # Treinamento tier 0 (não comprado) = upkeep 0, mesmo com Quantidade comprada
-    ...
+	# upkeep_atual(Treinamento) × quantidade de assistentes (linha Quantidade)
+	# Treinamento tier 0 (não comprado) = upkeep 0, mesmo com Quantidade comprada
+	...
 ```
 `relatorio_dia.gd.montar_relatorio()` desconta esse total **antes** de creditar: `DadosJogo.dinheiro_jogador += total_dinheiro - upkeep_total` — pode deixar o saldo **negativo de propósito** (dívida realista, decisão de design confirmada com o usuário). O resumo no `LabelResumo` mostra os três números separados: ganhos do dia, manutenção descontada, saldo final.
 
@@ -1178,13 +1178,13 @@ Diferente do `RelatorioDia` (que só mostra os números uma vez, no fim do dia),
 ```
 Score (instância de Scores.tscn)
 └── HUD (Node, hud_manager.gd)
-    └── control (Control)
-        ├── container_dinheiro (HBoxContainer)
-        │   └── icone_dinheiro (TextureRect, icone_dinheiro.gd)
-        │       └── contador_dinheiro (Label)
-        └── container_fama (HBoxContainer)
-            └── icone_fama (TextureRect)
-                └── contador_fama (Label)
+	└── control (Control)
+		├── container_dinheiro (HBoxContainer)
+		│   └── icone_dinheiro (TextureRect, icone_dinheiro.gd)
+		│       └── contador_dinheiro (Label)
+		└── container_fama (HBoxContainer)
+			└── icone_fama (TextureRect)
+				└── contador_fama (Label)
 ```
 
 ##### `hud_manager.gd` — `Node`
