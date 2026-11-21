@@ -48,9 +48,15 @@ Node2D
 │   ├── ScrollContainer
 │   │   └── VBoxLinhas
 │   └── BtnFechar
-├── BtnLivro                  ← v4.2: livro fechado sobre a mesa (btn_abrir_livro.gd)
-├── LivroDicas                ← v4.2: instância de LivroDicas.tscn (CanvasLayer), começa oculto
-└── Score                     ← instância de Scores.tscn: HUD permanente de dinheiro/fama (ver 3.11)
+└── Score                     ← v3.5, novo: instância de Scores.tscn, HUD permanente de dinheiro/fama
+	└── HUD (hud_manager.gd)
+		└── control
+			├── container_dinheiro
+			│   └── icone_dinheiro (icone_dinheiro.gd)
+			│       └── contador_dinheiro (Label)
+			└── container_fama
+				└── icone_fama
+					└── contador_fama (Label)
 ```
 
 > **Engine:** Godot 4  
@@ -73,7 +79,7 @@ Botão interativo representado visualmente pelo quadro de cortiça na parede. Ao
 extends TextureButton
 
 func _on_pressed() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Quadro.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Quadro.tscn")
 ```
 
 | Evento | Ação |
@@ -89,7 +95,7 @@ Elemento presente no canto esquerdo da tela. Exibe o texto **"Comece o dia!"** v
 extends TextureButton
 
 func _on_pressed() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Tela.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Tela.tscn")
 ```
 
 #### `BtnUpgrades` — `TextureButton` (v3.3, novo)
@@ -103,8 +109,8 @@ extends TextureButton
 @export var painel_upgrades: Control   # arraste o nó PainelUpgrades aqui no Inspetor
 
 func _on_pressed() -> void:
-    if painel_upgrades != null and painel_upgrades.has_method("abrir"):
-        painel_upgrades.abrir()
+	if painel_upgrades != null and painel_upgrades.has_method("abrir"):
+		painel_upgrades.abrir()
 ```
 
 #### `PainelUpgrades` — `Panel` (v3.3, novo)
@@ -127,9 +133,9 @@ Cena reutilizável do livro (`CanvasLayer`, layer 10), a mesma instanciada na `T
 
 ```
 [Escritório]
-     │
-     │  Jogador clica no Quadro_avisos
-     ▼
+	 │
+	 │  Jogador clica no Quadro_avisos
+	 ▼
 [Quadro.tscn]  ←── início do loop de gameplay
 ```
 
@@ -151,7 +157,7 @@ Node2D                        ← Script geral da cena (Script_geral_quadro.gd)
 │   └── TextureRect           ← Fundo visual: foto do quadro de cortiça
 ├── TB_Tutorial_1             ← Botão interativo: abre o tutorial (tb_tutorial_1.gd)
 └── Layer_Tutorial_1          ← CanvasLayer que contém o painel do tutorial
-    └── TextureRect           ← Conteúdo visual do tutorial (instruções, controles, etc.)
+	└── TextureRect           ← Conteúdo visual do tutorial (instruções, controles, etc.)
 ```
 
 > **Engine:** Godot 4  
@@ -171,28 +177,32 @@ extends Node2D
 @export var layer_tutorial: CanvasLayer
 
 func _ready() -> void:
-    if layer_tutorial != null:
-        layer_tutorial.hide()
-    if botao_tutorial != null and not botao_tutorial.pressed.is_connected(_on_botao_tutorial_pressionado):
-        botao_tutorial.pressed.connect(_on_botao_tutorial_pressionado)
+	# Garante que o tutorial começa oculto
+	if layer_tutorial != null:
+		layer_tutorial.hide()
+	# Conecta o sinal do botão manualmente (evita dupla conexão)
+	if botao_tutorial != null and not botao_tutorial.pressed.is_connected(_on_botao_tutorial_pressionado):
+		botao_tutorial.pressed.connect(_on_botao_tutorial_pressionado)
 
 func _on_botao_tutorial_pressionado() -> void:
-    if layer_tutorial != null:
-        layer_tutorial.show()
+	if layer_tutorial != null:
+		layer_tutorial.show()
 
 func _input(event: InputEvent) -> void:
-    if event.is_action_pressed("ui_accept"):
-        if layer_tutorial != null:
-            layer_tutorial.show()
-    if event.is_action_pressed("clique_direito"):
-        if layer_tutorial != null and layer_tutorial.visible:
-            layer_tutorial.hide()
-            get_viewport().set_input_as_handled()
-        else:
-            voltar_para_escritorio()
+	# Atalho de teclado: Barra de Espaço abre o tutorial
+	if event.is_action_pressed("ui_accept"):
+		if layer_tutorial != null:
+			layer_tutorial.show()
+	# Clique direito: fecha tutorial SE aberto, senão volta ao escritório
+	if event.is_action_pressed("clique_direito"):
+		if layer_tutorial != null and layer_tutorial.visible:
+			layer_tutorial.hide()
+			get_viewport().set_input_as_handled()
+		else:
+			voltar_para_escritorio()
 
 func voltar_para_escritorio() -> void:
-    get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")
+	get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")
 ```
 
 | Ação do jogador | Resultado |
@@ -214,8 +224,8 @@ extends TextureButton
 @onready var layer_tutorial: CanvasLayer = $"../Layer_Tutorial_1"
 
 func _on_pressed() -> void:
-    if layer_tutorial != null:
-        layer_tutorial.show()
+	if layer_tutorial != null:
+		layer_tutorial.show()
 ```
 
 #### `Layer_Tutorial_1` — `CanvasLayer`
@@ -225,16 +235,16 @@ Camada de sobreposição que exibe o conteúdo do tutorial por cima da cena. Com
 
 ```
 [Escritório]
-     │  Clica no Quadro_avisos
-     ▼
+	 │  Clica no Quadro_avisos
+	 ▼
 [Quadro]  ──── Clica em TB_Tutorial_1 ou pressiona Espaço ────► [Layer_Tutorial_1 visível]
-     │                                                                    │
-     │                                                         Clique direito
-     │                                                                    │
-     │◄───────────────────────────────────────────────────────────────────┘
-     │
-     │  Clique direito (tutorial fechado)
-     ▼
+	 │                                                                    │
+	 │                                                         Clique direito
+	 │                                                                    │
+	 │◄───────────────────────────────────────────────────────────────────┘
+	 │
+	 │  Clique direito (tutorial fechado)
+	 ▼
 [Escritório]
 ```
 
@@ -244,11 +254,68 @@ Camada de sobreposição que exibe o conteúdo do tutorial por cima da cena. Com
 
 ### 3.1 Visão geral e sistemas principais
 
-> ⚠️ **Nota de manutenção:** esta subseção descreve o sistema **original** de post-its (`Lembrete`/`PainelTrabalho`), substituído pelo sistema de expedição documentado na seção [3.4](#34-sistema-de-trabalho-diagnóstico-e-veredito-diferido). Mantido como registro histórico.
+> ⚠️ **Nota de manutenção:** esta subseção descreve o sistema **original** de post-its (`Lembrete`/`PainelTrabalho`). Esse sistema foi **substituído** pelo sistema de expedição (`GerenciadorExpediente` + `GerenciadorTrabalho` com `VBoxDisponiveis`/`VBoxAtivos`), documentado na seção [3.4](#34-sistema-de-trabalho-diagnóstico-e-veredito-diferido). O conteúdo abaixo foi mantido como registro histórico da arquitetura anterior.
+>
+> **Confirmado em runtime:** o ramo `Lembrete`/`GerenciadorTrabalho`(antigo)/`TimerLembrete` ainda existe fisicamente na árvore de `Tela.tscn`, solto no nível raiz, em paralelo ao `ModuloTrabalho` (onde vive o sistema novo). Ele não é mais referenciado por nenhum script ativo — `Main_select_script.gd` só acessa `$ModuloTrabalho/GerenciadorExpediente` — mas continua na cena e roda seu próprio `_ready()`. Existem, inclusive, **dois arquivos diferentes** chamados `gerenciador_trabalho.gd` no projeto, em pastas diferentes (o antigo em `res://Scripts/Tela/`, o novo em algum lugar dentro de `ModuloTrabalho`), o que gera confusão ao navegar pela lista de scripts do editor (que mostra só o nome curto). Recomendação: remover o ramo legado inteiro da árvore.
+
+A cena **Tela** (`res://Scenes/Tela.tscn`) é onde o loop principal de gameplay ocorre. O jogador visualiza um site suspeito na tela do computador e interage com ele para identificar problemas de segurança. A cena é composta por vários sistemas independentes que se comunicam por sinais e referências exportadas.
+
+#### Estrutura da Cena
+
+```
+Node2D                         ← Script principal (Main_select_script.gd)
+├── Sprite2D
+│   ├── Tela                   ← Imagem da tela do computador (fundo visual)
+│   └── TextureRect            ← Sobreposição visual (site exibido na tela)
+├── Lembrete                   ← Post-it clicável com tarefas aleatórias (lembrete.gd)
+├── GerenciadorTrabalho        ← Coordena abertura do painel de tarefas (gerenciador_trabalho.gd)
+├── PainelTrabalho             ← UI de detalhes da tarefa aceita/ignorada (painel_trabalho.gd)
+├── TimerLembrete               ← Timer para controlar ciclo dos lembretes
+├── BtnAbrirLivro               ← Botão que abre/fecha o LivroDicas (btn_abrir_livro.gd)
+└── CanvasLayer                ← Camada de sobreposição para elementos UI
+	├── CenterContainer        ← Centraliza o LivroDicas na tela
+	└── ModuloInspecao         ← Contém toda a lógica de inspeção de elementos
+		├── AreaCliqueInspecao ← Captura cliques na tela (area_clique_inspecao.gd)
+		├── GerenciadorInspecao← Lógica central de inspeção (gerenciador_inspecao.gd)
+		│   ├── NovaAba        ← Menu contextual de clique (nova_aba_script.gd)
+		│   ├── MensagemModal  ← Resultado da inspeção (mensagem_modal_scpt.gd)
+		│   ├── Alvo1          ← ColorRect oculto: região suspeita real (CaixaDeSelecao.gd)
+		│   ├── Alvo2          ← ColorRect neutro (não suspeito)
+		│   └── Alvo3          ← ColorRect neutro (não suspeito)
+		└── PainelModal        ← Versão alternativa do modal (mensagem_modal.gd)
+```
+
+> **Arquivo da cena:** `res://Scenes/Tela.tscn`
+
+#### Sistema de Lembretes (Tarefas)
+
+Os **Lembretes** são post-its fixados na tela do computador que representam tarefas recebidas pelo jogador. Cada um sorteia seus dados aleatoriamente a partir de `DadosJogo.banco_de_trabalhos` (Autoload).
 
 A cena **Tela** (`res://Scenes/Tela.tscn`) é onde o loop principal de gameplay ocorre. O jogador visualiza um site suspeito na tela do computador e interage com ele para identificar problemas de segurança.
 
-#### Sistema de Lembretes (Tarefas) — histórico
+```gdscript
+signal foi_clicado(titulo, descricao, recompensa, lembrete_clicado)
+```
+
+| Comportamento | Detalhe |
+|---|---|
+| Ao entrar na cena | Sorteia título, descrição e recompensa aleatória (`valor_base ± randi_range(-15, 25)`) |
+| Clique esquerdo | Emite `foi_clicado` com os dados do trabalho |
+| Clique direito | Esconde o post-it (`hide()`) |
+| `z_index` | 100 — garante que fique sobre o fundo |
+
+##### `GerenciadorTrabalho` — `Node`
+**Script:** `gerenciador_trabalho.gd`
+
+Recebe o sinal `foi_clicado` do Lembrete e repassa os dados ao `PainelTrabalho`.
+
+```gdscript
+func _on_lembrete_foi_clicado(titulo, descricao, recompensa, lembrete_clicado):
+	painel_trabalho.abrir(lembrete_clicado, titulo, descricao, recompensa)
+```
+
+##### `PainelTrabalho` — `Panel`
+**Script:** `painel_trabalho.gd`
 
 Post-its clicáveis com tarefas aleatórias, substituídos pelo sistema de expedição.
 
@@ -258,17 +325,160 @@ Post-its clicáveis com tarefas aleatórias, substituídos pelo sistema de exped
 
 #### Sistema de Inspeção (visão geral)
 
-É o sistema central de gameplay. *(estrutura detalhada na seção [3.2](#32-módulo-de-inspeção))*
+É o sistema central de gameplay. O jogador clica em regiões do site exibido para inspecioná-las e descobrir elementos suspeitos. *(estrutura detalhada na seção [3.2](#32-módulo-de-inspeção))*
+
+##### `AreaCliqueInspecao` — `Control`
+**Script:** `area_clique_inspecao.gd`
+
+Camada invisível sobre o site que captura todos os cliques do jogador.
+
+| Input | Comportamento |
+|---|---|
+| Clique esquerdo (popup fechado) | Registra posição e abre `NovaAba` via `GerenciadorInspecao` |
+| Clique esquerdo (popup aberto) | Ignora — deixa o clique passar para o popup |
+| Clique direito | Fecha todos os popups abertos |
+
+##### `GerenciadorInspecao` — `Node`
+**Script:** `gerenciador_inspecao.gd`
+
+Coordena toda a lógica de inspeção: abertura da `NovaAba`, verificação de colisão com alvos e exibição do resultado.
+
+**Fluxo de inspeção:**
+```
+Jogador clica na área
+		│
+		▼
+AreaCliqueInspecao.registrar_clique_na_area(pos)
+		│
+		▼
+NovaAba aparece próxima ao clique
+		│
+Jogador clica em "Inspecionar"
+		│
+		▼
+_on_botao_inspecionar_pressed()
+  ├── Verifica se pos está sobre Alvo1 (suspeito) ou Alvo2/3 (neutros)
+  ├── MensagemModal.mostrar(resultado)
+  │     ├── Exibe "🔍 Verificando..." por 2s
+  │     └── Exibe "⚠️ Alvo detectado!" ou "Nenhum alvo encontrado." por 2s, depois fecha
+  └── Após 4s: se acertou, Alvo1 muda de cor para vermelho semitransparente
+```
+
+| Nó | Tipo | Papel |
+|---|---|---|
+| `Alvo1` | `ColorRect` | Região suspeita real — invisível até ser detectada |
+| `Alvo2`, `Alvo3` | `ColorRect` | Regiões neutras — não geram alerta |
+
+##### `NovaAba` — `TextureRect`
+**Script:** `nova_aba_script.gd`
+
+Menu contextual que aparece próximo ao clique do jogador com o botão "Inspecionar".
+
+```gdscript
+signal inspecionar_pressionado
+```
+
+- Fecha automaticamente se o jogador clicar fora dela.
+- Emite `inspecionar_pressionado` ao confirmar a inspeção.
+
+##### `MensagemModal` — `Control`
+**Script:** `mensagem_modal_scpt.gd`
+
+Overlay de resultado da inspeção. Opera com sequência assíncrona via `await`:
+
+```
+mostrar(intersectou)
+  → "🔍 Verificando..." (2s)
+  → "⚠️ Alvo detectado!" ou "Nenhum alvo encontrado." (2s)
+  → esconder()
+```
+
+- `mouse_filter = MOUSE_FILTER_IGNORE` — não bloqueia input durante exibição.
+- `z_index = 100`.
 
 #### Script Principal da Cena
 
-**Script:** `Main_select_script.gd` — `extends Node2D`. Ponto de entrada; os gerenciadores filhos cuidam de toda a lógica.
+**Script:** `Main_select_script.gd` — `extends Node2D`
+
+Script raiz da cena. Atualmente atua como ponto de entrada e delegador: os gerenciadores filhos cuidam de toda a lógica.
+
+```gdscript
+func _on_btn_abrir_livro_pressed() -> void:
+	var instancia_livro = cena_livro.instantiate()
+	add_child(instancia_livro)
+	instancia_livro.abrir_livro()
+```
+
+> **Nota:** `_on_botao_inspecionar_pressed()` está vazio no script principal — a lógica de inspeção foi migrada para o `GerenciadorInspecao`.
+
+#### Fluxo Geral da Cena
+
+```
+[Tela carrega]
+	  │
+	  ├── PainelTrabalho ─── hide()
+	  ├── LivroDicas ─────── hide() (instanciado sob demanda)
+	  ├── NovaAba ─────────── hide()
+	  └── MensagemModal ───── hide()
+
+[Durante o gameplay]
+
+  Post-it (Lembrete) clicado
+	  │
+	  └─► GerenciadorTrabalho → PainelTrabalho.abrir()
+			   ├── Aceitar → trabalho_aceito + post-it some
+			   └── Ignorar → painel fecha
+
+  Clique na tela (AreaCliqueInspecao)
+	  │
+	  └─► NovaAba aparece → "Inspecionar"
+			   └─► GerenciadorInspecao verifica alvos
+						└─► MensagemModal exibe resultado (4s total)
+								 └─► Alvo1 muda de cor se acertou
+
+  BtnAbrirLivro clicado
+	  └─► LivroDicas instanciado/destruido no CenterContainer
+```
 
 ---
 
 ### 3.2 Módulo de Inspeção
 
-O **ModuloInspecao** é a camada invisível posicionada na frente da tela do computador. Detecta onde o jogador clica e avalia se aquela região corresponde a um problema de segurança real.
+O **ModuloInspecao** é a camada invisível posicionada na frente da tela do computador (site exibido). Ela não é visualmente exibida em condições normais — existe apenas para detectar onde o jogador clica e avaliar se aquela região corresponde a um problema de segurança real.
+
+> ⚠️ **Nota de manutenção:** a descrição abaixo (alvos `Alvo1`/`Alvo2`/`Alvo3` fixos como `ColorRect`) é a arquitetura **original**. O sistema atual usa `AlvoInspecao` (Resource), `TrabalhoInspecao` (Resource) e `AreaAlvo` (`Area2D` dinâmico) organizados numa **grade de 3 colunas × N linhas** com compensação de altura adaptativa, documentado na seção [3.4](#34-sistema-de-trabalho-diagnóstico-e-veredito-diferido). A "Variação por Dificuldade" descrita como design futuro logo abaixo já está parcialmente resolvida pelo grid: a quantidade de quadrantes clicáveis é sempre 3×N (todos inspecionáveis, com ou sem problema atribuído), e "quais são problemáticos" já é definido dinamicamente por trabalho via `AlvoInspecao.quadrante`.
+
+Atualmente a cena trabalha com **3 alvos fixos** (`Alvo1`, `Alvo2`, `Alvo3`), mas a intenção de design é que tanto a **quantidade de alvos** quanto **quais deles são "problemáticos"** variem de acordo com a dificuldade do trabalho sorteado.
+
+#### Estrutura da Cena (detalhada)
+
+```
+ModuloInspecao
+└── AreaCliqueInspecao         ← Captura cliques do jogador na tela (Control)
+	└── GerenciadorInspecao    ← Lógica de verificação dos alvos (Node)
+		├── NovaAba            ← Menu contextual "Inspecionar" (TextureRect)
+		│   └── VBoxContainer
+		│       └── Button     ← Botão que confirma a inspeção
+		├── MensagemModal      ← Feedback textual da inspeção (Control)
+		│   └── Label          ← Texto: "Verificando...", "Alvo detectado!", etc.
+		├── Alvo1               ← ColorRect: alvo suspeito (ou neutro, dependendo do sorteio)
+		├── Alvo2               ← ColorRect: alvo neutro
+		├── Alvo3               ← ColorRect: alvo neutro
+		└── CaixaSelecao        ← ColorRect auxiliar (script vazio; ver seção 3.1)
+```
+
+> Esta estrutura corresponde exatamente ao que já foi documentado na seção 3.1 (scripts `area_clique_inspecao.gd`, `gerenciador_inspecao.gd`, `nova_aba_script.gd`, `mensagem_modal_scpt.gd`, `CaixaDeSelecao.gd`). Esta seção foca no **papel de design** dos alvos dentro do módulo.
+
+#### Lógica dos Alvos
+
+| Nó | Papel atual | Comportamento ao ser inspecionado corretamente |
+|---|---|---|
+| `Alvo1` | Alvo suspeito (problema real) | Aparece visualmente e muda de cor para vermelho semitransparente (`Color(1, 0, 0, 0.35)`) |
+| `Alvo2` | Alvo neutro | Nenhuma alteração visual — inspecioná-lo retorna "Nenhum alvo encontrado." |
+| `Alvo3` | Alvo neutro | Mesmo comportamento de `Alvo2` |
+
+- Todos os alvos são `ColorRect` **invisíveis por padrão** — só ficam visíveis quando o jogador acerta a inspeção sobre um alvo problemático.
+- A verificação é feita por colisão de retângulos (`get_global_rect().has_point(...)`) entre a posição do clique e a área do alvo.
 
 > ⚠️ A descrição original (`Alvo1`/`Alvo2`/`Alvo3` fixos) foi substituída pelo sistema de grid dinâmico (`AlvoInspecao`/`TrabalhoInspecao`/`AreaAlvo`), documentado na seção [3.4](#34-sistema-de-trabalho-diagnóstico-e-veredito-diferido).
 
@@ -321,23 +531,72 @@ Abas laterais **Índice / Reconhecer / Proteger** (um único sprite; a aba atual
 Arquitetura atual (v3.1) do loop de trabalho. Todo o ciclo — inspecionar, diagnosticar, ignorar, encerrar — acontece dentro de um único popup contextual (`NovaAba`).
 
 ```
-GerenciadorExpediente libera um trabalho
-        │
-        ▼
-Item aparece em VBoxDisponiveis
-        │  jogador aceita
-        ▼
-DadosJogo.iniciar_resultado_pendente(agendado)
-        │
-        ▼
-CoordenadorTrabalho monta a grade de inspeção
-        │  jogador clica no site
-        ▼
-NovaAba abre com 5 botões: Inspecionar / Investigar / Diagnosticar / Ignorar / Encerrar
-        │
-        ▼
-[Fim do expediente]
-   → RelatorioDia revela certo/errado e credita dinheiro/fama
+GerenciadorExpediente libera um trabalho (horário do dia bateu)
+		│
+		▼
+Item aparece em VBoxDisponiveis (GerenciadorTrabalho)
+		│  jogador clica → aceita direto
+		▼
+DadosJogo.iniciar_resultado_pendente(agendado)   ← abre um ResultadoTrabalho "em branco"
+Item some de Disponíveis, aparece em VBoxAtivos com 1 controle: [Título/Selecionar]
+		│
+		│  jogador clica no título → trabalho_selecionado(agendado)
+		▼
+CoordenadorTrabalho monta a grade de inspeção (imagem do site + 15 AreaAlvo do grid)
+		│
+		│  jogador clica em QUALQUER ponto da imagem do site
+		▼
+NovaAba abre com 5 botões sempre presentes:
+   [Inspecionar]     ← desabilitado só se este ponto for um alvo NEUTRO já checado antes
+   [Investigar]      ← desabilitado depois do 1º uso que revela dica real no trabalho
+   [Diagnosticar]    ← desabilitado até ALGUM alvo suspeito ter sido encontrado no trabalho
+   [Ignorar]/[Designorar]  ← alterna por ponto clicado, disponível mesmo sem inspecionar
+   [Encerrar]        ← sempre disponível
+		│
+		├─ Inspecionar → GerenciadorInspecao.verificar_clique()
+		│      ├─ acertou (achou o alvo suspeito) → revela visualmente,
+		│      │    marca achou_alvo_correto = true no resultado pendente,
+		│      │    libera o botão Diagnosticar em QUALQUER ponto do trabalho
+		│      └─ neutro → marca esse quadrante como "já checado, sem nada"
+		│           (Inspecionar fica desabilitado se clicar de novo ali)
+		│
+		├─ Investigar → resposta instantânea no MensagemModal, 3 casos:
+		│      ├─ quadrante ainda não inspecionado → "Preciso investigar."
+		│      ├─ neutro já checado sem nada → "Nada de interessante nesta parte."
+		│      └─ suspeito já encontrado → texto de AlvoInspecao.dica
+		│           (consome o único uso permitido por trabalho, gravado
+		│           em TrabalhoAgendado.investigar_usado — só os dois
+		│           primeiros casos NÃO consomem, por não revelarem nada)
+		│
+		├─ Diagnosticar → abre submenu AO LADO com múltipla escolha
+		│      (opções geradas por DadosJogo.gerar_opcoes_diagnostico:
+		│      categoria certa do capítulo do LivroDicas + distratores)
+		│      │  jogador escolhe uma opção
+		│      ▼
+		│      diagnostico_escolhido(opcao) → CoordenadorTrabalho grava
+		│      diagnostico_correto no resultado pendente
+		│
+		├─ Ignorar/Designorar → alterna AreaAlvo.ignorado (não afeta o veredito,
+		│      é só uma marcação visual/mental pro jogador — "já chequei aqui")
+		│
+		└─ Encerrar → ConfirmationDialog mostra o diagnóstico atual escolhido
+			   (ou avisa que nenhum diagnóstico foi feito ainda)
+					│  jogador confirma
+					▼
+			   DadosJogo.finalizar_trabalho(agendado)
+				  → resultado.finalizar(): acertou_no_geral = achou_alvo_correto AND diagnostico_correto
+				  → resultado move de resultados_pendentes para resultados_do_dia
+			   GerenciadorTrabalho.marcar_trabalho_concluido(agendado)
+				  → remove o item de VBoxAtivos
+			   GerenciadorInspecao.limpar_alvos() + site_textura.texture = null
+				  → limpa a tela pro próximo trabalho
+			   Toast "Trabalho encerrado." aparece por 2s
+				  (SEM revelar se acertou ou errou)
+		│
+		▼
+[Fim do expediente — GerenciadorExpediente]
+   → tela de resumo do dia itera DadosJogo.resultados_do_dia
+   → SÓ AQUI o certo/errado e a recompensa de cada trabalho são revelados
 ```
 
 **Regra de acerto combinado:** achar o alvo suspeito **e** escolher a categoria certa no diagnóstico.
@@ -382,7 +641,95 @@ Os capítulos 0, 1, 2, 5, 6, 7, 8 e 9 do livro não tinham nenhum trabalho; a v4
 
 ### 3.5 Ciclo do Dia: Iniciar Dia e Relatório de Fim de Expediente
 
-Fecha o loop `Escritório → expediente → relatório → Escritório`. `RelatorioDia.tscn`/`relatorio_dia.gd` itera `DadosJogo.resultados_do_dia`, credita dinheiro e fama, e é a única tela que revela o veredito de cada trabalho.
+Esta seção documenta a camada mais externa do loop de gameplay (v3.2) — o que acontece **antes** do primeiro trabalho aparecer e **depois** do último ser encerrado, fechando o ciclo `Escritório → expediente → relatório → Escritório`.
+
+#### Fluxo completo
+
+```
+[Escritório]
+	 │  Jogador clica em Iniciar.gd (reaproveitado, sem mudança de código)
+	 ▼
+get_tree().change_scene_to_file("res://Scenes/Tela.tscn")
+	 │
+	 ▼
+[Tela.tscn carrega]
+	 │
+	 ▼
+Main_select_script._ready()
+	 ├── gerenciador_expediente.iniciar_expediente()
+	 │        └── DadosJogo.sortear_agenda_do_dia(...)
+	 │             └── reseta trabalhos_do_dia / trabalhos_concluidos_hoje
+	 │                 / resultados_pendentes / resultados_do_dia
+	 └── conecta gerenciador_expediente.expediente_encerrado → _on_expediente_encerrado()
+
+[Expediente rodando — 8h a 17h simuladas]
+	 │
+	 │  (jogador aceita/inspeciona/diagnostica/encerra trabalhos,
+	 │   ver fluxo completo na seção 3.4 — cada ciclo agora também
+	 │   grava hora_inicio/hora_fim e tentativas_certas/erradas)
+	 │
+	 ▼
+GerenciadorExpediente._process(): hora_atual >= HORA_FIM_EXPEDIENTE
+	 │
+	 ▼
+_encerrar_expediente() → expediente_encerrado.emit()
+	 │
+	 ▼
+Main_select_script._on_expediente_encerrado()
+	 │
+	 ▼
+get_tree().change_scene_to_file("res://Scenes/RelatorioDia.tscn")
+	 │
+	 ▼
+[RelatorioDia.tscn carrega]
+	 │
+	 ▼
+RelatorioDia._ready() → montar_relatorio()
+	 ├── itera DadosJogo.resultados_do_dia
+	 ├── monta 1 linha por trabalho: veredito (✅/❌), alvo encontrado,
+	 │   diagnóstico escolhido (+ se correto), tentativas certas/erradas,
+	 │   tempo gasto (hora_fim - hora_inicio), recompensa
+	 └── DadosJogo.dinheiro_jogador += total_dinheiro   ← só aqui é creditado
+	 │
+	 │  Jogador clica em BtnVoltar
+	 ▼
+get_tree().change_scene_to_file("res://Scenes/Escritorio.tscn")
+	 │
+	 ▼
+[Escritório — pronto pra Iniciar Dia de novo]
+```
+
+**Correção que fechou o ciclo (clique duplo):** antes desta versão, aceitar um trabalho em `VBoxDisponiveis` só o movia pra `VBoxAtivos` — a inspeção só abria com um segundo clique no item ativo (`_on_ativo_pressionado()`, emitindo `trabalho_selecionado`). Agora `_on_disponivel_pressionado()` já emite `trabalho_selecionado` direto ao aceitar, e `DadosJogo.iniciar_resultado_pendente()` migrou de `gerenciador_trabalho.gd` pra `coordenador_trabalho.gd` (que é onde o `hora_inicio` real do relógio simulado é conhecido).
+
+**Por que o dinheiro só é creditado no relatório, não durante o expediente:** decisão de design mantida desde a v1 (ver "Histórico de versões" abaixo) — o objetivo é nunca vazar se o jogador acertou ou errou um trabalho antes do fim do dia. `RelatorioDia.montar_relatorio()` é o único lugar que soma `resultado.recompensa` em `DadosJogo.dinheiro_jogador`.
+
+#### Integração com o relógio simulado (`GerenciadorExpediente`)
+
+`CoordenadorTrabalho` ganhou `@export var gerenciador_expediente: Node` e um helper `_hora_atual()` que lê `gerenciador_expediente.hora_atual` com segurança. Isso alimenta:
+- `ResultadoTrabalho.hora_inicio` — gravado quando `trabalho_selecionado` chega (início da inspeção).
+- `ResultadoTrabalho.hora_fim` — gravado quando o jogador confirma "Encerrar".
+- `ResultadoTrabalho.tempo_gasto_minutos()` — `(hora_fim - hora_inicio) * 60`, exibido no relatório.
+
+**Duração real de um dia inteiro:** com `GerenciadorExpediente.minutos_por_segundo_real = 4.0` (padrão) e expediente de 8h–17h (9 horas simuladas), um dia completo dura **~2 minutos e 15 segundos em tempo real** — ajustável no Inspetor sem mexer em código (ver tabela de referência no `netetive_changelog.md`).
+
+#### `RelatorioDia` — cena e estrutura de nós
+
+```
+RelatorioDia (Control)              ← res://Scenes/RelatorioDia.tscn
+├── LabelResumo (Label)             ← v3.4: texto fixo "Dia concluído"
+├── LabelDinheiro (Label)           ← v3.4, novo: só o dinheiro ganho no dia ("R$ %d")
+├── LabelFama (Label)               ← v3.4, novo: só a fama ganha no dia ("+%d fama")
+├── ScrollContainer (ScrollContainer)
+│   └── VBoxResultados (VBoxContainer)
+└── BtnVoltar (Button)
+```
+
+- `ScrollContainer` existe porque `VBoxResultados` cresce em altura conforme o número de trabalhos do dia — sem ele, uma lista longa simplesmente cortaria fora da tela; com ele, aparece rolagem.
+- `VBoxResultados` empilha uma linha por trabalho automaticamente, sem cálculo manual de posição.
+- Todos os nós são lidos via `get_node_or_null()` em `relatorio_dia.gd`, não `$caminho` direto — um nome/caminho errado gera `push_warning()` específico (dizendo qual nó falta) em vez de um erro fatal `Node not found` que derruba a cena inteira. Essa escolha veio de um bug real: o script foi inicialmente testado anexado a um nó dentro de `Tela.tscn` (raiz `Node2D`), fora da hierarquia esperada.
+- **v3.4:** antes disso, `LabelResumo` sozinho concentrava todos os números (trabalhos corretos, dinheiro, upkeep, saldo, fama) numa única string longa. Foi dividido em 3 labels pra ficar mais legível — `LabelResumo` virou só um texto fixo de status ("Dia concluído"), e os números de dinheiro/fama ganharam label próprio cada um. O cálculo interno (soma de `resultado.recompensa`/`resultado.fama_ganha`, desconto de upkeep, crédito em `DadosJogo`) não mudou — só a forma como é exibido.
+
+⚠️ **Ponto em aberto:** `Main_select_script._on_expediente_encerrado()` carrega `RelatorioDia.tscn` por string de caminho — já causou `Cannot open file`/`Failed loading resource` quando a cena foi salva num caminho/nome diferente do esperado. Ainda não migrado pra `@export var cena_relatorio: PackedScene`, que eliminaria esse risco.
 
 ---
 
@@ -402,44 +749,109 @@ Recurso permanente, paralelo ao dinheiro, que controla a quantidade de trabalhos
 
 Colunas configuráveis por trabalho (`colunas_grid`), quadrantes uniformes (sem compensação adaptativa), `AlvoInspecao.quadrantes: Array[int]` permitindo um alvo cobrir vários quadrantes, e múltiplos alvos `SUSPEITO` por trabalho desde que compartilhem o mesmo capítulo.
 
----
+func _ready() -> void:
+	banco_de_trabalhos = BancoDeTrabalhos.criar_todos()
+	upgrades = BancoDeUpgrades.criar_todas()
 
-### 3.9 Sistema de Áudio: Música de Fundo e Efeitos Sonoros
+func comprar_upgrade(chave: String) -> bool:
+	# valida: linha existe -> não está no máximo -> pré-requisito atendido -> saldo suficiente
+	# só então: debita dinheiro_jogador, incrementa linha.tier_atual
+	...
 
-`GerenciadorMusica` (Autoload, sem `class_name` — conflita com o próprio Autoload se declarado). Música de fundo com loop nativo do `AudioStreamMP3`, efeitos sonoros de clique e verificação, mudo afetando só o bus `Musica`.
+func obter_linha_upgrade(chave: String) -> LinhaUpgrade:
+	return upgrades.get(chave, null)
+```
+`comprar_upgrade()` é a **única porta de entrada** pra avançar uma linha — nenhum outro script incrementa `tier_atual` ou debita `dinheiro_jogador` diretamente. Isso mantém a validação centralizada, evitando que `painel_upgrades.gd` (UI) precise reimplementar as regras de negócio.
 
 ---
 
 ### 3.10 Sistema de Modificadores de Dificuldade e Cursor Virtual
 
-Substitui de vez a ideia anterior (cogitada, nunca implementada) de "dificuldade efetiva contínua" (`dificuldade_base × multiplicador de fama`) por um sistema de **modificadores discretos**: badges visuais sorteados por trabalho, cada um com efeito de jogo próprio e bônus de recompensa, desbloqueados progressivamente conforme a fama do jogador sobe.
+```gdscript
+# mensagem_modal_scpt.gd
+func tempo_total_atual() -> float:
+	var linha := DadosJogo.obter_linha_upgrade(BancoDeUpgrades.CHAVE_PC)
+	return linha.valor_efeito_atual(4.0) if linha != null else 4.0
+
+# gerenciador_inspecao.gd
+func _tempo_verificacao_atual() -> float:
+	if mensagem_modal != null and mensagem_modal.has_method("tempo_total_atual"):
+		return mensagem_modal.tempo_total_atual()
+	# fallback: lê a linha PC direto, se mensagem_modal não estiver atribuído
+	...
+```
+No tier 4 (`valor_efeito = 0.0`), ambos os `await get_tree().create_timer(...)` são pulados inteiramente (`if tempo > 0.0`) — verificação e revelação acontecem no mesmo frame do clique em "Inspecionar".
 
 > **Nota v4.1:** a implementação do Labirinto descrita abaixo (geração, colisão, revelação por proximidade) foi documentada já na v4.0, mas só foi de fato persistida nos arquivos reais do projeto nesta rodada — até então o modificador não tinha nenhum efeito de jogo (não entrava nem no sorteio). Ver `netetive_changelog.md` v4.1 e `netetive_scripts.md` pras notas completas sobre o que foi corrigido.
 
 #### Estrutura em tiers
 
 ```
-Fama < 50    → nenhum modificador aparece
-Fama 50-199  → T1 desbloqueado, até 1 modificador simultâneo por trabalho
-Fama 200-499 → T2 desbloqueado, até 2 simultâneos
-Fama 500+    → T3 desbloqueado, até 3 simultâneos
+Jogador clica "Delegar" num item de VBoxAtivos (gerenciador_trabalho.gd)
+		│  emite delegar_solicitado(agendado) — não conhece GerenciadorAssistente
+		▼
+CoordenadorTrabalho._on_delegar_solicitado()
+		│  chama gerenciador_assistente.delegar(agendado)
+		▼
+GerenciadorAssistente.delegar()
+		├─ garante ResultadoTrabalho pendente (caso o jogador nunca tenha
+		│   aberto a inspeção desse trabalho)
+		├─ se há slot livre (capacidade = linha Quantidade): processa direto
+		└─ senão: entra na fila FIFO (_fila_espera)
+		│
+		▼  [a cada frame, _process() compara hora_atual com hora_conclusao_prevista]
+		│
+   Ao vencer o horário:
+		├─ sorteia acerto pela taxa de sucesso do Treinamento
+		├─ fecha o ResultadoTrabalho direto (sem passar pela NovaAba)
+		├─ puxa o próximo da fila de espera, se houver
+		└─ emite trabalho_assistente_concluido(agendado, acertou)
+				│
+				▼
+		CoordenadorTrabalho._on_assistente_concluido()
+				├─ gerenciador_trabalho.marcar_trabalho_concluido(agendado)
+				│   (remove de VBoxAtivos — mesmo destino final do "Encerrar" manual)
+				└─ toast: "Assistente: '<título>' concluído com sucesso/erro."
 ```
 
 Cada trabalho sorteado no dia (`DadosJogo.sortear_agenda_do_dia()`) rola aleatoriamente a quantidade (0 até o teto permitido), escolhe tipos sem repetir, e sorteia um nível pra cada um. O teto de nível também cresce com o tier desbloqueado:
 
-| Modificador é de... | Nível máximo sem tiers extras | Com T2 desbloqueado | Com T3 desbloqueado |
-|---|---|---|---|
-| T1 | 2 | 3 | 4 |
-| T2 | 2 | — | 3 |
-| T3 | 1 (fixo) | 1 | 1 |
+```
+GerenciadorExpediente.expediente_encerrado dispara
+		▼
+Main_select_script._on_expediente_encerrado()
+		├─ GerenciadorIANoturna.processar_noite(hora_fim_expediente)
+		│      ├─ se IA Capacidade tier < 1: não faz nada
+		│      ├─ coleta "trabalhos sobrados": agendado.apareceu == true E
+		│      │   (nunca aceito OU aceito mas nunca concluído), EXCLUINDO
+		│      │   qualquer um que já tenha resultado pendente em outro
+		│      │   lugar (ex: ainda na fila do Assistente — a IA não "rouba"
+		│      │   um trabalho que já está sendo tratado)
+		│      ├─ embaralha e processa até a capacidade da linha (1-4/noite)
+		│      └─ por trabalho: sorteia acerto a 75% fixo, aplica % de
+		│          Eficiência sobre a recompensa, grava direto em
+		│          DadosJogo.resultados_do_dia (sem passar por
+		│          resultados_pendentes — não há hora_inicio real de
+		│          expediente, é tudo simulado de uma vez, à noite)
+		▼
+get_tree().change_scene_to_file("res://Scenes/RelatorioDia.tscn")
+```
+Os resultados da IA aparecem no `RelatorioDia` misturados com os do jogador/Assistente, diferenciados só pelo texto `"Resolvido pela IA (noturno)"` no campo Diagnóstico.
 
 **T3 tem uma regra especial:** só 1 dos 3 modificadores de T3 pode aparecer por trabalho (Caos, Travamento, Labirinto competem pelo mesmo slot).
 
 #### `ModificadorAtivo` (Resource-like, `RefCounted`)
 
 ```gdscript
-class_name ModificadorAtivo
-extends RefCounted
+static func calcular_total() -> int:
+	return _upkeep_assistente() + _upkeep_ia_capacidade() + _upkeep_ia_eficiencia()
+
+static func _upkeep_assistente() -> int:
+	# upkeep_atual(Treinamento) × quantidade de assistentes (linha Quantidade)
+	# Treinamento tier 0 (não comprado) = upkeep 0, mesmo com Quantidade comprada
+	...
+```
+`relatorio_dia.gd.montar_relatorio()` desconta esse total **antes** de creditar: `DadosJogo.dinheiro_jogador += total_dinheiro - upkeep_total` — pode deixar o saldo **negativo de propósito** (dívida realista, decisão de design confirmada com o usuário). O resumo no `LabelResumo` mostra os três números separados: ganhos do dia, manutenção descontada, saldo final.
 
 enum Tipo {
 	DESCONHECIDO, CONEXAO_LENTA, MAIS_OPCOES, ARMADILHA, MOUSE_GRANDE,
@@ -542,13 +954,13 @@ HUD permanente no Escritório (`Scores.tscn`, nó `Score`), mostrando o total ac
 ```
 Score (instância de Scores.tscn)
 └── HUD (Node, hud_manager.gd)
-    └── control (Control)
-        ├── container_dinheiro (HBoxContainer)
-        │   └── icone_dinheiro (TextureRect, icone_dinheiro.gd)
-        │       └── contador_dinheiro (Label)
-        └── container_fama (HBoxContainer)
-            └── icone_fama (TextureRect)
-                └── contador_fama (Label)
+	└── control (Control)
+		├── container_dinheiro (HBoxContainer)
+		│   └── icone_dinheiro (TextureRect, icone_dinheiro.gd)
+		│       └── contador_dinheiro (Label)
+		└── container_fama (HBoxContainer)
+			└── icone_fama (TextureRect)
+				└── contador_fama (Label)
 ```
 
 - **Polling:** `hud_manager.gd` lê `DadosJogo.dinheiro_jogador`/`fama_jogador` em `_process()` e só atualiza o texto quando o valor muda. `DadosJogo` não emite sinal para esses campos, e criar um alteraria um arquivo já estabilizado.

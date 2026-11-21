@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://di8ebtlmueqde"]
 
-[ext_resource type="Script" uid="uid://yd7fiua628yl" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_expediente.gd" id="1_hk1lg"]
-[ext_resource type="Script" uid="uid://hekqcvcxgl1t" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_trabalho.gd" id="2_aetti"]
-[ext_resource type="Script" uid="uid://buca4b3s26vve" path="res://Scripts/Tela/Modulo Trabalho/menu_trabalhos.gd" id="3_4p3wb"]
-[ext_resource type="Texture2D" uid="uid://uhviytogc2lr" path="res://icon.svg" id="3_aetti"]
+[ext_resource type="Script" uid="uid://bi0m6s23iu2my" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_expediente.gd" id="1_hk1lg"]
+[ext_resource type="Script" uid="uid://ch3qyno0saybg" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_trabalho.gd" id="2_aetti"]
+[ext_resource type="Script" uid="uid://bpiyskh2h6u88" path="res://Scripts/Tela/Modulo Trabalho/menu_trabalhos.gd" id="3_4p3wb"]
+[ext_resource type="Texture2D" uid="uid://5w7rll2n4h2o" path="res://Sprites/workIcon.png" id="3_fc5s7"]
 [ext_resource type="Theme" uid="uid://btb15t1ftymvc" path="res://Temas/12.tres" id="4_fc5s7"]
 [ext_resource type="Script" uid="uid://cfkae0ddyo4kq" path="res://Scripts/Tela/Modulo Trabalho/gerenciador_assitente.gd" id="5_4p3wb"]
-[ext_resource type="Script" uid="uid://pdusvdqblegs" path="res://Scripts/Tela/coordenador_trabalho.gd" id="6_a8tgx"]
+[ext_resource type="Script" uid="uid://qo68r34tfjmx" path="res://Scripts/Tela/coordenador_trabalho.gd" id="6_a8tgx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fc5s7"]
 
@@ -30,7 +30,7 @@ offset_left = 3.0
 offset_top = 516.0
 offset_right = 131.0
 offset_bottom = 644.0
-texture_normal = ExtResource("3_aetti")
+texture_normal = ExtResource("3_fc5s7")
 
 [node name="MenuTrabalhos" type="Panel" parent="GerenciadorTrabalho" unique_id=867683152]
 offset_right = 370.0
